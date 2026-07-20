@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="accGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#accGrad)" opacity="0.15"/>
+  <g transform="translate(20, 20)">
+    <!-- Leash / Collar -->
+    <path d="M 40,40 C 10,40 10,10 40,10 C 70,10 70,40 40,40 Z" fill="none" stroke="#8b5cf6" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 40,40 C 20,40 20,20 40,20 C 60,20 60,40 40,40 Z" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+    <!-- Gold Bell / Tag -->
+    <circle cx="40" cy="42" r="8" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+    <circle cx="40" cy="38" r="2" fill="#fff"/>
+    <line x1="40" y1="42" x2="40" y2="50" stroke="#d97706" stroke-width="1.5"/>
+    <!-- Cute Pet Tag Shape (Shield) -->
+    <path d="M 37,50 L 43,50 L 40,54 Z" fill="#d97706"/>
+  </g>
+</svg>

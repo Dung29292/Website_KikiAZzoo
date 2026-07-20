@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="careGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#careGrad)" opacity="0.15"/>
+  <g transform="translate(20, 20)">
+    <!-- Shampoo Bottle Body -->
+    <path d="M 28,25 L 52,25 Q 56,25 56,30 L 52,75 Q 52,78 40,78 Q 28,78 28,75 L 24,30 Q 24,25 28,25 Z" fill="#22c55e" stroke="#15803d" stroke-width="2" stroke-linejoin="round"/>
+    <!-- Bottle Cap -->
+    <rect x="35" y="15" width="10" height="10" rx="2" fill="#15803d" stroke="#14532d" stroke-width="1.5"/>
+    <!-- Label -->
+    <rect x="29" y="38" width="22" height="24" rx="3" fill="#fff" opacity="0.9"/>
+    <!-- Soap Bubbles -->
+    <circle cx="40" cy="46" r="3.5" fill="#3b82f6" opacity="0.4"/>
+    <circle cx="45" cy="52" r="2.5" fill="#3b82f6" opacity="0.4"/>
+    <circle cx="36" cy="54" r="2" fill="#3b82f6" opacity="0.4"/>
+    <circle cx="58" cy="20" r="4" fill="#a7f3d0" opacity="0.6"/>
+    <circle cx="68" cy="30" r="2.5" fill="#a7f3d0" opacity="0.6"/>
+    <circle cx="62" cy="42" r="5" fill="#a7f3d0" opacity="0.6"/>
+  </g>
+</svg>

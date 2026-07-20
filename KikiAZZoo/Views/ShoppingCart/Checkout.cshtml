@@ -1,0 +1,499 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    var cart = Model.Cart;
+}
+
+<div class="container py-4 checkout-page">
+    <nav class="breadcrumb-kiki mb-3">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> &gt;
+        <a asp-action="Index">Giỏ hàng</a> &gt; Thanh toán
+    </nav>
+
+    <h2 class="fw-bold mb-4"><i class="bi bi-credit-card"></i> Thanh toán</h2>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="checkout-card">
+                <h5 class="checkout-section-title"><i class="bi bi-geo-alt"></i> Thông tin giao hàng</h5>
+                <form asp-action="Checkout" method="post" id="checkoutForm">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <h5 class="checkout-section-title"><i class="bi bi-person"></i> Thông tin liên hệ (Đặt hàng nhanh)</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="GuestFullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input asp-for="GuestFullName" class="form-control" placeholder="Nhập đầy đủ họ tên..." required />
+                                <span asp-validation-for="GuestFullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="GuestPhoneNumber" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input asp-for="GuestPhoneNumber" class="form-control" placeholder="Ví dụ: 0987654321..." required />
+                                <span asp-validation-for="GuestPhoneNumber" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label asp-for="GuestEmail" class="form-label">Địa chỉ Email <span class="text-danger">*</span></label>
+                                <input asp-for="GuestEmail" type="email" class="form-control" placeholder="email@example.com..." required />
+                                <span asp-validation-for="GuestEmail" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    }
+                    <!-- Address Selectors -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Order.Province" class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                            <select asp-for="Order.Province" class="form-select" id="provinceSelect" required>
+                                <option value="">-- Chọn Tỉnh/Thành --</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Bình Dương">Bình Dương</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                            </select>
+                            <span asp-validation-for="Order.Province" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Order.District" class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
+                            <select asp-for="Order.District" class="form-select" id="districtSelect" required>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                            <span asp-validation-for="Order.District" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Order.Ward" class="form-label">Phường / Xã <span class="text-danger">*</span></label>
+                            <select asp-for="Order.Ward" class="form-select" id="wardSelect" required>
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                            <span asp-validation-for="Order.Ward" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Order.ShippingAddress" class="form-label">Địa chỉ cụ thể <span class="text-danger">*</span></label>
+                        <input asp-for="Order.ShippingAddress" class="form-control" placeholder="Số nhà, ngõ, tên đường..." required />
+                        <span asp-validation-for="Order.ShippingAddress" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Order.Notes" class="form-label">Ghi chú đơn hàng</label>
+                        <textarea asp-for="Order.Notes" class="form-control" rows="2" placeholder="Ghi chú thêm cho người giao hàng (tuỳ chọn)"></textarea>
+                    </div>
+
+                    <!-- VAT Invoice Option -->
+                    <div class="form-check form-switch mb-4 p-3 bg-light rounded shadow-sm border" style="border-color: rgba(13, 148, 136, 0.1) !important;">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="vatRequiredCheckbox" style="cursor: pointer;" />
+                        <label class="form-check-label fw-bold text-teal" for="vatRequiredCheckbox" style="cursor: pointer;">
+                            <i class="ph ph-file-text"></i> Yêu cầu xuất hóa đơn công ty (VAT)
+                        </label>
+                        <div id="vatFormFields" class="d-none mt-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Order.CompanyName" class="form-label small fw-semibold text-muted">Tên công ty / Đơn vị <span class="text-danger">*</span></label>
+                                    <input asp-for="Order.CompanyName" class="form-control" placeholder="Công ty TNHH..." id="checkoutCompanyName" />
+                                    <span asp-validation-for="Order.CompanyName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Order.TaxCode" class="form-label small fw-semibold text-muted">Mã số thuế <span class="text-danger">*</span></label>
+                                    <input asp-for="Order.TaxCode" class="form-control" placeholder="Mã số thuế..." id="checkoutTaxCode" />
+                                    <span asp-validation-for="Order.TaxCode" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="Order.CompanyAddress" class="form-label small fw-semibold text-muted">Địa chỉ đăng ký kinh doanh <span class="text-danger">*</span></label>
+                                    <input asp-for="Order.CompanyAddress" class="form-control" placeholder="Địa chỉ công ty..." id="checkoutCompanyAddress" />
+                                    <span asp-validation-for="Order.CompanyAddress" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="checkout-section-title"><i class="bi bi-wallet2"></i> Phương thức thanh toán</h5>
+                    <div class="payment-options mb-4">
+                        <label class="payment-option selected" for="payCod">
+                            <input type="radio" asp-for="Order.PaymentMethod" value="COD" id="payCod" checked />
+                            <div class="payment-option-body">
+                                <i class="bi bi-cash-coin"></i>
+                                <div>
+                                    <strong>Thanh toán khi nhận hàng (COD)</strong>
+                                    <small class="text-muted d-block">Thanh toán bằng tiền mặt khi nhận hàng</small>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="payment-option" for="payQr">
+                            <input type="radio" asp-for="Order.PaymentMethod" value="VietQR" id="payQr" />
+                            <div class="payment-option-body">
+                                <i class="bi bi-qr-code"></i>
+                                <div>
+                                    <strong>Chuyển khoản VietQR (Khuyên dùng)</strong>
+                                    <small class="text-muted d-block">Quét mã QR chuyển khoản nhanh 24/7</small>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="payment-option" for="payCard">
+                            <input type="radio" asp-for="Order.PaymentMethod" value="Card" id="payCard" />
+                            <div class="payment-option-body">
+                                <i class="bi bi-credit-card-2-front"></i>
+                                <div>
+                                    <strong>Thẻ tín dụng / Thẻ ATM</strong>
+                                    <small class="text-muted d-block">Thanh toán trực tuyến bảo mật qua thẻ nội địa/quốc tế</small>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Hidden fields to bind coupon/loyalty into the submit form -->
+                    <input type="hidden" name="CouponCode" id="hiddenCouponCode" value="" />
+                    <input type="hidden" name="UseLoyaltyPoints" id="hiddenUsePoints" value="false" />
+
+                    <button type="submit" class="btn btn-teal btn-lg w-100 d-lg-none mt-3">
+                        <i class="bi bi-check-circle"></i> Xác nhận đặt hàng
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="cart-summary checkout-summary sticky-sidebar">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bag-check"></i> Đơn hàng (@cart.TotalItems sản phẩm)</h5>
+
+                <!-- Items list -->
+                <div class="checkout-items mb-3">
+                    @foreach (var item in cart.Items)
+                    {
+                        <div class="checkout-item">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" alt="@item.Name" class="checkout-item-img" />
+                            }
+                            else
+                            {
+                                <div class="checkout-item-img checkout-item-img-placeholder"><i class="bi bi-image"></i></div>
+                            }
+                            <div class="checkout-item-info">
+                                <span class="checkout-item-name">@item.Name</span>
+                                <span class="checkout-item-meta">@item.Quantity x @item.Price.ToString("#,##0")đ</span>
+                            </div>
+                            <span class="checkout-item-total">@((item.Price * item.Quantity).ToString("#,##0"))đ</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Coupon Section -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-muted small"><i class="bi bi-ticket-perforated"></i> Mã giảm giá (Coupon)</label>
+                    <div class="input-group">
+                        <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Nhập mã (VD: KIKI10, SPALOVE)" />
+                        <button class="btn btn-outline-teal" type="button" id="applyCouponBtn">Áp dụng</button>
+                    </div>
+                    <div id="couponMessage" class="small mt-1 d-none"></div>
+                </div>
+
+                <!-- Loyalty points Section -->
+                @if (Model.AvailableLoyaltyPoints > 0)
+                {
+                    <div class="form-check form-switch mb-3 p-3 bg-light rounded" style="border: 1px solid #e2e8f0;">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="usePointsCheckbox" />
+                        <label class="form-check-label fw-semibold text-dark" for="usePointsCheckbox">
+                            Dùng điểm Kiki xu tích lũy
+                        </label>
+                        <small class="text-muted d-block">
+                            Bạn có <strong class="text-teal">@Model.AvailableLoyaltyPoints.ToString("#,##0") xu</strong> (tương đương <strong class="text-teal">@((Model.AvailableLoyaltyPoints * 1000).ToString("#,##0"))đ</strong>)
+                        </small>
+                    </div>
+                }
+
+                <!-- Pricing Details -->
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tạm tính</span>
+                    <span id="subTotalVal">@cart.SubTotal.ToString("#,##0")đ</span>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-2" id="shippingRow">
+                    <span class="text-muted">Phí vận chuyển</span>
+                    <span id="shippingFeeVal">@Model.ShippingFee.ToString("#,##0")đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2 text-danger d-none" id="couponDiscountRow">
+                    <span class="text-muted text-danger">Mã giảm giá</span>
+                    <span id="couponDiscountVal">-0đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2 text-danger d-none" id="loyaltyDiscountRow">
+                    <span class="text-muted text-danger">Kiki xu khấu trừ</span>
+                    <span id="loyaltyDiscountVal">-0đ</span>
+                </div>
+
+                <p class="checkout-shipping-hint small text-muted mb-2" id="shippingHint">
+                    <i class="bi bi-info-circle"></i> Miễn phí giao hàng cho đơn từ 300k (Hà Nội, TP.HCM) và từ 500k (Tỉnh khác).
+                </p>
+                <hr />
+                <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                    <span>Tổng cộng</span>
+                    <span class="product-price" id="totalVal">@Model.Total.ToString("#,##0")đ</span>
+                </div>
+
+                <button type="submit" form="checkoutForm" class="btn btn-teal btn-lg w-100 d-none d-lg-block">
+                    <i class="bi bi-check-circle"></i> Xác nhận đặt hàng
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Mock Location Data
+            const locations = {
+                "Hà Nội": {
+                    "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa", "Phường Mai Dịch"],
+                    "Quận Ba Đình": ["Phường Trúc Bạch", "Phường Điện Biên", "Phường Kim Mã"],
+                    "Quận Đống Đa": ["Phường Láng Hạ", "Phường Ô Chợ Dừa"]
+                },
+                "TP. Hồ Chí Minh": {
+                    "Quận 1": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Đa Kao"],
+                    "Quận 3": ["Phường Võ Thị Sáu", "Phường 1", "Phường 2"],
+                    "Quận Bình Thạnh": ["Phường 25", "Phường 26"]
+                },
+                "Đà Nẵng": {
+                    "Quận Hải Châu": ["Phường Hòa Cường Bắc", "Phường Hòa Thuận Đông"],
+                    "Quận Sơn Trà": ["Phường An Hải Bắc", "Phường Thọ Quang"]
+                },
+                "Hải Phòng": {
+                    "Quận Hồng Bàng": ["Phường Phan Bội Châu", "Phường Hoàng Văn Thụ"],
+                    "Quận Ngô Quyền": ["Phường Máy Tơ", "Phường Lạch Tray"]
+                }
+            };
+
+            const provinceSelect = document.getElementById("provinceSelect");
+            const districtSelect = document.getElementById("districtSelect");
+            const wardSelect = document.getElementById("wardSelect");
+
+            // Handles Province Change
+            provinceSelect.addEventListener("change", function () {
+                const selectedProvince = this.value;
+                districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+                if (selectedProvince && locations[selectedProvince]) {
+                    Object.keys(locations[selectedProvince]).forEach(dist => {
+                        const opt = document.createElement("option");
+                        opt.value = dist;
+                        opt.textContent = dist;
+                        districtSelect.appendChild(opt);
+                    });
+                } else if (selectedProvince) {
+                    // Fallback for provinces not in mock list
+                    const opt = document.createElement("option");
+                    opt.value = "Quận trung tâm";
+                    opt.textContent = "Quận trung tâm";
+                    districtSelect.appendChild(opt);
+                }
+                
+                // Update checkout values
+                updateCheckoutValues();
+            });
+
+            // Handles District Change
+            districtSelect.addEventListener("change", function () {
+                const selectedProvince = provinceSelect.value;
+                const selectedDistrict = this.value;
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+                if (selectedProvince && selectedDistrict && locations[selectedProvince] && locations[selectedProvince][selectedDistrict]) {
+                    locations[selectedProvince][selectedDistrict].forEach(ward => {
+                        const opt = document.createElement("option");
+                        opt.value = ward;
+                        opt.textContent = ward;
+                        wardSelect.appendChild(opt);
+                    });
+                } else if (selectedDistrict) {
+                    const opt = document.createElement("option");
+                    opt.value = "Phường 1";
+                    opt.textContent = "Phường 1";
+                    wardSelect.appendChild(opt);
+                }
+            });
+            
+            // Restore previous values after validation reload
+            if (provinceSelect.value) {
+                const selectedProvince = provinceSelect.value;
+                districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+                const prevDistrict = '@Html.Raw(Model.Order.District)';
+                const prevWard = '@Html.Raw(Model.Order.Ward)';
+
+                if (locations[selectedProvince]) {
+                    Object.keys(locations[selectedProvince]).forEach(dist => {
+                        const opt = document.createElement("option");
+                        opt.value = dist;
+                        opt.textContent = dist;
+                        if (dist === prevDistrict) opt.selected = true;
+                        districtSelect.appendChild(opt);
+                    });
+                } else {
+                    const opt = document.createElement("option");
+                    opt.value = "Quận trung tâm";
+                    opt.textContent = "Quận trung tâm";
+                    opt.selected = true;
+                    districtSelect.appendChild(opt);
+                }
+
+                const selectedDistrict = districtSelect.value;
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                if (locations[selectedProvince] && locations[selectedProvince][selectedDistrict]) {
+                    locations[selectedProvince][selectedDistrict].forEach(ward => {
+                        const opt = document.createElement("option");
+                        opt.value = ward;
+                        opt.textContent = ward;
+                        if (ward === prevWard) opt.selected = true;
+                        wardSelect.appendChild(opt);
+                    });
+                } else if (selectedDistrict) {
+                    const opt = document.createElement("option");
+                    opt.value = "Phường 1";
+                    opt.textContent = "Phường 1";
+                    opt.selected = true;
+                    wardSelect.appendChild(opt);
+                }
+            }
+
+            // Handles Payment Option Click Styling
+            const paymentOptions = document.querySelectorAll(".payment-option input[type='radio']");
+            paymentOptions.forEach(opt => {
+                opt.addEventListener("change", function () {
+                    document.querySelectorAll(".payment-option").forEach(el => el.classList.remove("selected"));
+                    if (this.checked) {
+                        this.closest(".payment-option").classList.add("selected");
+                    }
+                });
+            });
+
+            // Ajax calculation for Coupon, Loyalty Points & Shipping
+            const couponInput = document.getElementById("couponInput");
+            const applyCouponBtn = document.getElementById("applyCouponBtn");
+            const couponMessage = document.getElementById("couponMessage");
+            const usePointsCheckbox = document.getElementById("usePointsCheckbox");
+            
+            const hiddenCouponCode = document.getElementById("hiddenCouponCode");
+            const hiddenUsePoints = document.getElementById("hiddenUsePoints");
+
+            let appliedCoupon = "";
+
+            applyCouponBtn.addEventListener("click", function () {
+                const code = couponInput.value.trim();
+                appliedCoupon = code;
+                updateCheckoutValues();
+            });
+
+            if (usePointsCheckbox) {
+                usePointsCheckbox.addEventListener("change", function () {
+                    updateCheckoutValues();
+                });
+            }
+
+            function updateCheckoutValues() {
+                const province = provinceSelect.value;
+                const code = appliedCoupon;
+                const usePoints = usePointsCheckbox ? usePointsCheckbox.checked : false;
+
+                hiddenCouponCode.value = code;
+                hiddenUsePoints.value = usePoints;
+
+                const data = new FormData();
+                data.append("couponCode", code);
+                data.append("province", province);
+                data.append("useLoyaltyPoints", usePoints);
+
+                fetch("/ShoppingCart/CalculateCheckout", {
+                    method: "POST",
+                    body: data
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        // Update Shipping
+                        document.getElementById("shippingFeeVal").textContent = res.shippingFee === 0 ? "Miễn phí" : formatMoney(res.shippingFee) + "đ";
+                        
+                        // Update shipping hint
+                        const shippingHint = document.getElementById("shippingHint");
+                        const isMetro = province.includes("Hà Nội") || province.includes("Hồ Chí Minh") || province.includes("HCM");
+                        const threshold = isMetro || !province ? 300000 : 500000;
+                        if (res.shippingFee > 0) {
+                            shippingHint.innerHTML = `<i class="bi bi-info-circle"></i> Mua thêm <strong class="text-teal">${formatMoney(threshold - res.subTotal)}đ</strong> để được miễn phí ship khu vực ${province || "của bạn"}.`;
+                        } else {
+                            shippingHint.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Đơn hàng của bạn đã đủ điều kiện <strong class="text-success">miễn phí vận chuyển</strong>!`;
+                        }
+
+                        // Update Coupon
+                        const couponRow = document.getElementById("couponDiscountRow");
+                        if (res.discountAmount > 0) {
+                            couponRow.classList.remove("d-none");
+                            document.getElementById("couponDiscountVal").textContent = "-" + formatMoney(res.discountAmount) + "đ";
+                            couponMessage.textContent = res.message;
+                            couponMessage.className = "small mt-1 text-success fw-semibold";
+                            couponMessage.classList.remove("d-none");
+                        } else {
+                            couponRow.classList.add("d-none");
+                            if (code) {
+                                couponMessage.textContent = res.message;
+                                couponMessage.className = "small mt-1 text-danger fw-semibold";
+                                couponMessage.classList.remove("d-none");
+                            } else {
+                                couponMessage.classList.add("d-none");
+                            }
+                        }
+
+                        // Update Loyalty
+                        const loyaltyRow = document.getElementById("loyaltyDiscountRow");
+                        if (res.loyaltyDiscount > 0) {
+                            loyaltyRow.classList.remove("d-none");
+                            document.getElementById("loyaltyDiscountVal").textContent = "-" + formatMoney(res.loyaltyDiscount) + "đ";
+                        } else {
+                            loyaltyRow.classList.add("d-none");
+                        }
+
+                        // Update Total
+                        document.getElementById("totalVal").textContent = formatMoney(res.total) + "đ";
+                    }
+                })
+                .catch(err => console.error("Error calculating checkout values:", err));
+            }
+
+            function formatMoney(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount);
+            }
+
+            // VAT Fields Toggle
+            const vatRequiredCheckbox = document.getElementById("vatRequiredCheckbox");
+            const vatFormFields = document.getElementById("vatFormFields");
+            const checkoutCompanyName = document.getElementById("checkoutCompanyName");
+            const checkoutTaxCode = document.getElementById("checkoutTaxCode");
+            const checkoutCompanyAddress = document.getElementById("checkoutCompanyAddress");
+
+            if (vatRequiredCheckbox) {
+                vatRequiredCheckbox.addEventListener("change", function() {
+                    if (vatRequiredCheckbox.checked) {
+                        vatFormFields.classList.remove("d-none");
+                        checkoutCompanyName.setAttribute("required", "required");
+                        checkoutTaxCode.setAttribute("required", "required");
+                        checkoutCompanyAddress.setAttribute("required", "required");
+                    } else {
+                        vatFormFields.classList.add("d-none");
+                        checkoutCompanyName.removeAttribute("required");
+                        checkoutTaxCode.removeAttribute("required");
+                        checkoutCompanyAddress.removeAttribute("required");
+                        checkoutCompanyName.value = "";
+                        checkoutTaxCode.value = "";
+                        checkoutCompanyAddress.value = "";
+                    }
+                });
+            }
+        });
+    </script>
+}

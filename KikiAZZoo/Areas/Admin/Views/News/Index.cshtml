@@ -1,0 +1,29 @@
+@model IEnumerable<BlogPost>
+@{
+    ViewData["Title"] = "Quản lý tin tức";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Tin tức</h2>
+    <a asp-action="Add" class="btn btn-teal"><i class="bi bi-plus"></i> Thêm bài viết</a>
+</div>
+
+<table class="table table-hover">
+    <thead class="table-light">
+        <tr><th>Tiêu đề</th><th>Ngày</th><th>Nổi bật</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.Title</td>
+                <td>@p.PublishedDate.ToString("dd/MM/yyyy")</td>
+                <td>@(p.IsFeatured ? "✓" : "")</td>
+                <td>
+                    <a asp-action="Update" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

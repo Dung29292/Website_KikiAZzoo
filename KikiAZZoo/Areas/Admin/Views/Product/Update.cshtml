@@ -1,0 +1,212 @@
+@model Product
+@{
+    ViewData["Title"] = "Sửa sản phẩm";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Sản phẩm", Url.Action("Index", "Product") ?? ""),
+        ("Chỉnh sửa", "")
+    };
+}
+
+<!-- Quill CSS -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0 text-teal"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa sản phẩm</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update" method="post" enctype="multipart/form-data" id="productForm">
+            <input type="hidden" asp-for="Id" />
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm..." />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label fw-semibold">Giá bán (đ) <span class="text-danger">*</span></label>
+                            <input asp-for="Price" class="form-control" type="number" step="1000" placeholder="Ví dụ: 150000" />
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="OriginalPrice" class="form-label fw-semibold">Giá gốc (đ)</label>
+                            <input asp-for="OriginalPrice" class="form-control" type="number" step="1000" placeholder="Ví dụ: 180000" />
+                            <span asp-validation-for="OriginalPrice" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả sản phẩm</label>
+                        <!-- Quill Editor Container -->
+                        <div id="editor-container" style="height: 250px; border-radius: 0 0 6px 6px;"></div>
+                        <!-- Hidden field to bind with Model -->
+                        <input type="hidden" asp-for="Description" id="descriptionInput" />
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Ingredients" class="form-label fw-semibold">Thành phần</label>
+                            <textarea asp-for="Ingredients" class="form-control" rows="2" placeholder="Thành phần chính của sản phẩm..."></textarea>
+                            <span asp-validation-for="Ingredients" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="UsageGuide" class="form-label fw-semibold">Hướng dẫn sử dụng</label>
+                            <textarea asp-for="UsageGuide" class="form-control" rows="2" placeholder="Liều lượng, cách dùng..."></textarea>
+                            <span asp-validation-for="UsageGuide" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 border-start-md">
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
+                        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select"></select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BrandId" class="form-label fw-semibold">Thương hiệu</label>
+                        <select asp-for="BrandId" asp-items="ViewBag.Brands" class="form-select">
+                            <option value="">-- Chọn thương hiệu --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PetTypeId" class="form-label fw-semibold">Loại thú cưng</label>
+                        <select asp-for="PetTypeId" asp-items="ViewBag.PetTypes" class="form-select">
+                            <option value="">-- Không áp dụng --</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label asp-for="Stock" class="form-label fw-semibold">Số lượng kho</label>
+                            <input asp-for="Stock" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="Stock" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6 d-flex align-items-end pb-2">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" asp-for="IsActive" id="IsActive">
+                                <label class="form-check-label fw-semibold" for="IsActive">Kích hoạt</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Hình ảnh sản phẩm</label>
+                        <!-- Drag and Drop Zone -->
+                        <div id="drag-drop-zone" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light cursor-pointer position-relative">
+                            <input type="file" name="imageUrl" id="imageInput" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/*" />
+                            
+                            @{
+                                var hasImage = !string.IsNullOrEmpty(Model.ImageUrl);
+                            }
+                            
+                            <div id="drag-drop-text" class="@(hasImage ? "d-none" : "")">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-teal"></i>
+                                <p class="mb-1 small fw-bold mt-2">Kéo thả ảnh hoặc click để chọn</p>
+                                <p class="text-muted small mb-0">Hỗ trợ JPG, PNG, WEBP</p>
+                            </div>
+                            <div id="image-preview-container" class="@(hasImage ? "" : "d-none") mt-2">
+                                <img id="previewImage" src="@Model.ImageUrl" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover;" />
+                                <button type="button" id="removeImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle p-1 d-flex align-items-center justify-content-center" style="width: 25px; height: 25px;"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-teal px-4"><i class="bi bi-save me-1"></i> Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Raw description value to load into Quill -->
+<div id="raw-description-content" class="d-none">@Html.Raw(Model.Description)</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- Quill JS -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Quill
+            const quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Nhập mô tả sản phẩm...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Set existing content
+            const rawContent = document.getElementById("raw-description-content").innerHTML;
+            quill.root.innerHTML = rawContent;
+
+            // Bind Quill content to hidden input before form submit
+            const form = document.getElementById("productForm");
+            form.addEventListener("submit", function () {
+                const descInput = document.getElementById("descriptionInput");
+                descInput.value = quill.root.innerHTML;
+            });
+
+            // Drag and drop image preview
+            const imageInput = document.getElementById("imageInput");
+            const previewContainer = document.getElementById("image-preview-container");
+            const previewImage = document.getElementById("previewImage");
+            const dragDropText = document.getElementById("drag-drop-text");
+            const dragDropZone = document.getElementById("drag-drop-zone");
+            const removeBtn = document.getElementById("removeImageBtn");
+
+            imageInput.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        previewImage.src = ev.target.result;
+                        previewContainer.classList.remove("d-none");
+                        dragDropText.classList.add("d-none");
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                imageInput.value = "";
+                previewImage.src = "";
+                previewContainer.classList.add("d-none");
+                dragDropText.classList.remove("d-none");
+            });
+
+            // Highlight drag drop zone on drag events
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dragDropZone.addEventListener(eventName, () => {
+                    dragDropZone.classList.add('border-teal', 'bg-teal-light');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dragDropZone.addEventListener(eventName, () => {
+                    dragDropZone.classList.remove('border-teal', 'bg-teal-light');
+                }, false);
+            });
+        });
+    </script>
+}

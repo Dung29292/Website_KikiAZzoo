@@ -1,0 +1,167 @@
+@model Order
+@{
+    ViewData["Title"] = "Thanh toán trực tuyến";
+    var isQr = Model.PaymentMethod == "VietQR";
+}
+
+<div class="container py-5 payment-page">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-teal text-white py-3 text-center border-0">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-shield-lock"></i> Cổng thanh toán KikiPay</h4>
+                    <small class="opacity-75">Đơn hàng #@Model.Id</small>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <span class="text-muted d-block small">Số tiền cần thanh toán</span>
+                        <h2 class="fw-bold text-teal mb-0">@Model.TotalPrice.ToString("#,##0")đ</h2>
+                    </div>
+
+                    @if (isQr)
+                    {
+                        <!-- VietQR Transfer Info -->
+                        <div class="text-center">
+                            <h5 class="fw-semibold mb-3">Quét mã VietQR chuyển khoản</h5>
+                            <div class="qr-container p-3 bg-white rounded-3 d-inline-block border mb-3 shadow-sm">
+                                @{
+                                    // Generate dynamically using VietQR API
+                                    var addInfo = Uri.EscapeDataString($"KIKIAZZOO DH{Model.Id}");
+                                    var qrUrl = $"https://img.vietqr.io/image/970415-11336699-compact2.png?amount={((int)Model.TotalPrice)}&addInfo={addInfo}&accountName=KikiAZZoo%20Petshop";
+                                }
+                                <img src="@qrUrl" alt="Mã chuyển khoản VietQR" style="max-width: 250px; height: auto;" class="img-fluid rounded" />
+                            </div>
+
+                            <div class="text-start bg-light p-3 rounded-3 mb-4 border" style="font-size: 0.9rem;">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Ngân hàng:</span>
+                                    <span class="fw-bold">VietinBank (ICB)</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Chủ tài khoản:</span>
+                                    <span class="fw-bold">KikiAZZoo Petshop</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Số tài khoản:</span>
+                                    <span class="fw-bold">11336699</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Nội dung chuyển khoản:</span>
+                                    <span class="fw-bold text-danger">KIKIAZZOO DH@Model.Id</span>
+                                </div>
+                            </div>
+
+                            <form asp-action="ConfirmPayment" method="post" id="qrPaymentForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="orderId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-teal btn-lg w-100 py-2 rounded-pill fw-semibold shadow-sm">
+                                    <i class="bi bi-check-circle"></i> Tôi đã chuyển khoản thành công
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Simulated Card Form -->
+                        <div class="card-payment-form">
+                            <h5 class="fw-semibold mb-3"><i class="bi bi-credit-card-2-front"></i> Nhập thông tin thẻ thanh toán</h5>
+                            
+                            <form asp-action="ConfirmPayment" method="post" id="cardPaymentForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="orderId" value="@Model.Id" />
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Tên trên thẻ</label>
+                                    <input type="text" class="form-control text-uppercase" placeholder="NGUYEN VAN A" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Số thẻ</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                        <input type="text" class="form-control" id="cardNumberInput" placeholder="4111 2222 3333 4444" required />
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Hạn dùng (Tháng/Năm)</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY" required />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Mã CVV</label>
+                                        <input type="password" class="form-control" placeholder="123" maxlength="3" required />
+                                    </div>
+                                </div>
+
+                                <div id="loadingSpinner" class="d-none text-center py-3">
+                                    <div class="spinner-border text-teal mb-2" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted small mb-0">Đang xác minh giao dịch với ngân hàng...</p>
+                                </div>
+
+                                <button type="submit" id="paySubmitBtn" class="btn btn-teal btn-lg w-100 py-2 rounded-pill fw-semibold shadow-sm">
+                                    Thanh toán @Model.TotalPrice.ToString("#,##0")đ
+                                </button>
+                            </form>
+                        </div>
+                    }
+
+                    <div class="text-center mt-3">
+                        <a asp-controller="Account" asp-action="Orders" class="btn btn-link text-muted small text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Quay lại sau (Thanh toán sau)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const cardForm = document.getElementById("cardPaymentForm");
+            const cardNumber = document.getElementById("cardNumberInput");
+
+            if (cardNumber) {
+                // Formatting card numbers as 4-digit groups
+                cardNumber.addEventListener("input", function (e) {
+                    let val = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                    let matches = val.match(/\d{4,16}/g);
+                    let match = matches && matches[0] || '';
+                    let parts = [];
+
+                    for (let i = 0, len = match.length; i < len; i += 4) {
+                        parts.push(match.substring(i, i + 4));
+                    }
+
+                    if (parts.length > 0) {
+                        this.value = parts.join(' ');
+                    } else {
+                        this.value = val;
+                    }
+                });
+            }
+
+            if (cardForm) {
+                cardForm.addEventListener("submit", function (e) {
+                    e.preventDefault(); // Stop default submit
+                    
+                    const submitBtn = document.getElementById("paySubmitBtn");
+                    const spinner = document.getElementById("loadingSpinner");
+                    
+                    submitBtn.classList.add("disabled");
+                    submitBtn.disabled = true;
+                    spinner.classList.remove("d-none");
+
+                    // Simulate payment delay
+                    setTimeout(() => {
+                        cardForm.submit();
+                    }, 2500);
+                });
+            }
+        });
+    </script>
+}

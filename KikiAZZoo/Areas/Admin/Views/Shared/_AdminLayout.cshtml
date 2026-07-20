@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin KikiAzoo</title>
+    <partial name="_Styles" />
+</head>
+<body>
+    <script>
+        (function () {
+            const localTheme = localStorage.getItem('kikiDarkMode');
+            if (localTheme === '1' || (localTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('kikiDarkMode', isDark ? '1' : '0');
+            const icon = document.getElementById('adminDarkModeIcon');
+            if (icon) icon.className = isDark ? 'bi bi-sun fs-5' : 'bi bi-moon fs-5';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const isDark = document.body.classList.contains('dark-mode');
+            const icon = document.getElementById('adminDarkModeIcon');
+            if (icon) icon.className = isDark ? 'bi bi-sun fs-5' : 'bi bi-moon fs-5';
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+                if (localStorage.getItem('kikiDarkMode') === null) {
+                    const shouldBeDark = e.matches;
+                    if (shouldBeDark) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                    const newIcon = document.getElementById('adminDarkModeIcon');
+                    if (newIcon) newIcon.className = shouldBeDark ? 'bi bi-sun fs-5' : 'bi bi-moon fs-5';
+                }
+            });
+        });
+    </script>
+    <div class="row g-0">
+        <div class="col-md-2 admin-sidebar">
+            <h5 class="text-white px-3 mb-4"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 120px; height: 35px; object-fit: cover; vertical-align: middle;" /> <span class="small text-white-50 align-middle">Admin</span></h5>
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index"><i class="bi bi-box"></i> Sản phẩm</a>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index"><i class="bi bi-tags"></i> Danh mục</a>
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index"><i class="bi bi-receipt"></i> Đơn hàng</a>
+            <a asp-area="Admin" asp-controller="News" asp-action="Index"><i class="bi bi-newspaper"></i> Tin tức</a>
+            <a asp-area="Admin" asp-controller="Booking" asp-action="Index"><i class="bi bi-calendar-check"></i> Lịch đặt dịch vụ</a>
+            <a asp-area="Admin" asp-controller="Coupon" asp-action="Index"><i class="bi bi-tag-fill"></i> Mã giảm giá</a>
+            <hr class="border-secondary mx-3" />
+            <a asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i> Về trang chủ</a>
+            <a asp-area="" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+        </div>
+        <div class="col-md-10 admin-content">
+            <!-- Top Navbar Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h3 class="fw-bold mb-0 text-dark">@ViewData["Title"]</h3>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0" style="font-size: 0.85rem; background: transparent; padding: 0;">
+                            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" class="text-teal text-decoration-none"><i class="bi bi-house-door"></i> Admin</a></li>
+                            @if (ViewData["Breadcrumbs"] != null)
+                            {
+                                var list = ViewData["Breadcrumbs"] as List<(string Name, string Url)>;
+                                if (list != null)
+                                {
+                                    foreach (var item in list)
+                                    {
+                                        if (!string.IsNullOrEmpty(item.Url))
+                                        {
+                                            <li class="breadcrumb-item"><a href="@item.Url" class="text-teal text-decoration-none">@item.Name</a></li>
+                                        }
+                                        else
+                                        {
+                                            <li class="breadcrumb-item active text-muted" aria-current="page">@item.Name</li>
+                                        }
+                                    }
+                                }
+                            }
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary position-relative rounded-circle p-0 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 280px; font-size: 0.85rem; z-index: 1060;">
+                            <li><h6 class="dropdown-header fw-bold text-dark">Thông báo mới nhất</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-dark" href="/Admin/Order"><i class="bi bi-info-circle text-warning me-2"></i> Có đơn hàng mới đang chờ xử lý</a></li>
+                            <li><a class="dropdown-item py-2 text-dark" href="/Admin/Product"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Sản phẩm sắp hết hàng trong kho</a></li>
+                            <li><a class="dropdown-item py-2 text-dark" href="/Admin/Booking"><i class="bi bi-calendar-event text-info me-2"></i> Khách hàng vừa đặt lịch hẹn dịch vụ</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Dark Mode Toggle -->
+                    <button class="btn btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center" onclick="toggleDarkMode()" style="width: 40px; height: 40px;">
+                        <i class="bi bi-moon fs-5" id="adminDarkModeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            @RenderBody()
+        </div>
+    </div>
+    <partial name="_Scripts" />
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

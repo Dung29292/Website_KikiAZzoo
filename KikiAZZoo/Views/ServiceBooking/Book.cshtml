@@ -1,0 +1,195 @@
+@model PetServiceBooking
+@{
+    var service = ViewBag.Service as Service;
+    ViewData["Title"] = $"Đặt lịch {service?.Name}";
+    var userPets = ViewBag.UserPets as List<PetProfile> ?? new List<PetProfile>();
+    var timeSlots = ViewBag.TimeSlots as string[] ?? new string[0];
+}
+
+<div class="container py-4 profile-page">
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-8">
+            <div class="checkout-card p-4 rounded-4 shadow-sm border bg-white">
+                <h3 class="fw-bold mb-3 text-dark"><i class="bi bi-calendar-heart text-teal"></i> Đặt lịch hẹn chăm sóc</h3>
+                <p class="text-muted mb-4">Bạn đang đặt lịch cho dịch vụ: <strong class="text-dark">@service?.Name</strong></p>
+
+                <!-- Service info card -->
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4 border mb-4 shadow-sm">
+                    <div class="service-icon-box bg-teal text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                        <i class="bi @(service?.Icon ?? "bi-star")"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">@service?.Name</h6>
+                        <small class="text-muted d-block mb-1">@service?.Description</small>
+                        <span class="fw-semibold text-teal fs-6">Giá từ: @(service?.PriceFrom == null || service.PriceFrom == 0 ? "Miễn phí" : service.PriceFrom.Value.ToString("#,##0") + "đ")</span>
+                    </div>
+                </div>
+
+                <form asp-action="Book" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ServiceId" />
+                    <input type="hidden" asp-for="UserId" />
+
+                    <!-- Date picker -->
+                    <div class="mb-3">
+                        <label asp-for="BookingDate" class="form-label fw-semibold">1. Chọn ngày hẹn <span class="text-danger">*</span></label>
+                        <input asp-for="BookingDate" class="form-control" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required />
+                        <span asp-validation-for="BookingDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Time Slots grid chips -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">2. Chọn khung giờ hẹn <span class="text-danger">*</span></label>
+                        <div class="time-slots-grid d-flex flex-wrap gap-2">
+                            @foreach (var slot in timeSlots)
+                            {
+                                <div class="time-slot-chip">
+                                    <input type="radio" asp-for="TimeSlot" value="@slot" id="slot_@slot" class="d-none" required />
+                                    <label for="slot_@slot" class="btn btn-outline-teal rounded-pill px-3 py-1 btn-sm">
+                                        <i class="bi bi-clock"></i> @slot
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <span asp-validation-for="TimeSlot" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Quick Autofill with User Pets -->
+                    @if (userPets.Any())
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small"><i class="bi bi-magic"></i> Chọn nhanh từ hồ sơ bé của bạn</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var pet in userPets)
+                                {
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 pet-autofill-btn" data-name="@pet.Name" data-species="@pet.Species">
+                                        <i class="bi bi-paw-fill"></i> @pet.Name (@pet.Species)
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="PetName" class="form-label fw-semibold">3. Tên bé thú cưng <span class="text-danger">*</span></label>
+                            <input asp-for="PetName" class="form-control" id="petNameInput" placeholder="VD: Bông, Kiki..." required />
+                            <span asp-validation-for="PetName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PetType" class="form-label fw-semibold">4. Loại thú cưng <span class="text-danger">*</span></label>
+                            <select asp-for="PetType" class="form-select" id="petTypeSelect" required>
+                                <option value="Chó">Chó</option>
+                                <option value="Mèo">Mèo</option>
+                                <option value="Chim">Chim</option>
+                                <option value="Hamster">Hamster</option>
+                                <option value="Thỏ">Thỏ</option>
+                            </select>
+                            <span asp-validation-for="PetType" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label fw-semibold">Ghi chú thêm</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="VD: Bé hơi nhát người lạ, cần cắt lông gọn ở vùng tai... (tuỳ chọn)"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-teal rounded-pill px-4">
+                            <i class="bi bi-calendar-check"></i> Xác nhận đặt lịch
+                        </button>
+                        <a asp-controller="Service" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Autofill buttons handler
+            const autofillBtns = document.querySelectorAll(".pet-autofill-btn");
+            const nameInput = document.getElementById("petNameInput");
+            const typeSelect = document.getElementById("petTypeSelect");
+
+            autofillBtns.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const name = this.getAttribute("data-name");
+                    const species = this.getAttribute("data-species");
+
+                    if (nameInput) nameInput.value = name;
+                    if (typeSelect) {
+                        typeSelect.value = species;
+                        // Trigger validation if active
+                        $(typeSelect).valid();
+                    }
+                    if (nameInput) $(nameInput).valid();
+                });
+            });
+
+            // Styling for active timeslots
+            const slots = document.querySelectorAll(".time-slot-chip input[type='radio']");
+            slots.forEach(slot => {
+                slot.addEventListener("change", function () {
+                    document.querySelectorAll(".time-slot-chip label").forEach(lbl => {
+                        lbl.classList.remove("btn-teal");
+                        lbl.classList.add("btn-outline-teal");
+                    });
+                    if (this.checked) {
+                        const lbl = document.querySelector(`label[for='${this.id}']`);
+                        if (lbl) {
+                            lbl.classList.remove("btn-outline-teal");
+                            lbl.classList.add("btn-teal");
+                        }
+                    }
+                });
+            });
+
+            // Check booked slots when date changes
+            const dateInput = document.querySelector("input[name='BookingDate']");
+            if (dateInput) {
+                dateInput.addEventListener("change", checkBookedSlots);
+                // Run on load
+                checkBookedSlots();
+            }
+
+            function checkBookedSlots() {
+                const dateVal = dateInput.value;
+                if (!dateVal) return;
+
+                fetch(`/ServiceBooking/GetBookedSlots?date=${dateVal}`)
+                    .then(res => res.json())
+                    .then(bookedSlots => {
+                        slots.forEach(slot => {
+                            const lbl = document.querySelector(`label[for='${slot.id}']`);
+                            if (bookedSlots.includes(slot.value)) {
+                                slot.disabled = true;
+                                slot.checked = false;
+                                if (lbl) {
+                                    lbl.classList.add("disabled", "btn-light", "text-muted");
+                                    lbl.classList.remove("btn-outline-teal", "btn-teal");
+                                    lbl.style.pointerEvents = "none";
+                                    lbl.style.opacity = "0.5";
+                                }
+                            } else {
+                                slot.disabled = false;
+                                if (lbl) {
+                                    lbl.classList.remove("disabled", "btn-light", "text-muted");
+                                    lbl.classList.add("btn-outline-teal");
+                                    lbl.style.pointerEvents = "auto";
+                                    lbl.style.opacity = "1";
+                                }
+                            }
+                        });
+                    })
+                    .catch(err => console.error("Error loading booked slots:", err));
+            }
+        });
+    </script>
+}

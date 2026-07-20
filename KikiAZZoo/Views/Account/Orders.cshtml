@@ -1,0 +1,172 @@
+@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    var unpaidCount = Model.Count(o => o.PaymentStatus == "Pending" && o.Status != "Cancelled");
+}
+
+<div class="container py-4 profile-page">
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <div class="profile-nav-card p-3 rounded-4 shadow-sm border bg-white">
+                <div class="text-center py-3">
+                    <div class="avatar-placeholder bg-teal-light text-teal rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Hồ sơ của tôi</h5>
+                </div>
+                <hr />
+                <div class="list-group list-group-flush border-0">
+                    <a asp-controller="Account" asp-action="Profile" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-person-gear"></i> Thông tin tài khoản</a>
+                    <a asp-controller="Account" asp-action="Orders" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3 active"><i class="bi bi-receipt"></i> Đơn hàng đã mua</a>
+                    <a asp-controller="Pet" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-paw-fill"></i> Hồ sơ thú cưng</a>
+                    <a asp-controller="ServiceBooking" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-calendar-check"></i> Lịch hẹn dịch vụ</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <div class="checkout-card p-4 rounded-4 shadow-sm border bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-receipt text-teal"></i> Lịch sử đơn hàng</h3>
+                    
+                    <!-- Time Filters Form -->
+                    <form method="get" asp-action="Orders" id="filterForm" class="d-flex align-items-center gap-2">
+                        <label class="small text-muted fw-bold text-nowrap">Thời gian:</label>
+                        <select name="filterTime" class="form-select form-select-sm rounded-pill" style="min-width: 140px;" onchange="this.form.submit()">
+                            <!option value="" @(string.IsNullOrEmpty(ViewBag.FilterTime) ? "selected" : "")>Tất cả</!option>
+                            <!option value="month" @(ViewBag.FilterTime == "month" ? "selected" : "")>Tháng này</!option>
+                            <!option value="3months" @(ViewBag.FilterTime == "3months" ? "selected" : "")>3 tháng qua</!option>
+                            <!option value="year" @(ViewBag.FilterTime == "year" ? "selected" : "")>Năm nay</!option>
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Unpaid alert banner -->
+                @if (unpaidCount > 0)
+                {
+                    <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4 rounded-3 py-2.5" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 text-warning fs-5"></i>
+                        <div class="small fw-semibold">
+                            Bạn có <strong class="text-danger">@unpaidCount</strong> đơn hàng chưa thanh toán. Vui lòng thanh toán sớm để nhận sản phẩm.
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 text-teal-light mb-3"><i class="bi bi-inbox"></i></div>
+                        <p class="mb-3">Không tìm thấy đơn hàng nào.</p>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-teal rounded-pill px-4 btn-sm">Mua sắm ngay</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-none d-md-block border rounded-3 overflow-hidden shadow-sm">
+                        <table class="table table-hover align-middle mb-0" style="background: transparent;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã đơn</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Thanh toán</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th class="pe-3 text-center" style="width: 250px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold ps-3">#@o.Id</td>
+                                        <td class="small">@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @if (o.PaymentStatus == "Paid")
+                                            {
+                                                <span class="badge bg-success-light text-success rounded-pill px-2 py-1 small"><i class="bi bi-credit-card-2-front"></i> Đã trả</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning-light text-warning rounded-pill px-2 py-1 small"><i class="bi bi-credit-card"></i> Chưa trả</span>
+                                            }
+                                        </td>
+                                        <td class="product-price fw-bold text-dark">@o.TotalPrice.ToString("#,##0")đ</td>
+                                        <td><partial name="_OrderStatusBadge" model="o.Status" /></td>
+                                        <td class="pe-3 text-center">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a asp-action="OrderDetails" asp-route-id="@o.Id" class="btn btn-xs btn-outline-teal rounded-pill px-2".style="font-size: 0.78rem;" title="Xem chi tiết">Chi tiết</a>
+                                                
+                                                @if (o.PaymentMethod != "COD" && o.PaymentStatus == "Pending" && o.Status != "Cancelled")
+                                                {
+                                                    <a asp-controller="ShoppingCart" asp-action="Payment" asp-route-orderId="@o.Id" class="btn btn-xs btn-teal rounded-pill px-2" style="font-size: 0.78rem;">Trả ngay</a>
+                                                }
+                                                
+                                                <!-- Re-order button -->
+                                                <a asp-controller="ShoppingCart" asp-action="Reorder" asp-route-orderId="@o.Id" class="btn btn-xs btn-outline-orange rounded-pill px-2" style="font-size: 0.78rem;" title="Thêm tất cả vào giỏ hàng"><i class="bi bi-arrow-repeat"></i> Mua lại</a>
+                                                
+                                                <!-- Support Chat link -->
+                                                <a href="https://zalo.me/your-zalo-id-or-phone" target="_blank" class="btn btn-xs btn-outline-info rounded-pill px-2" style="font-size: 0.78rem;" title="Hỗ trợ nhanh qua Zalo"><i class="bi bi-chat-dots-fill"></i> Chat</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-md-none">
+                        @foreach (var o in Model)
+                        {
+                            <div class="order-mobile-card border rounded-4 p-3 mb-3 shadow-sm bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="fw-bold text-dark">Đơn hàng #@o.Id</span>
+                                    <partial name="_OrderStatusBadge" model="o.Status" />
+                                </div>
+                                <p class="text-muted small mb-2"><i class="bi bi-calendar"></i> @o.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Thanh toán:</span>
+                                    <span class="small fw-semibold text-dark">
+                                        @if (o.PaymentStatus == "Paid")
+                                        {
+                                            <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Đã trả</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning"><i class="bi bi-clock-fill me-1"></i>Chưa trả</span>
+                                        }
+                                        (@o.PaymentMethod)
+                                    </span>
+                                </div>
+                                <p class="product-price fw-bold fs-5 mb-3">@o.TotalPrice.ToString("#,##0")đ</p>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex gap-2">
+                                        <a asp-action="OrderDetails" asp-route-id="@o.Id" class="btn btn-sm btn-outline-teal w-100 rounded-pill">Xem chi tiết</a>
+                                        @if (o.PaymentMethod != "COD" && o.PaymentStatus == "Pending" && o.Status != "Cancelled")
+                                        {
+                                            <a asp-controller="ShoppingCart" asp-action="Payment" asp-route-orderId="@o.Id" class="btn btn-sm btn-teal w-100 rounded-pill">Thanh toán</a>
+                                        }
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="ShoppingCart" asp-action="Reorder" asp-route-orderId="@o.Id" class="btn btn-sm btn-outline-orange w-100 rounded-pill"><i class="bi bi-arrow-repeat me-1"></i>Mua lại</a>
+                                        <a href="https://zalo.me/your-zalo-id-or-phone" target="_blank" class="btn btn-sm btn-outline-info w-100 rounded-pill"><i class="bi bi-chat-dots-fill me-1"></i>Hỗ trợ</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling helper for smaller buttons in the list */
+    .btn-xs {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.72rem;
+        border-radius: 999px !important;
+    }
+</style>

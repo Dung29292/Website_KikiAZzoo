@@ -1,0 +1,683 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var hasFilters = Model.CategoryGroupId.HasValue || Model.CategoryId.HasValue || Model.PetTypeId.HasValue
+        || Model.BrandId.HasValue || Model.PriceRangeId.HasValue || !string.IsNullOrEmpty(Model.Search)
+        || !string.IsNullOrEmpty(Model.StatusFilter) || Model.RatingFilter.HasValue;
+}
+
+<div class="container py-5">
+    <nav class="breadcrumb-kiki mb-4">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> > Sản phẩm
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2" style="color: var(--dark);">Sản phẩm</h1>
+        <p class="text-muted" style="max-width: 500px; margin: 0 auto;">
+            @Model.TotalCount kết quả
+            @if (hasFilters) { <span>– đang lọc</span> }
+        </p>
+    </div>
+
+    <!-- Filter tags -->
+    @if (hasFilters)
+    {
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-4 p-3" style="background: var(--teal-light); border-radius: 16px;">
+            <span class="fw-semibold small" style="color: var(--teal-dark);"><i class="ph ph-funnel-simple me-1"></i>Đang lọc:</span>
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">Tìm: @Model.Search</span>
+            }
+            @if (Model.CategoryGroupId.HasValue)
+            {
+                var g = Model.CategoryGroups.FirstOrDefault(x => x.Id == Model.CategoryGroupId);
+                if (g != null) { <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">@g.Name</span> }
+            }
+            @if (Model.CategoryId.HasValue)
+            {
+                var c = Model.Categories.FirstOrDefault(x => x.Id == Model.CategoryId);
+                if (c != null) { <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">@c.Name</span> }
+            }
+            @if (Model.PetTypeId.HasValue)
+            {
+                var pt = Model.PetTypes.FirstOrDefault(x => x.Id == Model.PetTypeId);
+                if (pt != null) { <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--orange-dark);border:1px solid rgba(249,115,22,.2)"><i class="bi @pt.Icon me-1"></i>@pt.Name</span> }
+            }
+            @if (Model.BrandId.HasValue)
+            {
+                var b = Model.Brands.FirstOrDefault(x => x.Id == Model.BrandId);
+                if (b != null) { <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--purple);border:1px solid rgba(139,92,246,.2)"><i class="ph ph-tag me-1"></i>@b.Name</span> }
+            }
+            @if (Model.PriceRangeId.HasValue)
+            {
+                var pr = Model.PriceRanges.FirstOrDefault(x => x.Id == Model.PriceRangeId);
+                if (pr != null) { <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">@pr.Label</span> }
+            }
+            @if (!string.IsNullOrEmpty(Model.StatusFilter))
+            {
+                var lbl = Model.StatusFilter switch { "sale" => "Đang giảm giá", "bestseller" => "Bán chạy", "new" => "Hàng mới", _ => Model.StatusFilter };
+                <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--orange-dark);border:1px solid rgba(249,115,22,.2)">@lbl</span>
+            }
+            @if (Model.RatingFilter.HasValue)
+            {
+                <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)"><i class="ph-fill ph-star me-1"></i>≥ @Model.RatingFilter sao</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.PetAge))
+            {
+                var lbl = Model.PetAge switch { "young" => "Con non / Nhỏ", "adult" => "Trưởng thành", _ => Model.PetAge };
+                <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">Tuổi: @lbl</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.FoodType))
+            {
+                var lbl = Model.FoodType switch { "hat" => "Thức ăn hạt", "pate" => "Pate / Đồ ướt", "snack" => "Snack / Bánh thưởng", _ => Model.FoodType };
+                <span class="badge rounded-pill px-3 py-2" style="background:#fff;color:var(--teal-dark);border:1px solid rgba(13,148,136,.15)">Dạng: @lbl</span>
+            }
+            <a asp-action="Index" class="btn btn-sm ms-auto" style="background:var(--teal);color:#fff;border-radius:999px;padding:.3rem 1rem;font-size:.8rem;font-weight:600">
+                <i class="ph ph-x me-1"></i>Xóa tất cả
+            </a>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Sidebar filter - Desktop -->
+        <div class="col-lg-3">
+            <div class="sticky-sidebar d-none d-lg-block">
+                <div class="filter-card-modern">
+                    <div class="filter-card-header">
+                        <i class="ph ph-funnel-simple me-2"></i>Bộ lọc
+                    </div>
+                    <div class="filter-card-body">
+                        @{ ViewData["FilterPrefix"] = "Desktop"; }
+                        <partial name="_ProductFilterForm" model="Model" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product grid -->
+        <div class="col-lg-9">
+            <!-- Sort & mobile filter bar -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3" style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(13,148,136,.06)">
+                <span class="fw-semibold small" style="color:var(--dark)">
+                    <i class="ph ph-squares-four me-1" style="color:var(--teal)"></i>@Model.TotalCount sản phẩm
+                </span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button class="btn d-lg-none d-flex align-items-center gap-2"
+                            style="background:var(--teal);color:#fff;border-radius:999px;font-size:.85rem;font-weight:600;padding:.45rem 1rem"
+                            type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                        <i class="ph ph-funnel-simple"></i> Bộ lọc
+                    </button>
+                    <form method="get" asp-action="Index" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                        <input type="hidden" name="categoryGroupId" value="@Model.CategoryGroupId" />
+                        <input type="hidden" name="petTypeId" value="@Model.PetTypeId" />
+                        <input type="hidden" name="brandId" value="@Model.BrandId" />
+                        <input type="hidden" name="priceRangeId" value="@Model.PriceRangeId" />
+                        <input type="hidden" name="search" value="@Model.Search" />
+                        <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                        <input type="hidden" name="ratingFilter" value="@Model.RatingFilter" />
+                        <label class="small fw-semibold text-nowrap" style="color:#64748b">Sắp xếp:</label>
+                        <select name="sortBy" class="form-select form-select-sm" style="border-radius:999px;border-color:#e2e8f0;font-size:.85rem;min-width:160px" onchange="this.form.submit()">
+                            <option value="default" selected="@(Model.SortBy=="default")">Mặc định</option>
+                            <option value="price_asc" selected="@(Model.SortBy=="price_asc")">Giá thấp → cao</option>
+                            <option value="price_desc" selected="@(Model.SortBy=="price_desc")">Giá cao → thấp</option>
+                            <option value="newest" selected="@(Model.SortBy=="newest")">Mới nhất</option>
+                            <option value="best_selling" selected="@(Model.SortBy=="best_selling")">Bán chạy</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Products -->
+            @if (Model.Products.Any())
+            {
+                <div class="product-grid">
+                    @foreach (var item in Model.Products)
+                    {
+                        @await Html.PartialAsync("_ProductCard", item)
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5" style="background:#fff;border-radius:24px;padding:3rem 2rem !important">
+                    <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;background:rgba(13,148,136,.1);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--teal)">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </div>
+                    <h5 class="fw-bold mt-4 mb-2" style="color:var(--dark)">Không tìm thấy sản phẩm</h5>
+                    <p class="text-muted small">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+                    <a asp-action="Index" class="btn" style="background:var(--teal);color:#fff;border-radius:999px;font-weight:600">Xóa bộ lọc</a>
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                var current = Model.CurrentPage;
+                var total = Model.TotalPages;
+                var start = Math.Max(1, current - 2);
+                var end = Math.Min(total, current + 2);
+
+                <nav class="mt-5" aria-label="Phân trang">
+                    <ul class="pagination pagination-modern justify-content-center">
+                        @if (current > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(current-1)"
+                                   asp-route-categoryId="@Model.CategoryId" asp-route-categoryGroupId="@Model.CategoryGroupId"
+                                   asp-route-petTypeId="@Model.PetTypeId" asp-route-brandId="@Model.BrandId"
+                                   asp-route-priceRangeId="@Model.PriceRangeId" asp-route-search="@Model.Search"
+                                   asp-route-statusFilter="@Model.StatusFilter" asp-route-ratingFilter="@Model.RatingFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
+                                    <i class="ph ph-caret-left"></i>
+                                </a>
+                            </li>
+                        }
+                        @if (start > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="1"
+                                   asp-route-categoryId="@Model.CategoryId" asp-route-categoryGroupId="@Model.CategoryGroupId"
+                                   asp-route-petTypeId="@Model.PetTypeId" asp-route-brandId="@Model.BrandId"
+                                   asp-route-priceRangeId="@Model.PriceRangeId" asp-route-search="@Model.Search"
+                                   asp-route-statusFilter="@Model.StatusFilter" asp-route-ratingFilter="@Model.RatingFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center">1</a>
+                            </li>
+                            @if (start > 2) { <li class="page-item disabled"><span class="page-link" style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:none">…</span></li> }
+                        }
+                        @for (int i = start; i <= end; i++)
+                        {
+                            <li class="page-item @(i==current?"active":"")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@i"
+                                   asp-route-categoryId="@Model.CategoryId" asp-route-categoryGroupId="@Model.CategoryGroupId"
+                                   asp-route-petTypeId="@Model.PetTypeId" asp-route-brandId="@Model.BrandId"
+                                   asp-route-priceRangeId="@Model.PriceRangeId" asp-route-search="@Model.Search"
+                                   asp-route-statusFilter="@Model.StatusFilter" asp-route-ratingFilter="@Model.RatingFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center"
+                                   aria-current="@(i==current?"page":null)">@i</a>
+                            </li>
+                        }
+                        @if (end < total)
+                        {
+                            @if (end < total - 1) { <li class="page-item disabled"><span class="page-link" style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:none">…</span></li> }
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@total"
+                                   asp-route-categoryId="@Model.CategoryId" asp-route-categoryGroupId="@Model.CategoryGroupId"
+                                   asp-route-petTypeId="@Model.PetTypeId" asp-route-brandId="@Model.BrandId"
+                                   asp-route-priceRangeId="@Model.PriceRangeId" asp-route-search="@Model.Search"
+                                   asp-route-statusFilter="@Model.StatusFilter" asp-route-ratingFilter="@Model.RatingFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center">@total</a>
+                            </li>
+                        }
+                        @if (current < total)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(current+1)"
+                                   asp-route-categoryId="@Model.CategoryId" asp-route-categoryGroupId="@Model.CategoryGroupId"
+                                   asp-route-petTypeId="@Model.PetTypeId" asp-route-brandId="@Model.BrandId"
+                                   asp-route-priceRangeId="@Model.PriceRangeId" asp-route-search="@Model.Search"
+                                   asp-route-statusFilter="@Model.StatusFilter" asp-route-ratingFilter="@Model.RatingFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   style="border-radius:999px;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
+                                    <i class="ph ph-caret-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+
+    <!-- SEO Content Section at the bottom -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mt-5 bg-white">
+        <h5 class="fw-bold text-teal mb-3"><i class="bi bi-info-circle-fill me-2"></i>KikiAzoo - Siêu thị thức ăn và phụ kiện thú cưng uy tín</h5>
+        <p class="text-muted mb-0 small" style="line-height: 1.6;">
+            Chào mừng bạn đến với KikiAzoo, nơi cung cấp các sản phẩm <strong>thức ăn cho thú cưng</strong> chất lượng cao cùng hàng ngàn mẫu <strong>phụ kiện giá tốt</strong>. Chúng tôi tự hào mang đến các giải pháp dinh dưỡng tối ưu và vật dụng cần thiết để bạn chăm sóc thú cưng của mình một cách chu đáo nhất. Hãy khám phá ngay các chương trình ưu đãi hấp dẫn dành riêng cho chó mèo và tận hưởng dịch vụ giao hàng nhanh chóng, tiện lợi của KikiAzoo!
+        </p>
+    </div>
+</div>
+
+<!-- Mobile filter offcanvas -->
+<div class="offcanvas offcanvas-start filter-offcanvas" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header" style="border-bottom:1px solid #f0f0f0;padding:1.25rem">
+        <h5 class="offcanvas-title fw-bold" style="color:var(--teal-dark)"><i class="ph ph-funnel-simple me-2"></i>Bộ lọc</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
+    </div>
+    <div class="offcanvas-body" style="padding:1.25rem">
+        @{ ViewData["FilterPrefix"] = "Mobile"; }
+        <partial name="_ProductFilterForm" model="Model" />
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light py-3">
+                <h5 class="modal-title fw-bold text-teal"><i class="bi bi-lightning-fill me-1"></i>Xem nhanh sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <img id="qv-image" src="" alt="" class="img-fluid rounded-4 shadow-sm" style="width: 100%; height: 280px; object-fit: cover;" />
+                    </div>
+                    <div class="col-md-7 d-flex flex-column justify-content-between">
+                        <div>
+                            <span id="qv-category" class="badge bg-teal-light text-teal mb-2 small"></span>
+                            <h3 id="qv-name" class="fw-bold text-dark mb-2"></h3>
+                            
+                            <!-- Rating -->
+                            <div class="d-flex align-items-center gap-1 mb-3">
+                                <span id="qv-stars" class="text-warning"></span>
+                                <span id="qv-rating-text" class="text-muted small"></span>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <span id="qv-price" class="fs-4 fw-bold text-danger me-2"></span>
+                                <del id="qv-original-price" class="text-muted small"></del>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-dark small mb-1">Mô tả ngắn:</h6>
+                                <p id="qv-description" class="text-muted small mb-0" style="max-height: 120px; overflow-y: auto; line-height: 1.5;"></p>
+                            </div>
+                        </div>
+
+                        <!-- Quantity Selector & Cart Submit -->
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <label class="small fw-bold text-muted">Số lượng:</label>
+                                <div class="input-group" style="width: 120px;">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="changeQty(-1)">-</button>
+                                    <input type="number" id="qv-qty" class="form-control text-center py-1" value="1" min="1" max="10" readonly />
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="changeQty(1)">+</button>
+                                </div>
+                                <span id="qv-stock-status" class="small"></span>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a id="qv-add-cart-btn" href="" class="btn btn-teal flex-grow-1 py-2 fw-bold"><i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ</a>
+                                <a id="qv-detail-btn" href="" class="btn btn-outline-teal py-2 fw-bold">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Compare Bar -->
+<div id="compareBar" class="position-fixed bottom-0 start-50 translate-middle-x bg-white shadow-lg border rounded-top-4 p-3 d-none" style="z-index: 1050; width: 90%; max-width: 600px; transition: transform 0.3s ease;">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3" id="compare-thumbnails">
+            <!-- Thumbnails will be rendered here dynamically -->
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary fw-semibold" id="btn-clear-compare">Xóa</button>
+            <button class="btn btn-sm btn-teal fw-semibold" id="btn-compare-now"><i class="bi bi-arrows-collapse me-1"></i>So sánh ngay</button>
+        </div>
+    </div>
+</div>
+
+<!-- Compare Comparison Modal -->
+<div class="modal fade" id="compareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light py-3">
+                <h5 class="modal-title fw-bold text-teal"><i class="bi bi-arrows-left-right me-2"></i>So sánh sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center mb-0">
+                        <thead class="table-light">
+                            <tr id="compare-header-row">
+                                <th style="width: 25%;">Thuộc tính</th>
+                                <!-- Dynamic columns for products -->
+                            </tr>
+                        </thead>
+                        <tbody id="compare-body-rows">
+                            <!-- Dynamic comparison rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to top button -->
+<button type="button" id="backToTop" class="btn btn-teal rounded-circle p-0 shadow position-fixed d-none" style="bottom: 25px; right: 25px; width: 45px; height: 45px; z-index: 1040;">
+    <i class="bi bi-arrow-up fs-5"></i>
+</button>
+
+<style>
+    /* Styling for image hover actions */
+    .product-card__img:hover .product-image-hover-actions {
+        opacity: 1 !important;
+    }
+    
+    .product-image-hover-actions .btn:hover {
+        background-color: var(--teal) !important;
+        color: white !important;
+    }
+
+    /* Out of stock card styling */
+    .product-out-of-stock {
+        opacity: 0.85;
+    }
+    .product-out-of-stock .product-image {
+        filter: grayscale(40%) blur(1px);
+    }
+
+    /* Dark Mode overrides for Quick View & Compare */
+    body.dark-mode .modal-content {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .modal-header,
+    body.dark-mode .modal-footer {
+        background-color: #0f172a !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .modal-content .text-muted,
+    body.dark-mode .modal-content .text-secondary {
+        color: #94a3b8 !important;
+    }
+    body.dark-mode .modal-content .text-dark {
+        color: #f1f5f9 !important;
+    }
+    body.dark-mode .modal-content .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    body.dark-mode #compareBar {
+        background-color: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: #f1f5f9 !important;
+    }
+    body.dark-mode #compareBar .text-muted {
+        color: #94a3b8 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Quantity change helper for Quick View modal
+        let currentStock = 10;
+        const noImagePlaceholder = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="50" font-family="sans-serif" font-size="12" fill="%2394a3b8" dominant-baseline="middle" text-anchor="middle">No Image</text></svg>';
+
+        function changeQty(amount) {
+            const input = document.getElementById("qv-qty");
+            let val = parseInt(input.value) + amount;
+            if (val < 1) val = 1;
+            if (val > currentStock) val = currentStock;
+            input.value = val;
+            
+            // Re-bind add to cart link with quantity
+            const btn = document.getElementById("qv-add-cart-btn");
+            const baseHref = btn.getAttribute("data-base-href");
+            btn.href = `${baseHref}?quantity=${val}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Back to top behavior
+            const backToTopBtn = document.getElementById("backToTop");
+            window.addEventListener("scroll", function () {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.remove("d-none");
+                } else {
+                    backToTopBtn.classList.add("d-none");
+                }
+            });
+
+            backToTopBtn.addEventListener("click", function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            });
+
+            // Fake Countdown Timer logic (e.g. counts down 2h 15m 30s)
+            function initCountdownTimers() {
+                const timers = document.querySelectorAll(".countdown-timer");
+                if (timers.length === 0) return;
+
+                // Simple state: countdown from a fixed duration of 8130 seconds (2h 15m 30s)
+                let timeLeft = 8130;
+
+                setInterval(function () {
+                    if (timeLeft <= 0) {
+                        timeLeft = 8130; // Reset just for visual demonstration loop
+                    }
+                    timeLeft--;
+
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+
+                    const formatted = 
+                        String(hours).padStart(2, '0') + ":" + 
+                        String(minutes).padStart(2, '0') + ":" + 
+                        String(seconds).padStart(2, '0');
+
+                    timers.forEach(t => {
+                        t.textContent = formatted;
+                    });
+                }, 1000);
+            }
+            initCountdownTimers();
+
+            // Quick View Trigger via AJAX
+            const qvModal = new bootstrap.Modal(document.getElementById("quickViewModal"));
+            document.querySelectorAll(".btn-quick-view").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    
+                    // Fetch data
+                    fetch(`/api/products/${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById("qv-image").src = data.imageUrl || noImagePlaceholder;
+                            document.getElementById("qv-name").textContent = data.name;
+                            document.getElementById("qv-category").textContent = data.categoryGroup + " › " + data.category;
+                            
+                            // Rating stars
+                            let starsHtml = "";
+                            const ratingVal = data.rating || 5;
+                            for (let i = 0; i < Math.floor(ratingVal); i++) {
+                                starsHtml += '<i class="ph-fill ph-star"></i>';
+                            }
+                            for (let i = Math.floor(ratingVal); i < 5; i++) {
+                                starsHtml += '<i class="ph ph-star"></i>';
+                            }
+                            document.getElementById("qv-stars").innerHTML = starsHtml;
+                            document.getElementById("qv-rating-text").textContent = `(${ratingVal})`;
+
+                            // Price
+                            document.getElementById("qv-price").textContent = data.price.toLocaleString('vi-VN') + "đ";
+                            if (data.originalPrice && data.originalPrice > data.price) {
+                                document.getElementById("qv-original-price").textContent = data.originalPrice.toLocaleString('vi-VN') + "đ";
+                            } else {
+                                document.getElementById("qv-original-price").textContent = "";
+                            }
+
+                            // Description
+                            document.getElementById("qv-description").innerHTML = data.description || "Chưa có mô tả chi tiết cho sản phẩm này.";
+
+                            // Stock status & limits
+                            currentStock = data.stock > 0 ? data.stock : 10;
+                            const stockStatus = document.getElementById("qv-stock-status");
+                            if (data.stock === 0) {
+                                stockStatus.innerHTML = '<span class="badge bg-danger">Hết hàng</span>';
+                                document.getElementById("qv-add-cart-btn").classList.add("disabled");
+                            } else if (data.stock <= 5) {
+                                stockStatus.innerHTML = `<span class="badge bg-warning text-dark">Chỉ còn ${data.stock} sản phẩm</span>`;
+                                document.getElementById("qv-add-cart-btn").classList.remove("disabled");
+                            } else {
+                                stockStatus.innerHTML = `<span class="badge bg-success">Còn hàng (${data.stock})</span>`;
+                                document.getElementById("qv-add-cart-btn").classList.remove("disabled");
+                            }
+
+                            // Cart / Detail Buttons
+                            const addCartBtn = document.getElementById("qv-add-cart-btn");
+                            addCartBtn.setAttribute("data-base-href", `/ShoppingCart/AddToCart/${data.id}`);
+                            addCartBtn.href = `/ShoppingCart/AddToCart/${data.id}?quantity=1`;
+                            
+                            document.getElementById("qv-detail-btn").href = `/Product/Details/${data.id}`;
+                            document.getElementById("qv-qty").value = 1;
+
+                            qvModal.show();
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert("Không thể tải thông tin sản phẩm!");
+                        });
+                });
+            });
+
+            // Product Compare Feature logic
+            let comparedProducts = JSON.parse(sessionStorage.getItem("comparedProducts") || "[]");
+
+            function updateCompareBar() {
+                const compareBar = document.getElementById("compareBar");
+                const thumbsContainer = document.getElementById("compare-thumbnails");
+
+                if (comparedProducts.length === 0) {
+                    compareBar.classList.add("d-none");
+                    return;
+                }
+
+                compareBar.classList.remove("d-none");
+                thumbsContainer.innerHTML = "";
+
+                comparedProducts.forEach(prod => {
+                    const div = document.createElement("div");
+                    div.className = "position-relative";
+                    div.style.width = "50px";
+                    div.style.height = "50px";
+                    div.innerHTML = `
+                        <img src="${prod.image || noImagePlaceholder}" class="rounded shadow-sm" style="width:100%;height:100%;object-fit:cover;" />
+                        <button type="button" class="btn-remove-compare btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" data-id="${prod.id}" style="width:18px;height:18px;font-size:10px;">&times;</button>
+                    `;
+                    thumbsContainer.appendChild(div);
+                });
+
+                // Attach remove actions
+                document.querySelectorAll(".btn-remove-compare").forEach(btn => {
+                    btn.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        const id = this.getAttribute("data-id");
+                        comparedProducts = comparedProducts.filter(p => p.id !== id);
+                        sessionStorage.setItem("comparedProducts", JSON.stringify(comparedProducts));
+                        updateCompareBar();
+                    });
+                });
+            }
+            updateCompareBar();
+
+            // Toggle compare click
+            document.querySelectorAll(".btn-compare").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const id = this.getAttribute("data-id");
+                    
+                    // Check if already in list
+                    if (comparedProducts.some(p => p.id === id)) {
+                        comparedProducts = comparedProducts.filter(p => p.id !== id);
+                    } else {
+                        if (comparedProducts.length >= 3) {
+                            alert("Chỉ so sánh tối đa 3 sản phẩm cùng lúc!");
+                            return;
+                        }
+                        comparedProducts.push({
+                            id: id,
+                            name: this.getAttribute("data-name"),
+                            price: this.getAttribute("data-price"),
+                            image: this.getAttribute("data-image"),
+                            rating: this.getAttribute("data-rating"),
+                            category: this.getAttribute("data-category")
+                        });
+                    }
+
+                    sessionStorage.setItem("comparedProducts", JSON.stringify(comparedProducts));
+                    updateCompareBar();
+                });
+            });
+
+            // Clear compare
+            document.getElementById("btn-clear-compare").addEventListener("click", function() {
+                comparedProducts = [];
+                sessionStorage.setItem("comparedProducts", "[]");
+                updateCompareBar();
+            });
+
+            // Compare comparison modal trigger
+            const compareModal = new bootstrap.Modal(document.getElementById("compareModal"));
+            document.getElementById("btn-compare-now").addEventListener("click", function() {
+                if (comparedProducts.length < 2) {
+                    alert("Hãy chọn ít nhất 2 sản phẩm để tiến hành so sánh!");
+                    return;
+                }
+
+                // Render Table rows dynamically
+                const headerRow = document.getElementById("compare-header-row");
+                const bodyRows = document.getElementById("compare-body-rows");
+
+                headerRow.innerHTML = `<th style="width: 25%;">Thuộc tính</th>`;
+                comparedProducts.forEach(p => {
+                    const th = document.createElement("th");
+                    th.style.width = `${75 / comparedProducts.length}%`;
+                    th.innerHTML = `
+                        <img src="${p.image || noImagePlaceholder}" class="rounded-3 shadow-sm mb-2" style="width:80px;height:80px;object-fit:cover;" />
+                        <div class="small fw-bold text-dark text-truncate" style="max-width:180px;">${p.name}</div>
+                    `;
+                    headerRow.appendChild(th);
+                });
+
+                // Generate Rows
+                let rowsHtml = "";
+
+                // Row: Giá bán
+                rowsHtml += `<tr><td class="fw-bold text-muted small text-start ps-3">Giá bán</td>`;
+                comparedProducts.forEach(p => {
+                    rowsHtml += `<td class="fw-bold text-teal">${p.price}đ</td>`;
+                });
+                rowsHtml += `</tr>`;
+
+                // Row: Danh mục
+                rowsHtml += `<tr><td class="fw-bold text-muted small text-start ps-3">Danh mục</td>`;
+                comparedProducts.forEach(p => {
+                    rowsHtml += `<td>${p.category || "N/A"}</td>`;
+                });
+                rowsHtml += `</tr>`;
+
+                // Row: Đánh giá
+                rowsHtml += `<tr><td class="fw-bold text-muted small text-start ps-3">Đánh giá</td>`;
+                comparedProducts.forEach(p => {
+                    rowsHtml += `<td><span class="text-warning"><i class="ph-fill ph-star me-1"></i>${p.rating || 5}</span></td>`;
+                });
+                rowsHtml += `</tr>`;
+
+                // Row: Thao tác mua
+                rowsHtml += `<tr><td class="fw-bold text-muted small text-start ps-3">Hành động</td>`;
+                comparedProducts.forEach(p => {
+                    rowsHtml += `<td><a href="/ShoppingCart/AddToCart/${p.id}" class="btn btn-teal btn-sm"><i class="bi bi-cart-plus me-1"></i>Mua ngay</a></td>`;
+                });
+                rowsHtml += `</tr>`;
+
+                bodyRows.innerHTML = rowsHtml;
+                compareModal.show();
+            });
+        });
+    </script>
+}

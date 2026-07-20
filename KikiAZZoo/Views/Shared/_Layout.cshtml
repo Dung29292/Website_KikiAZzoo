@@ -1,0 +1,229 @@
+@using KikiAZZoo.Extensions
+@using KikiAZZoo.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    var cart = Context.Session.GetObjectFromJson<ShoppingCart>("Cart") ?? new ShoppingCart();
+    var cartCount = cart.TotalItems;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KikiAzoo</title>
+    <partial name="_Styles" />
+</head>
+<body>
+    <script>
+        (function () {
+            const localTheme = localStorage.getItem('kikiDarkMode');
+            if (localTheme === '1' || (localTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand-kiki" asp-area="" asp-controller="Home" asp-action="Index"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 160px; height: 45px; object-fit: cover;" /></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Index"><i class="ph ph-house"></i> Trang chủ</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Product" asp-action="Index"><i class="ph ph-storefront"></i> Sản phẩm</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Service" asp-action="Index"><i class="ph ph-scissors"></i> Dịch vụ</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="About"><i class="ph ph-info"></i> Về chúng tôi</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="News" asp-action="Index"><i class="ph ph-newspaper"></i> Tin tức</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Contact"><i class="ph ph-chat-circle-dots"></i> Liên hệ</a></li>
+                    </ul>
+                    <form class="d-none d-lg-flex me-2 header-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
+                        <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm kiếm..." autocomplete="off" />
+                        <button type="submit" class="header-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
+                        <div id="searchSuggestions" class="search-suggestions-box d-none"></div>
+                    </form>
+                    <div class="header-actions d-flex align-items-center gap-2">
+                        <!-- Dark Mode Toggle -->
+                        <button id="darkModeToggle" class="header-icon-btn border-0 bg-transparent" title="Chuyển giao diện" onclick="toggleDarkMode()">
+                            <i class="ph ph-moon" id="darkModeIcon"></i>
+                        </button>
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <div class="dropdown">
+                                <button type="button" class="header-icon-btn dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown" aria-expanded="false" title="Tài khoản">
+                                    <i class="ph-fill ph-user-circle-check"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><span class="dropdown-item-text small fw-bold text-teal">@User.Identity?.Name</span></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile"><i class="ph ph-user me-2"></i>Tài khoản</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Orders"><i class="ph ph-shopping-bag me-2"></i>Đơn hàng</a></li>
+                                    @if (User.IsInRole(SD.Role_Admin))
+                                    {
+                                        <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="ph ph-gear me-2"></i>Quản trị</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout"><i class="ph ph-sign-out me-2"></i>Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-area="" asp-controller="Account" asp-action="Login" class="btn-header-login">Đăng nhập</a>
+                            <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-header-register">Đăng ký</a>
+                        }
+                        <a href="javascript:void(0)" onclick="openMiniCart()" class="header-icon-btn header-cart" title="Giỏ hàng">
+                            <i class="ph ph-shopping-cart"></i>
+                            <span class="cart-badge @(cartCount > 0 ? "" : "d-none")">@cartCount</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>@RenderBody()</main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="footer-brand"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 180px; height: 50px; object-fit: cover;" /></h5>
+                    <p class="text-white-50 small">Cửa hàng thú cưng trực tuyến – bán thú cưng, phụ kiện, thức ăn và cung cấp dịch vụ spa, tắm rửa, nhận nuôi uy tín tại Việt Nam.</p>
+                    <p class="text-white-50 small mb-1"><i class="ph ph-map-pin"></i> 123 Đường Pet, Q.1, TP.HCM</p>
+                    <p class="text-white-50 small mb-1"><i class="ph ph-phone"></i> Hotline: 1900 1234</p>
+                    <div class="footer-social mt-3">
+                        <a href="#" title="Facebook"><i class="ph-fill ph-facebook-logo"></i></a>
+                        <a href="#" title="Instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                        <a href="#" title="TikTok"><i class="ph-fill ph-tiktok-logo"></i></a>
+                        <a href="#" title="Youtube"><i class="ph-fill ph-youtube-logo"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Sản phẩm</h5>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="1">Thú cưng</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="2">Thức ăn</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="3">Đồ chơi</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="4">Phụ kiện</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="5">Quần áo</a>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Dịch vụ</h5>
+                    <a asp-area="" asp-controller="Service" asp-action="Index">Spa &amp; Chăm sóc</a>
+                    <a asp-area="" asp-controller="Service" asp-action="Index">Tắm rửa</a>
+                    <a asp-area="" asp-controller="Service" asp-action="Index">Nhận nuôi</a>
+                    <a asp-area="" asp-controller="Service" asp-action="Index">Khách sạn pet</a>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Hỗ trợ</h5>
+                    <a asp-area="" asp-controller="Home" asp-action="FAQ">Câu hỏi thường gặp</a>
+                    <a asp-area="" asp-controller="Home" asp-action="ShoppingGuide">Hướng dẫn mua hàng</a>
+                    <a asp-area="" asp-controller="Home" asp-action="ReturnPolicy">Chính sách đổi trả</a>
+                    <a asp-area="" asp-controller="Home" asp-action="ShippingPolicy">Vận chuyển</a>
+                    <a asp-area="" asp-controller="Home" asp-action="Contact">Liên hệ</a>
+                </div>
+            </div>
+            <hr class="border-secondary mt-4" />
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <p class="text-white-50 small mb-0">&copy; 2026 KikiAzoo. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="footer-link-inline">Bảo mật</a>
+                    <a asp-area="" asp-controller="Home" asp-action="About" class="footer-link-inline">Giới thiệu</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add to Cart Modal -->
+    <div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border: none; border-radius: 16px;">
+                <div class="modal-header" style="border-bottom: 1px solid #eee; padding: 1.5rem;">
+                    <h5 class="modal-title fw-bold" id="addToCartLabel" style="color: var(--dark);">Thêm vào giỏ hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <img id="modalProductImage" src="" alt="Product" style="width: 100%; border-radius: 12px; object-fit: cover;">
+                        </div>
+                        <div class="col-8">
+                            <h6 id="modalProductName" class="fw-bold" style="color: var(--dark); margin-bottom: 0.5rem;"></h6>
+                            <p id="modalProductCategory" style="font-size: 0.85rem; color: #999; margin-bottom: 1rem;"></p>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.9rem; color: #666;">Đơn giá:</span>
+                                    <span id="modalProductPrice" class="fw-bold" style="color: var(--teal); font-size: 1rem;"></span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
+                                    <span style="font-size: 0.9rem; color: #666;">Số lượng:</span>
+                                    <div class="quantity-selector" style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <button class="qty-btn" id="decreaseQty" style="width: 32px; height: 32px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-weight: bold; color: #666;">−</button>
+                                        <input type="number" id="modalQuantity" value="1" min="1" style="width: 60px; text-align: center; border: 1px solid #ddd; border-radius: 6px; padding: 0.4rem;">
+                                        <button class="qty-btn" id="increaseQty" style="width: 32px; height: 32px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-weight: bold; color: #666;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background: rgba(94, 180, 159, 0.08); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span style="font-size: 0.85rem; color: #666;">Tổng cộng:</span>
+                                <div id="modalTotalPrice" style="font-size: 1.5rem; font-weight: 800; color: var(--teal); margin-top: 0.25rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eee; padding: 1.5rem; gap: 1rem;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 0.6rem 2rem;">Hủy</button>
+                    <button type="button" id="confirmAddToCart" class="btn btn-teal" style="border-radius: 8px; padding: 0.6rem 2rem;">Thêm vào giỏ</button>
+                    <button type="button" id="confirmBuyNow" class="btn btn-orange d-none" style="border-radius: 8px; padding: 0.6rem 2rem;">Mua ngay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Cart Drawer -->
+    <div id="miniCartDrawer" class="mini-cart-drawer">
+        <div id="miniCartContainer">
+            <!-- Loaded dynamically via AJAX -->
+        </div>
+    </div>
+    <div id="miniCartOverlay" class="mini-cart-overlay" onclick="closeMiniCart()"></div>
+
+    <partial name="_Scripts" />
+    <script src="~/js/toast.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('kikiDarkMode', isDark ? '1' : '0');
+            const icon = document.getElementById('darkModeIcon');
+            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const isDark = document.body.classList.contains('dark-mode');
+            const icon = document.getElementById('darkModeIcon');
+            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+
+            // Listen for system theme changes dynamically
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+                // Only follow system changes if the user hasn't explicitly set a preference
+                if (localStorage.getItem('kikiDarkMode') === null) {
+                    const shouldBeDark = e.matches;
+                    if (shouldBeDark) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                    const newIcon = document.getElementById('darkModeIcon');
+                    if (newIcon) newIcon.className = shouldBeDark ? 'ph ph-sun' : 'ph ph-moon';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

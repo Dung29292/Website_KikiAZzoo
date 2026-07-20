@@ -1,0 +1,280 @@
+@model IEnumerable<Product>
+@using KikiAZZoo.Models
+@{
+    ViewData["Title"] = "Trang chủ";
+    var services = ViewBag.Services as IEnumerable<Service> ?? Array.Empty<Service>();
+    var petTypes = ViewBag.PetTypes as List<PetType> ?? new();
+    var categoryGroups = ViewBag.CategoryGroups as List<CategoryGroup> ?? new();
+
+    string GetPetIcon(PetType pt) => pt.Name switch
+    {
+        "Chó" => "fa-solid fa-dog",
+        "Mèo" => "fa-solid fa-cat",
+        "Chim" => "fa-solid fa-dove",
+        "Hamster" => "fa-solid fa-otter",
+        "Thỏ" => "fa-solid fa-carrot",
+        _ => !string.IsNullOrEmpty(pt.Icon) ? pt.Icon : "fa-solid fa-paw"
+    };
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<style>
+    .value-icon-wrap i,
+    .pill-icon-wrap i,
+    .service-icon-wrap-sm i {
+        color: #ffffff !important;
+        font-size: 1.25rem;
+    }
+
+    /* Scroll reveal animations */
+    .reveal {
+        position: relative;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+    }
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<section class="hero-section">
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <!-- Seasonal Promo Badge -->
+                <div class="alert alert-warning border-0 py-2 px-3 mb-3 d-inline-flex align-items-center gap-2 rounded-pill shadow-sm" style="font-size: 0.82rem; font-weight: 700; color: #856404;">
+                    <span class="badge bg-danger text-white">🎁 KHUYẾN MÃI</span>
+                    <span>Nhập mã <strong class="text-danger">KIKINEW5</strong> giảm 5% cho đơn hàng đầu tiên!</span>
+                </div>
+                <br />
+                <span class="hero-badge"><i class="fa-solid fa-star text-warning"></i> Cửa hàng thú cưng #1</span>
+                <h1 class="hero-title">THẾ GIỚI PET<br /><span class="hero-title-accent">ĐÁNG YÊU</span></h1>
+                <p class="hero-subtitle">Mua sắm, nhận nuôi thú cưng và đặt dịch vụ chăm sóc tại KikiAzoo – nơi thú cưng được yêu thương.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-teal btn-lg">MUA SẮM NGAY</a>
+                    <a asp-controller="Service" asp-action="Index" class="btn btn-orange btn-lg">DỊCH VỤ</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <img src="~/images/hero-pets.png" alt="KikiAzoo" class="hero-img auth-float" style="max-height: 480px; object-fit: contain;" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Value bar with scroll reveal -->
+<section class="value-bar reveal">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="value-item value-item-1">
+                    <div class="value-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+                    <h6>Chính hãng</h6><p>100% uy tín</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item value-item-2">
+                    <div class="value-icon-wrap"><i class="fa-solid fa-scissors"></i></div>
+                    <h6>Dịch vụ spa</h6><p>Chăm sóc chuyên nghiệp</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item value-item-3">
+                    <div class="value-icon-wrap"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <h6>Nhận nuôi</h6><p>Kết nối yêu thương</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item value-item-4">
+                    <div class="value-icon-wrap"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h6>Giao nhanh</h6><p>Miễn phí từ 300K</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (categoryGroups.Any())
+{
+    <section class="home-section section-categories reveal">
+        <div class="container">
+            <div class="section-heading text-center">
+                <span class="section-tag">Khám phá</span>
+                <h2 class="section-title">Danh mục sản phẩm</h2>
+            </div>
+            <div class="row g-3 justify-content-center">
+                @{
+                    var catIdx = 0;
+                }
+                @foreach (var g in categoryGroups)
+                {
+                    catIdx++;
+                    <div class="col-4 col-md-2">
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="@g.Id"
+                           class="category-pill category-pill-@(catIdx % 6 + 1)">
+                            <span class="pill-icon-wrap"><i class="@g.Icon"></i></span>
+                            <span class="pill-label">@g.Name</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (petTypes.Any())
+{
+    <section class="home-section section-pets reveal">
+        <div class="container">
+            <div class="section-heading text-center">
+                <span class="section-tag section-tag-orange">Thú cưng</span>
+                <h2 class="section-title">Mua theo loại thú cưng</h2>
+            </div>
+            <div class="row g-3 justify-content-center">
+                @{
+                    var petIdx = 0;
+                }
+                @foreach (var pt in petTypes)
+                {
+                    petIdx++;
+                    <div class="col-4 col-md-2">
+                        <a asp-controller="Product" asp-action="Index" asp-route-petTypeId="@pt.Id"
+                           class="pet-pill pet-pill-@(petIdx % 5 + 1)">
+                            <span class="pill-icon-wrap"><i class="@GetPetIcon(pt)"></i></span>
+                            <span class="pill-label">@pt.Name</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="home-section section-services reveal">
+    <div class="container">
+        <div class="section-heading-row">
+            <div>
+                <span class="section-tag">Chăm sóc</span>
+                <h2 class="section-title mb-0">Dịch vụ nổi bật</h2>
+            </div>
+            <a asp-controller="Service" asp-action="Index" class="btn btn-teal">Xem tất cả</a>
+        </div>
+        <div class="row g-4">
+            @{
+                var svcIdx = 0;
+            }
+            @foreach (var s in services)
+            {
+                svcIdx++;
+                <div class="col-md-6 col-lg-3">
+                    <div class="service-card service-card-@(svcIdx % 4 + 1) h-100">
+                        <div class="service-icon-wrap-sm"><i class="@s.Icon"></i></div>
+                        <h5>@s.Name</h5>
+                        <p class="text-muted small">@(s.Description.Length > 80 ? s.Description[..80] + "..." : s.Description)</p>
+                        <a asp-controller="Service" asp-action="Details" asp-route-id="@s.Id" class="btn btn-sm btn-teal">Chi tiết</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="home-section section-products bg-section-soft reveal">
+    <div class="container">
+        <div class="section-heading-row">
+            <div>
+                <span class="section-tag section-tag-purple">Hot</span>
+                <h2 class="section-title mb-0">Sản phẩm nổi bật</h2>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-orange">Xem tất cả</a>
+        </div>
+        <div class="swiper products-swiper py-4 px-2">
+            <div class="swiper-wrapper">
+                @foreach (var item in Model)
+                {
+                    <div class="swiper-slide h-auto">
+                        @{
+                            await Html.RenderPartialAsync("_ProductCard", item);
+                        }
+                    </div>
+                }
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="home-section py-5 bg-teal text-white reveal" style="background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); margin-bottom: -50px; border-radius: 24px 24px 0 0;">
+    <div class="container">
+        <div class="row align-items-center justify-content-between g-4">
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-2 text-white"><i class="bi bi-envelope-paper-heart me-2"></i>Đăng ký nhận bản tin ưu đãi</h3>
+                <p class="mb-0 text-white-50 small">Nhận thông báo sớm nhất về các sản phẩm mới, mã ưu đãi và kiến thức bổ ích để nuôi thú cưng.</p>
+            </div>
+            <div class="col-lg-5">
+                <form id="newsletterForm" onsubmit="handleNewsletterSubmit(event)" class="input-group">
+                    <input type="email" id="nl-email" class="form-control rounded-start-pill py-2.5 px-3 border-0" placeholder="Địa chỉ email của bạn..." required />
+                    <button type="submit" class="btn btn-orange rounded-end-pill px-4 fw-bold">ĐĂNG KÝ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Success Newsletter Modal -->
+<div class="modal fade" id="newsletterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header bg-success text-white py-3 border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Đăng ký thành công!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-gift text-teal" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold text-dark mt-3">Quà tặng dành riêng cho bạn</h5>
+                <p class="text-muted small">Cảm ơn bạn đã đăng ký nhận tin. Dưới đây là mã giảm giá 10% áp dụng cho đơn hàng tiếp theo:</p>
+                <div class="bg-light p-3 rounded-3 border border-dashed text-teal fw-bold fs-4 letter-spacing-1 mb-2">KIKINEW10</div>
+                <small class="text-muted d-block">Sao chép mã trên và sử dụng tại trang thanh toán.</small>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-teal w-100 rounded-pill" data-bs-dismiss="modal">Bắt đầu mua sắm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll reveal animation handler
+    function reveal() {
+        const reveals = document.querySelectorAll(".reveal");
+        for (let i = 0; i < reveals.length; i++) {
+            const windowHeight = window.innerHeight;
+            const elementTop = reveals[i].getBoundingClientRect().top;
+            const elementVisible = 150;
+            if (elementTop < windowHeight - elementVisible) {
+                reveals[i].classList.add("active");
+            }
+        }
+    }
+    window.addEventListener("scroll", reveal);
+    // Initial call
+    document.addEventListener("DOMContentLoaded", reveal);
+
+    // Newsletter form handler
+    function handleNewsletterSubmit(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById("nl-email");
+        if (emailInput.value) {
+            emailInput.value = "";
+            const modal = new bootstrap.Modal(document.getElementById("newsletterModal"));
+            modal.show();
+        }
+    }
+</script>

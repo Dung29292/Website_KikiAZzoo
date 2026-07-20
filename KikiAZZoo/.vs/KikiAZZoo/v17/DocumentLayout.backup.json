@@ -1,0 +1,426 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\visual\\KikiAZZoo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\contact.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\contact.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\about.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\about.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\orders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\orders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\profile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\profile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\shippingpolicy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\shippingpolicy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\returnpolicy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\returnpolicy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\forgotpasswordconfirmation.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\forgotpasswordconfirmation.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\forgotpassword.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\forgotpassword.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\account\\accessdenied.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\account\\accessdenied.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\shoppingguide.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\shoppingguide.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\home\\faq.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\home\\faq.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\migrations\\20260609150417_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\migrations\\20260609150417_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|d:\\visual\\kikiazzoo\\kikiazzoo\\areas\\admin\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F907B75F-4436-40A9-8EC0-86186E515EC6}|KikiAZZoo\\KikiAZZoo.csproj|solutionrelative:kikiazzoo\\areas\\admin\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 215,
+          "SelectedChildIndex": 14,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Program.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Program.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Program.cs",
+              "RelativeToolTip": "KikiAZZoo\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-15T04:01:50.032Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\appsettings.json",
+              "RelativeDocumentMoniker": "KikiAZZoo\\appsettings.json",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\appsettings.json",
+              "RelativeToolTip": "KikiAZZoo\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAACCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-06-15T04:01:14.177Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "KikiAZZoo\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-14T20:30:49.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Controllers\\AccountController.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "KikiAZZoo\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-14T20:30:49.251Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAALIAAAAAAAAAAAAuwMgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:59:32.599Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "20260609150417_InitialCreate.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Migrations\\20260609150417_InitialCreate.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Migrations\\20260609150417_InitialCreate.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Migrations\\20260609150417_InitialCreate.cs",
+              "RelativeToolTip": "KikiAZZoo\\Migrations\\20260609150417_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-14T19:59:05.232Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ShoppingGuide.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ShoppingGuide.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\ShoppingGuide.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ShoppingGuide.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\ShoppingGuide.cshtml",
+              "ViewState": "AgIAABsAAAAAAAAAAAAEwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:49:36.814Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ShippingPolicy.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ShippingPolicy.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\ShippingPolicy.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ShippingPolicy.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\ShippingPolicy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:49:35.992Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ReturnPolicy.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ReturnPolicy.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\ReturnPolicy.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\ReturnPolicy.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\ReturnPolicy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:49:33.776Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Privacy.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Privacy.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\Privacy.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Privacy.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\Privacy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:49:30.129Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAALMAAAAAAAAAAAAYwMAAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:44:17.953Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "FAQ.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\FAQ.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\FAQ.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\FAQ.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\FAQ.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:44:11.524Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Contact.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Contact.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\Contact.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\Contact.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\Contact.cshtml",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAYwBEAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:44:01.942Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "About.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\About.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Home\\About.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Home\\About.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Home\\About.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:55.311Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Register.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\Register.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Register.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\Register.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:46.38Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Profile.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Profile.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\Profile.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Profile.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\Profile.cshtml",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAEwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:41.654Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Orders.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Orders.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\Orders.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Orders.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\Orders.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:33.991Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "OrderDetails.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\OrderDetails.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\OrderDetails.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\OrderDetails.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\OrderDetails.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:19.919Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\Login.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAABgAAAAAAAAAAAApwB8AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:43:06.133Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ForgotPasswordConfirmation.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\ForgotPasswordConfirmation.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\ForgotPasswordConfirmation.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\ForgotPasswordConfirmation.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\ForgotPasswordConfirmation.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:41:59.445Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ForgotPassword.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\ForgotPassword.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\ForgotPassword.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\ForgotPassword.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\ForgotPassword.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:41:49.933Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AccessDenied.cshtml",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\AccessDenied.cshtml",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Views\\Account\\AccessDenied.cshtml",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Views\\Account\\AccessDenied.cshtml",
+              "RelativeToolTip": "KikiAZZoo\\Views\\Account\\AccessDenied.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-14T19:41:45.895Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Areas\\Admin\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Areas\\Admin\\Controllers\\CategoryController.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Areas\\Admin\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "KikiAZZoo\\Areas\\Admin\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-14T19:41:11.374Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "BookingController.cs",
+              "DocumentMoniker": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Areas\\Admin\\Controllers\\BookingController.cs",
+              "RelativeDocumentMoniker": "KikiAZZoo\\Areas\\Admin\\Controllers\\BookingController.cs",
+              "ToolTip": "D:\\visual\\KikiAZZoo\\KikiAZZoo\\Areas\\Admin\\Controllers\\BookingController.cs",
+              "RelativeToolTip": "KikiAZZoo\\Areas\\Admin\\Controllers\\BookingController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-14T19:41:07.117Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 297,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

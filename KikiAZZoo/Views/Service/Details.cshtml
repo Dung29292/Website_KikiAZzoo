@@ -1,0 +1,131 @@
+@model Service
+@{
+    ViewData["Title"] = Model.Name;
+    var isPetHotel = Model.Name.Contains("Khách sạn", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Hotel", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="container py-5">
+    <nav class="breadcrumb-kiki mb-4">
+        <a asp-action="Index">Dịch vụ</a> &gt; <span class="text-teal fw-semibold">@Model.Name</span>
+    </nav>
+    
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center">
+                <div class="service-detail-icon bg-teal-light text-teal rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 120px; height: 120px; font-size: 3.5rem;">
+                    <i class="bi @Model.Icon"></i>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <span class="badge bg-teal-light text-teal mb-2 fw-bold">Dịch vụ chất lượng cao</span>
+                <h1 class="fw-bold text-dark">@Model.Name</h1>
+                @if (Model.PriceFrom.HasValue)
+                {
+                    <p class="product-price fs-4 mb-3 text-teal fw-bold">
+                        @(Model.PriceFrom == 0 ? "Miễn phí" : $"Giá chỉ từ: {Model.PriceFrom.Value.ToString("#,##0")}đ")
+                    </p>
+                }
+                <p class="text-muted" style="line-height: 1.6;">@Model.Description</p>
+                <div class="mt-4">
+                    <a asp-controller="ServiceBooking" asp-action="Book" asp-route-serviceId="@Model.Id" class="btn btn-teal btn-lg px-4"><i class="bi bi-calendar-check-fill me-1"></i>Đặt lịch hẹn ngay</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg ms-2">Quay lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quy trình thực hiện Section -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <h4 class="fw-bold text-dark mb-4 border-bottom pb-2"><i class="bi bi-diagram-3-fill text-teal me-2"></i>Quy trình thực hiện chuyên nghiệp</h4>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-4 text-center h-100 border hover-shadow-sm transition">
+                    <div class="bg-teal text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px; font-weight: bold;">1</div>
+                    <h6 class="fw-bold text-teal">Khám & Tư vấn</h6>
+                    <p class="text-muted small mb-0">Kiểm tra tình trạng sức khỏe tổng quát và da lông của bé trước khi bắt đầu.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-4 text-center h-100 border hover-shadow-sm transition">
+                    <div class="bg-teal text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px; font-weight: bold;">2</div>
+                    <h6 class="fw-bold text-teal">Chuẩn bị & Vệ sinh</h6>
+                    <p class="text-muted small mb-0">Cắt móng, vệ sinh tai, loại bỏ lông xơ rối ban đầu giúp bé thoải mái nhất.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-4 text-center h-100 border hover-shadow-sm transition">
+                    <div class="bg-teal text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px; font-weight: bold;">3</div>
+                    <h6 class="fw-bold text-teal">Thực hiện chính</h6>
+                    <p class="text-muted small mb-0">Sử dụng sữa tắm chuyên dụng, massage thư giãn, cắt tỉa tạo kiểu tinh tế.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-4 text-center h-100 border hover-shadow-sm transition">
+                    <div class="bg-teal text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px; font-weight: bold;">4</div>
+                    <h6 class="fw-bold text-teal">Sấy khô & Bàn giao</h6>
+                    <p class="text-muted small mb-0">Sấy đánh bông lông, xịt nước hoa dưỡng lông thơm mát trước khi trao lại chủ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isPetHotel)
+    {
+        <!-- Hotel rules and restrictions box -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-orange-light-soft" style="background-color: #fffaf0; border-left: 5px solid var(--orange) !important;">
+            <h5 class="fw-bold text-warning-dark mb-3"><i class="bi bi-shield-fill-exclamation me-2"></i>Quy định & Lưu ý khi gửi thú cưng dài ngày</h5>
+            <ul class="text-muted small mb-0 lh-lg">
+                <li>Bé thú cưng bắt buộc phải tiêm phòng đầy đủ các mũi cơ bản ít nhất trước 14 ngày gửi.</li>
+                <li>Hạn chế gửi các bé có bệnh truyền nhiễm hoặc đang điều trị bệnh cấp tính (vui lòng liên hệ riêng).</li>
+                <li>Khuyến khích chủ mang theo thức ăn quen thuộc của bé để tránh thay đổi thức ăn đột ngột gây rối loạn tiêu hóa.</li>
+                <li>Chúng tôi sẽ gửi video/hình ảnh cập nhật tình hình ăn uống và sinh hoạt của bé 2 lần mỗi ngày qua Zalo.</li>
+            </ul>
+        </div>
+    }
+    else
+    {
+        <!-- Before/After showcase pictures -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <h4 class="fw-bold text-dark mb-4 border-bottom pb-2"><i class="bi bi-images text-teal me-2"></i>Hình ảnh thực tế kết quả (Before & After)</h4>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5">
+                    <div class="position-relative overflow-hidden rounded-4 border shadow-sm">
+                        <img src="/images/before-spa.jpg" alt="Before Spa" class="img-fluid w-100" style="height: 250px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=600&auto=format&fit=crop'" />
+                        <span class="position-absolute bottom-0 start-0 bg-dark bg-opacity-70 text-white px-3 py-1 fw-bold small">Trước khi Spa</span>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="position-relative overflow-hidden rounded-4 border shadow-sm">
+                        <img src="/images/after-spa.jpg" alt="After Spa" class="img-fluid w-100" style="height: 250px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?q=80&w=600&auto=format&fit=crop'" />
+                        <span class="position-absolute bottom-0 start-0 bg-teal text-white px-3 py-1 fw-bold small">Sau khi Spa</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Đánh giá khách hàng Section -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h4 class="fw-bold text-dark mb-4 border-bottom pb-2"><i class="bi bi-chat-heart-fill text-teal me-2"></i>Khách hàng nói gì về chúng tôi</h4>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-4 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-dark small">Nguyễn Minh Thư</div>
+                        <span class="text-warning"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
+                    </div>
+                    <p class="text-muted small mb-0">"Bé cún nhà mình cực kỳ kén nơi tắm nhưng khi tới KikiAzoo thì ngoan vô cùng. Các bạn nhân viên thao tác nhẹ nhàng, bé về nhà thơm phức và lông tơ mượt."</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-4 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-dark small">Trần Hữu Quân</div>
+                        <span class="text-warning"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
+                    </div>
+                    <p class="text-muted small mb-0">"Dịch vụ chuyên nghiệp lắm, cơ sở vật chất sạch sẽ không hề có mùi hôi. Cắt tỉa móng lông rất nghệ thuật. Sẽ ủng hộ shop dài lâu!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

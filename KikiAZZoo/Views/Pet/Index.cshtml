@@ -1,0 +1,175 @@
+@model IEnumerable<PetProfile>
+@{
+    ViewData["Title"] = "Hồ sơ thú cưng của tôi";
+}
+
+<style>
+    .pet-container {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .premium-pet-card {
+        border: 1px solid rgba(13, 148, 136, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        background: #ffffff;
+    }
+
+    .premium-pet-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(13, 148, 136, 0.1) !important;
+        border-color: rgba(13, 148, 136, 0.2);
+    }
+
+    .pet-img-wrapper {
+        position: relative;
+        height: 180px;
+        background: #f8fafc;
+        overflow: hidden;
+    }
+
+    .pet-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .premium-pet-card:hover .pet-img-wrapper img {
+        transform: scale(1.06);
+    }
+
+    body.dark-mode .premium-pet-card {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-mode .premium-pet-card .bg-light {
+        background-color: #0f172a !important;
+        color: #cbd5e1 !important;
+    }
+</style>
+
+<div class="container py-4 profile-page pet-container">
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <div class="profile-nav-card p-3 rounded-4 shadow-sm border bg-white">
+                <div class="text-center py-3">
+                    <div class="avatar-placeholder bg-teal-light text-teal rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.2rem;">
+                        <i class="ph-fill ph-user"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Hồ sơ của tôi</h5>
+                </div>
+                <hr class="my-3" />
+                <div class="list-group list-group-flush border-0">
+                    <a asp-controller="Account" asp-action="Profile" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="ph ph-user-circle-gear me-2"></i> Thông tin tài khoản</a>
+                    <a asp-controller="Account" asp-action="Orders" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="ph ph-receipt me-2"></i> Đơn hàng đã mua</a>
+                    <a asp-controller="Pet" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3 active"><i class="ph ph-paw-print me-2"></i> Hồ sơ thú cưng</a>
+                    <a asp-controller="ServiceBooking" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="ph ph-calendar-check me-2"></i> Lịch hẹn dịch vụ</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="checkout-card p-4 rounded-4 shadow-sm border bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0 text-dark"><i class="ph ph-paw text-teal me-2"></i> Hồ sơ thú cưng của tôi</h3>
+                    <a asp-action="Upsert" class="btn btn-teal rounded-pill px-4 shadow-sm">
+                        <i class="ph ph-plus-circle me-1"></i> Thêm bé mới
+                    </a>
+                </div>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+                        <i class="ph ph-check-circle-fill"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 text-teal-light mb-3"><i class="ph ph-smiley-blank"></i></div>
+                        <p class="mb-3">Bạn chưa đăng ký hồ sơ thú cưng nào.</p>
+                        <a asp-action="Upsert" class="btn btn-outline-teal rounded-pill px-4 btn-sm">Bắt đầu thêm ngay</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var pet in Model)
+                        {
+                            var speciesLower = pet.Species?.ToLower() ?? "";
+                            var badgeClass = speciesLower.Contains("chó") || speciesLower.Contains("dog") ? "bg-teal" :
+                                             (speciesLower.Contains("mèo") || speciesLower.Contains("cat") ? "bg-orange" : "bg-purple");
+                            var speciesIcon = speciesLower.Contains("chó") || speciesLower.Contains("dog") ? "ph-dog" :
+                                              (speciesLower.Contains("mèo") || speciesLower.Contains("cat") ? "ph-cat" : "ph-paw-print");
+                            
+                            <div class="col-md-6 col-xl-4">
+                                <div class="card h-100 premium-pet-card border shadow-sm rounded-4 overflow-hidden">
+                                    <div class="pet-img-wrapper d-flex align-items-center justify-content-center">
+                                        @if (!string.IsNullOrEmpty(pet.ImageUrl))
+                                        {
+                                            <img src="@pet.ImageUrl" alt="@pet.Name" />
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center text-teal-light fs-1"><i class="ph ph-image-square"></i></div>
+                                        }
+                                        
+                                        <!-- Species Badge -->
+                                        <span class="badge @badgeClass position-absolute top-0 end-0 m-3 rounded-pill px-3 py-1 shadow-sm d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                                            <i class="ph @speciesIcon"></i> @pet.Species
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body p-3">
+                                        <h5 class="fw-bold mb-1 text-dark text-truncate">@pet.Name</h5>
+                                        
+                                        @if (!string.IsNullOrEmpty(pet.Breed))
+                                        {
+                                            <span class="text-muted d-block small mb-2"><i class="ph ph-tag"></i> Giống: @pet.Breed</span>
+                                        }
+
+                                        <div class="row g-2 text-center text-dark py-2 bg-light rounded-3 mb-3" style="font-size: 0.85rem;">
+                                            <div class="col-6 border-end" style="border-right: 1px solid #e2e8f0 !important;">
+                                                <span class="text-muted d-block small text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tuổi</span>
+                                                <strong class="fs-6 text-teal">@pet.Age tuổi</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="text-muted d-block small text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Cân nặng</span>
+                                                <strong class="fs-6 text-orange">@pet.Weight kg</strong>
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(pet.HealthNotes))
+                                        {
+                                            <p class="text-muted small mb-3 text-truncate" title="@pet.HealthNotes">
+                                                <i class="ph ph-first-aid"></i> @pet.HealthNotes
+                                            </p>
+                                        }
+
+                                        <div class="d-flex gap-2">
+                                            <a asp-action="Upsert" asp-route-id="@pet.Id" class="btn btn-outline-teal btn-sm w-100 rounded-pill">
+                                                <i class="ph ph-pencil-simple"></i> Chỉnh sửa
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@pet.Id" method="post" class="w-100" onsubmit="return confirm('Bạn có chắc muốn xoá hồ sơ bé @pet.Name không?')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+                                                    <i class="ph ph-trash"></i> Xoá bỏ
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

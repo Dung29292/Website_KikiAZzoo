@@ -1,0 +1,171 @@
+@model IEnumerable<PetServiceBooking>
+@{
+    ViewData["Title"] = "Quản lý lịch hẹn";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Lịch đặt dịch vụ", "")
+    };
+    var users = ViewBag.Users as Dictionary<string, ApplicationUser> ?? new Dictionary<string, ApplicationUser>();
+    var eventsJson = Html.Raw(ViewBag.EventsJson);
+}
+
+<!-- FullCalendar CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-check text-teal"></i> Quản lý lịch hẹn chăm sóc</h2>
+    
+    <!-- View Switcher Tabs -->
+    <div class="nav nav-pills gap-2 bg-light p-1 rounded-3" id="viewTab" role="tablist">
+        <button class="nav-link active rounded-2 px-3 py-1.5 fw-bold text-teal bg-white shadow-sm" id="calendar-tab" data-bs-toggle="pill" data-bs-target="#calendar-view" type="button" role="tab" aria-controls="calendar-view" aria-selected="true">
+            <i class="bi bi-calendar3 me-1"></i> Lịch biểu
+        </button>
+        <button class="nav-link rounded-2 px-3 py-1.5 fw-bold text-secondary" id="list-tab" data-bs-toggle="pill" data-bs-target="#list-view" type="button" role="tab" aria-controls="list-view" aria-selected="false">
+            <i class="bi bi-list-ul me-1"></i> Danh sách
+        </button>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+    </div>
+}
+
+<div class="tab-content" id="viewTabContent">
+    <!-- Calendar View -->
+    <div class="tab-pane fade show active" id="calendar-view" role="tabpanel" aria-labelledby="calendar-tab">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div id="calendar" style="min-height: 600px;"></div>
+        </div>
+    </div>
+
+    <!-- List View -->
+    <div class="tab-pane fade" id="list-view" role="tabpanel" aria-labelledby="list-tab">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Mã lịch</th>
+                            <th>Khách hàng</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày hẹn</th>
+                            <th>Khung giờ</th>
+                            <th>Thú cưng</th>
+                            <th>Giá tiền</th>
+                            <th>Trạng thái</th>
+                            <th class="pe-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center py-4 text-muted">Chưa có lịch hẹn nào.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var b in Model)
+                            {
+                                var user = users.TryGetValue(b.UserId, out var u) ? u : null;
+                                <tr>
+                                    <td class="fw-semibold ps-3">#@b.Id</td>
+                                    <td>
+                                        <span class="d-block fw-semibold text-dark">@(user?.FullName ?? "N/A")</span>
+                                        <small class="text-muted">@(user?.Email ?? "N/A")</small>
+                                    </td>
+                                    <td><span class="fw-semibold text-teal">@b.Service?.Name</span></td>
+                                    <td>@b.BookingDate.ToString("dd/MM/yyyy")</td>
+                                    <td><i class="bi bi-clock"></i> @b.TimeSlot</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border rounded-pill px-2 py-1 small">
+                                            @b.PetName (@b.PetType)
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-dark">@(b.Price == 0 ? "Miễn phí" : b.Price.ToString("#,##0") + "đ")</td>
+                                    <td>
+                                        @if (b.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning-light text-warning rounded-pill px-2 py-1 small"><i class="bi bi-hourglass-split"></i> Chờ duyệt</span>
+                                        }
+                                        else if (b.Status == "Confirmed")
+                                        {
+                                            <span class="badge bg-primary-light text-primary rounded-pill px-2 py-1 small"><i class="bi bi-check-circle"></i> Đã duyệt</span>
+                                        }
+                                        else if (b.Status == "Completed")
+                                        {
+                                            <span class="badge bg-success-light text-success rounded-pill px-2 py-1 small"><i class="bi bi-patch-check"></i> Đã xong</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-light text-danger rounded-pill px-2 py-1 small"><i class="bi bi-x-circle"></i> Đã hủy</span>
+                                        }
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-teal rounded-pill px-3">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/vi.global.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // View Switcher visual classes helper
+            const calendarTab = document.getElementById("calendar-tab");
+            const listTab = document.getElementById("list-tab");
+
+            calendarTab.addEventListener("click", function() {
+                calendarTab.className = "nav-link active rounded-2 px-3 py-1.5 fw-bold text-teal bg-white shadow-sm";
+                listTab.className = "nav-link rounded-2 px-3 py-1.5 fw-bold text-secondary";
+            });
+
+            listTab.addEventListener("click", function() {
+                listTab.className = "nav-link active rounded-2 px-3 py-1.5 fw-bold text-teal bg-white shadow-sm";
+                calendarTab.className = "nav-link rounded-2 px-3 py-1.5 fw-bold text-secondary";
+            });
+
+            // Initialize FullCalendar
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'vi',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                themeSystem: 'bootstrap5',
+                events: @eventsJson,
+                eventClick: function(info) {
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                        info.jsEvent.preventDefault();
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Refresh calendar when tab is shown
+            document.getElementById('calendar-tab').addEventListener('shown.bs.tab', function () {
+                calendar.updateSize();
+            });
+        });
+    </script>
+}

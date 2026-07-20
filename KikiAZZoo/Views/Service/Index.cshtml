@@ -1,0 +1,62 @@
+@model IEnumerable<Service>
+@{
+    ViewData["Title"] = "Dịch vụ";
+}
+
+<div class="container py-5">
+    <nav class="breadcrumb-kiki mb-4">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> > Dịch vụ
+    </nav>
+
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2" style="color: var(--dark);">Dịch vụ KikiAzoo</h1>
+        <p class="text-muted" style="max-width: 520px; margin: 0 auto;">
+            Chăm sóc thú cưng toàn diện – từ spa, tắm rửa đến nhận nuôi
+        </p>
+    </div>
+
+    <div class="row g-4">
+        @{
+            int idx = 0;
+            var iconColors = new[] {
+                "linear-gradient(135deg, var(--teal), var(--teal-dark))",
+                "linear-gradient(135deg, var(--orange), var(--orange-dark))",
+                "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                "linear-gradient(135deg, var(--pink), #db2777)",
+                "linear-gradient(135deg, #38bdf8, #0284c7)",
+                "linear-gradient(135deg, #fbbf24, #d97706)"
+            };
+        }
+        @foreach (var s in Model)
+        {
+            var color = iconColors[idx % iconColors.Length];
+            idx++;
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card-full h-100">
+                    <div class="service-icon-wrap" style="background: @color">
+                        <i class="bi @s.Icon"></i>
+                    </div>
+                    <h5 class="fw-bold">@s.Name</h5>
+                    <p class="text-muted small mb-0">@s.Description</p>
+
+                    @if (s.PriceFrom.HasValue)
+                    {
+                        <div class="service-price-tag mt-3">
+                            <i class="ph ph-money me-1"></i>
+                            @(s.PriceFrom == 0 ? "Miễn phí tư vấn" : $"Từ {s.PriceFrom.Value.ToString("#,##0")}đ")
+                        </div>
+                    }
+
+                    <div class="service-card-actions mt-auto pt-3">
+                        <a asp-action="Details" asp-route-id="@s.Id" class="btn btn-teal btn-sm">
+                            <i class="ph ph-eye me-1"></i>Chi tiết
+                        </a>
+                        <a asp-controller="ServiceBooking" asp-action="Book" asp-route-serviceId="@s.Id" class="btn btn-outline-teal btn-sm">
+                            <i class="ph ph-calendar-check me-1"></i>Đặt lịch
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

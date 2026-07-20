@@ -1,0 +1,12 @@
+@model Category
+@{
+    ViewData["Title"] = "Xóa danh mục";
+}
+
+<h2 class="text-danger">Xóa danh mục</h2>
+<p>Bạn có chắc muốn xóa <strong>@Model.Name</strong>?</p>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

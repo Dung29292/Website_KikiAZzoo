@@ -1,0 +1,131 @@
+@model PetServiceBooking
+@{
+    ViewData["Title"] = $"Chi tiết lịch hẹn #{Model.Id}";
+    var user = ViewBag.User as ApplicationUser;
+}
+
+<div class="mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Details Card -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-teal text-white py-3 border-0">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event"></i> Thông tin chi tiết lịch hẹn #@Model.Id</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6 border-end">
+                        <h6 class="text-muted small text-uppercase fw-semibold mb-3">Dịch vụ & Lịch hẹn</h6>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Tên dịch vụ</span>
+                            <strong class="text-dark fs-5">@Model.Service?.Name</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Ngày thực hiện</span>
+                            <strong class="text-dark"><i class="bi bi-calendar"></i> @Model.BookingDate.ToString("dd/MM/yyyy")</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Khung giờ hẹn</span>
+                            <strong class="text-dark"><i class="bi bi-clock"></i> @Model.TimeSlot</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Giá dịch vụ dự kiến</span>
+                            <strong class="text-teal fs-5">@(Model.Price == 0 ? "Miễn phí" : Model.Price.ToString("#,##0") + "đ")</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 ps-md-4">
+                        <h6 class="text-muted small text-uppercase fw-semibold mb-3">Thú cưng & Khách hàng</h6>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Khách hàng đặt lịch</span>
+                            <strong class="text-dark">@(user?.FullName ?? "N/A")</strong>
+                            <small class="text-muted d-block">SĐT: @(user?.PhoneNumber ?? "N/A")</small>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Tên bé thú cưng</span>
+                            <strong class="text-dark">@Model.PetName</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted d-block small">Loài thú cưng</span>
+                            <span class="badge bg-teal-light text-teal rounded-pill px-3 py-1">@Model.PetType</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4 pt-3 border-top">
+                        <span class="text-muted d-block small">Ghi chú của khách hàng</span>
+                        <p class="text-dark bg-light p-3 rounded-3 border mb-0">
+                            @(string.IsNullOrEmpty(Model.Notes) ? "Không có ghi chú nào." : Model.Notes)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Panel -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-teal"></i> Trạng thái hiện tại</h5>
+            
+            <div class="mb-4">
+                @if (Model.Status == "Pending")
+                {
+                    <div class="alert alert-warning border-0 rounded-3 text-center py-2 mb-0">
+                        <i class="bi bi-hourglass-split"></i> <strong>Đang chờ phê duyệt</strong>
+                    </div>
+                }
+                else if (Model.Status == "Confirmed")
+                {
+                    <div class="alert alert-primary border-0 rounded-3 text-center py-2 mb-0">
+                        <i class="bi bi-check-circle"></i> <strong>Đã duyệt & Xác nhận</strong>
+                    </div>
+                }
+                else if (Model.Status == "Completed")
+                {
+                    <div class="alert alert-success border-0 rounded-3 text-center py-2 mb-0">
+                        <i class="bi bi-patch-check"></i> <strong>Đã hoàn thành chăm sóc</strong>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-danger border-0 rounded-3 text-center py-2 mb-0">
+                        <i class="bi bi-x-circle"></i> <strong>Đã hủy lịch</strong>
+                    </div>
+                }
+            </div>
+
+            <h6 class="fw-bold mb-2">Cập nhật trạng thái mới</h6>
+            <form asp-action="UpdateStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                
+                <div class="mb-3">
+                    <select name="status" class="form-select" id="statusSelect">
+                        <option value="Pending" selected="@(Model.Status == "Pending" ? "selected" : null)">Chờ duyệt (Pending)</option>
+                        <option value="Confirmed" selected="@(Model.Status == "Confirmed" ? "selected" : null)">Đã duyệt (Confirmed)</option>
+                        <option value="Completed" selected="@(Model.Status == "Completed" ? "selected" : null)">Đã xong (Completed)</option>
+                        <option value="Cancelled" selected="@(Model.Status == "Cancelled" ? "selected" : null)">Đã hủy (Cancelled)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-teal w-100 rounded-pill py-2 fw-semibold">
+                    <i class="bi bi-arrow-repeat"></i> Cập nhật trạng thái
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+

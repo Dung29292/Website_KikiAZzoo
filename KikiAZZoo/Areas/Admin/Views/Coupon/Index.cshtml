@@ -1,0 +1,131 @@
+@model List<Coupon>
+@{
+    ViewData["Title"] = "Quản lý Mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-tag-fill text-warning"></i> Mã giảm giá</h2>
+        <p class="text-muted small mb-0">Quản lý tất cả mã coupon giảm giá trên hệ thống</p>
+    </div>
+    <a asp-action="Upsert" class="btn btn-warning rounded-pill px-4">
+        <i class="bi bi-plus-lg"></i> Tạo mã mới
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2 small mb-4">
+        <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Code</th>
+                        <th>Giảm giá</th>
+                        <th>Đơn tối thiểu</th>
+                        <th>Thời hạn</th>
+                        <th>Sử dụng</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-tag fs-2 d-block mb-2 opacity-25"></i>
+                                Chưa có mã giảm giá nào
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var coupon in Model)
+                    {
+                        var isExpired = coupon.EndDate < DateTime.Now;
+                        var isExhausted = coupon.MaxUsage.HasValue && coupon.UsageCount >= coupon.MaxUsage;
+                        <tr>
+                            <td class="ps-4">
+                                <span class="badge bg-warning text-dark fs-6 rounded-pill px-3 py-1 fw-bold font-monospace">
+                                    @coupon.Code
+                                </span>
+                            </td>
+                            <td>
+                                @if (coupon.IsPercentage)
+                                {
+                                    <span class="badge bg-success-light text-success fs-6 rounded-pill">
+                                        <i class="bi bi-percent"></i> @coupon.DiscountValue%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info-light text-info fs-6 rounded-pill">
+                                        <i class="bi bi-currency-exchange"></i> @coupon.DiscountValue.ToString("#,##0")đ
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-muted small">@coupon.MinOrderValue.ToString("#,##0")đ</td>
+                            <td class="small">
+                                <span class="@(isExpired ? "text-danger" : "text-success")">
+                                    <i class="bi bi-calendar-range"></i>
+                                    @coupon.StartDate.ToString("dd/MM/yy") → @coupon.EndDate.ToString("dd/MM/yy")
+                                </span>
+                                @if (isExpired)
+                                {
+                                    <span class="badge bg-danger rounded-pill d-block mt-1" style="font-size:0.65rem;">Hết hạn</span>
+                                }
+                            </td>
+                            <td class="small text-center">
+                                <span class="@(isExhausted ? "text-danger fw-bold" : "text-muted")">
+                                    @coupon.UsageCount / @(coupon.MaxUsage.HasValue ? coupon.MaxUsage.Value.ToString() : "∞")
+                                </span>
+                            </td>
+                            <td>
+                                @if (coupon.IsActive && !isExpired && !isExhausted)
+                                {
+                                    <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle"></i> Hoạt động</span>
+                                }
+                                else if (!coupon.IsActive)
+                                {
+                                    <span class="badge bg-secondary rounded-pill"><i class="bi bi-pause-circle"></i> Tạm dừng</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger rounded-pill"><i class="bi bi-x-circle"></i> Hết hạn/Hết lượt</span>
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="Upsert" asp-route-id="@coupon.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="ToggleStatus" asp-route-id="@coupon.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm @(coupon.IsActive ? "btn-outline-warning" : "btn-outline-success") rounded-pill px-3"
+                                                title="@(coupon.IsActive ? "Vô hiệu hóa" : "Kích hoạt")">
+                                            <i class="bi @(coupon.IsActive ? "bi-pause" : "bi-play")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-route-id="@coupon.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Xóa mã \'@coupon.Code\'? Hành động này không thể hoàn tác.')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,189 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var recentOrders = ViewBag.RecentOrders as List<Order> ?? new();
+    var orderUsers = ViewBag.OrderUsers as Dictionary<string, ApplicationUser> ?? new();
+    var labelsJson = Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ChartLabels));
+    var valuesJson = Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ChartValues));
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Alerts Banner -->
+@if (ViewBag.LowStockCount > 0 || ViewBag.PendingOrdersCount > 0)
+{
+    <div class="row mb-4">
+        <div class="col-12 d-flex flex-column gap-2">
+            @if (ViewBag.PendingOrdersCount > 0)
+            {
+                <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+                    <div>
+                        Có <strong>@ViewBag.PendingOrdersCount</strong> đơn hàng mới đang chờ xử lý. <a href="/Admin/Order" class="alert-link text-decoration-underline">Xử lý ngay</a>
+                    </div>
+                </div>
+            }
+            @if (ViewBag.LowStockCount > 0)
+            {
+                <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-shield-fill-x me-2 fs-5"></i>
+                    <div>
+                        Cảnh báo: Có <strong>@ViewBag.LowStockCount</strong> sản phẩm sắp hết hàng (Số lượng tồn kho &le; 5). <a href="/Admin/Product" class="alert-link text-decoration-underline">Xem và cập nhật kho</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-white bg-teal" style="background: linear-gradient(135deg, #0d9488, #0f766e);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0">@ViewBag.ProductCount</h3>
+                    <p class="mb-0 small text-white-50">Sản phẩm</p>
+                </div>
+                <i class="bi bi-box fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0">@ViewBag.CategoryCount</h3>
+                    <p class="mb-0 small text-white-50">Danh mục</p>
+                </div>
+                <i class="bi bi-tags fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0">@ViewBag.OrderCount</h3>
+                    <p class="mb-0 small text-white-50">Đơn hàng</p>
+                </div>
+                <i class="bi bi-receipt fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0">@ViewBag.UserCount</h3>
+                    <p class="mb-0 small text-white-50">Người dùng</p>
+                </div>
+                <i class="bi bi-people fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Chart Section -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm p-4 h-100 bg-white">
+            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-graph-up text-teal"></i> Doanh thu 6 tháng gần nhất</h5>
+            <div style="position: relative; height: 320px; width: 100%;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders List -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm p-4 h-100 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-teal"></i> Đơn hàng mới nhất</h5>
+                <a href="/Admin/Order" class="btn btn-outline-teal btn-sm fw-bold">Xem tất cả</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th>Mã ĐH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!recentOrders.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">Chưa có đơn hàng nào</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var order in recentOrders)
+                            {
+                                var user = orderUsers.ContainsKey(order.UserId) ? orderUsers[order.UserId] : null;
+                                <tr>
+                                    <td><a href="/Admin/Order/Details/@order.Id" class="fw-bold text-teal text-decoration-none">#@order.Id</a></td>
+                                    <td>
+                                        <div class="small fw-semibold text-dark">@(user?.FullName ?? "Khách vãng lai")</div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">@(user?.Email ?? "")</div>
+                                    </td>
+                                    <td class="small text-muted">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="fw-bold text-dark">@order.TotalPrice.ToString("#,##0")đ</td>
+                                    <td>
+                                        <partial name="_OrderStatusBadge" model="order.Status" />
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const labels = @labelsJson;
+        const dataValues = @valuesJson;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu (đ)',
+                    data: dataValues,
+                    borderColor: '#0d9488',
+                    backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('vi-VN') + 'đ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

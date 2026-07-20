@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="clothGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#clothGrad)" opacity="0.15"/>
+  <g transform="translate(20, 20)">
+    <!-- Hanger -->
+    <path d="M 40,15 C 38,15 37,12 40,10 C 43,8 45,11 43,15 L 40,25" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 25,25 L 40,18 L 55,25" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+    <!-- Sweater Body -->
+    <path d="M 22,25 L 58,25 L 62,38 L 54,42 L 52,65 L 28,65 L 26,42 L 18,38 Z" fill="#0ea5e9" stroke="#0284c7" stroke-width="2" stroke-linejoin="round"/>
+    <!-- Stripes -->
+    <path d="M 27,33 H 53" stroke="#f43f5e" stroke-width="3"/>
+    <path d="M 28,45 H 52" stroke="#fff" stroke-width="3"/>
+    <path d="M 28,55 H 52" stroke="#f59e0b" stroke-width="3"/>
+    <!-- Cute paw print in the middle -->
+    <circle cx="40" cy="40" r="3" fill="#0f172a" opacity="0.2"/>
+  </g>
+</svg>

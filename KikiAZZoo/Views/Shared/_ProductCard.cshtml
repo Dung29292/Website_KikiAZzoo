@@ -1,0 +1,156 @@
+@model Product
+
+<div class="product-card-wrapper">
+    <div class="product-card kiki-card @(Model.Stock == 0 ? "product-out-of-stock" : "")">
+
+        <!-- Image Section -->
+        <div class="product-card__img position-relative overflow-hidden">
+            <a asp-action="Details" asp-controller="Product" asp-route-id="@Model.Id" class="d-block product-img-link">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="product-image" loading="lazy">
+                }
+                else
+                {
+                    <div class="img-placeholder">
+                        <i class="ph ph-image"></i>
+                    </div>
+                }
+                
+                @if (Model.Stock == 0)
+                {
+                    <div class="out-of-stock-overlay d-flex align-items-center justify-content-center position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 text-white fw-bold">
+                        <span class="badge bg-danger px-3 py-2 fs-6 shadow">Tạm hết hàng</span>
+                    </div>
+                }
+            </a>
+
+            <!-- Badges -->
+            <div class="product-badges">
+                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
+                {
+                    var discount = (int)Math.Round((Model.OriginalPrice.Value - Model.Price) / Model.OriginalPrice.Value * 100);
+                    <span class="badge-discount">-@discount%</span>
+                }
+                @if (Model.SalesCount >= 30)
+                {
+                    <span class="badge-bestseller"><i class="ph-fill ph-fire"></i> Bán chạy</span>
+                }
+                @if (Model.Rating >= 4.8)
+                {
+                    <span class="badge bg-warning text-dark"><i class="ph-fill ph-star"></i> Yêu thích</span>
+                }
+                @if (Model.CreatedDate >= DateTime.Now.AddDays(-30))
+                {
+                    <span class="badge-new"><i class="ph ph-sparkle"></i> Mới</span>
+                }
+            </div>
+            
+            <!-- Quick hover action buttons overlay on image -->
+            <div class="product-image-hover-actions d-flex flex-column gap-2 position-absolute end-0 top-0 m-2 opacity-0 transition">
+                <button type="button" class="btn btn-quick-view btn-light btn-sm rounded-circle p-2 shadow-sm" data-id="@Model.Id" title="Xem nhanh">
+                    <i class="ph ph-eye fs-5"></i>
+                </button>
+                <button type="button" class="btn btn-compare btn-light btn-sm rounded-circle p-2 shadow-sm" 
+                        data-id="@Model.Id" 
+                        data-name="@Model.Name" 
+                        data-price="@Model.Price.ToString("#,##0")" 
+                        data-image="@Model.ImageUrl" 
+                        data-rating="@Model.Rating"
+                        data-category="@Model.Category?.Name"
+                        title="So sánh">
+                    <i class="ph ph-arrows-left-right fs-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <h3 class="product-card__title mt-3">
+            <a asp-action="Details" asp-controller="Product" asp-route-id="@Model.Id">
+                @Model.Name
+            </a>
+        </h3>
+
+        <!-- Price & Countdown -->
+        <div class="product-card__price-section">
+            <p class="product-card__price mb-1">
+                <span class="price-current">@Model.Price.ToString("#,##0")đ</span>
+                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
+                {
+                    <span class="price-original">@Model.OriginalPrice.Value.ToString("#,##0")đ</span>
+                }
+            </p>
+            
+            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
+            {
+                <!-- Fake Countdown Timer to create urgency -->
+                <div class="product-countdown d-flex align-items-center gap-1 text-danger small fw-bold mb-2" data-countdown="true">
+                    <i class="bi bi-clock-history"></i> <span class="countdown-text" style="font-size: 0.75rem;">Kết thúc sau: <span class="countdown-timer">02:15:30</span></span>
+                </div>
+            }
+        </div>
+
+        <!-- Category -->
+        @if (Model.Category != null)
+        {
+            <p class="product-card__category">
+                <i class="ph ph-tag"></i> @Model.Category.CategoryGroup?.Name › @Model.Category.Name
+            </p>
+        }
+
+        <!-- Pet Type -->
+        @if (Model.PetType != null)
+        {
+            <div class="product-card__pettype">
+                <span class="pet-badge">
+                    <i class="bi @Model.PetType.Icon"></i> @Model.PetType.Name
+                </span>
+            </div>
+        }
+
+        <!-- Rating -->
+        @if (Model.Rating > 0)
+        {
+            <div class="product-card__rating">
+                <span class="rating-stars">
+                    @for (int i = 0; i < (int)Model.Rating; i++)
+                    {
+                        <i class="ph-fill ph-star"></i>
+                    }
+                    @for (int i = (int)Model.Rating; i < 5; i++)
+                    {
+                        <i class="ph ph-star"></i>
+                    }
+                </span>
+                <span class="rating-text">(@Model.Rating)</span>
+            </div>
+        }
+
+        <!-- Action Buttons (show on hover) -->
+        <div class="product-card__actions mt-3">
+            @if (Model.Stock > 0)
+            {
+                @if (Model.Category?.CategoryGroup?.Name != "Thú cưng")
+                {
+                    <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id"
+                       class="btn btn-buy btn-add-cart w-100">
+                        <i class="ph ph-shopping-cart-simple"></i> Thêm vào giỏ
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Details" asp-controller="Product" asp-route-id="@Model.Id"
+                       class="btn btn-buy w-100">
+                        <i class="ph ph-eye"></i> Xem chi tiết
+                    </a>
+                }
+            }
+            else
+            {
+                <button type="button" class="btn btn-secondary w-100 disabled" disabled>
+                    <i class="ph ph-shield-warning"></i> Hết hàng
+                </button>
+            }
+        </div>
+    </div>
+</div>

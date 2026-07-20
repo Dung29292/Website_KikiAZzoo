@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="toyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fce7f3"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#toyGrad)" opacity="0.15"/>
+  <g transform="translate(15, 15)">
+    <!-- Ball -->
+    <circle cx="40" cy="40" r="24" fill="#ec4899" stroke="#db2777" stroke-width="2"/>
+    <path d="M 24,24 A 24,24 0 0,0 56,56" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="4 4" opacity="0.7"/>
+    <path d="M 56,24 A 24,24 0 0,0 24,56" fill="none" stroke="#fff" stroke-width="2" opacity="0.5"/>
+    <!-- Bone Toy -->
+    <g transform="translate(30, 45) rotate(-30)">
+      <!-- Left side double circles -->
+      <circle cx="10" cy="8" r="7" fill="#8b5cf6" stroke="#6d28d9" stroke-width="1.5"/>
+      <circle cx="10" cy="18" r="7" fill="#8b5cf6" stroke="#6d28d9" stroke-width="1.5"/>
+      <!-- Right side double circles -->
+      <circle cx="45" cy="8" r="7" fill="#8b5cf6" stroke="#6d28d9" stroke-width="1.5"/>
+      <circle cx="45" cy="18" r="7" fill="#8b5cf6" stroke="#6d28d9" stroke-width="1.5"/>
+      <!-- Middle Bar -->
+      <rect x="10" y="8" width="35" height="10" fill="#8b5cf6" stroke="#6d28d9" stroke-width="1.5"/>
+      <!-- Inner fill fix to hide overlapping strokes -->
+      <rect x="11" y="9" width="33" height="8" fill="#8b5cf6"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,280 @@
+@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Sản phẩm", "")
+    };
+}
+
+<div class="card shadow-sm border-0 mb-4 bg-light-soft" style="background-color: #f8fafc; border: 1px solid #e2e8f0 !important;">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small text-muted fw-bold">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control border-start-0" placeholder="Tên hoặc mô tả..." />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted fw-bold">Danh mục</label>
+                <select name="categoryId" class="form-select form-select-sm">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var c in (List<Category>)ViewBag.CategoriesList)
+                    {
+                        <!option value="@c.Id" @(ViewBag.CategoryId == c.Id ? "selected" : "")>
+                            @(c.CategoryGroup?.Name != null ? $"{c.CategoryGroup.Name} › " : "")@c.Name
+                        </!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted fw-bold">Thương hiệu</label>
+                <select name="brandId" class="form-select form-select-sm">
+                    <option value="">Tất cả thương hiệu</option>
+                    @foreach (var b in (List<Brand>)ViewBag.BrandsList)
+                    {
+                        <!option value="@b.Id" @(ViewBag.BrandId == b.Id ? "selected" : "")>@b.Name</!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted fw-bold">Loại thú cưng</label>
+                <select name="petTypeId" class="form-select form-select-sm">
+                    <option value="">Tất cả thú cưng</option>
+                    @foreach (var pt in (List<PetType>)ViewBag.PetTypesList)
+                    {
+                        <!option value="@pt.Id" @(ViewBag.PetTypeId == pt.Id ? "selected" : "")>@pt.Name</!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted fw-bold">Sắp xếp</label>
+                <select name="sortBy" class="form-select form-select-sm">
+                    <!option value="" @(string.IsNullOrEmpty(ViewBag.SortBy) ? "selected" : "")>Mới nhất</!option>
+                    <!option value="price_asc" @(ViewBag.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</!option>
+                    <!option value="price_desc" @(ViewBag.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</!option>
+                    <!option value="name_asc" @(ViewBag.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</!option>
+                    <!option value="name_desc" @(ViewBag.SortBy == "name_desc" ? "selected" : "")>Tên Z-A</!option>
+                    <!option value="stock_asc" @(ViewBag.SortBy == "stock_asc" ? "selected" : "")>Tồn kho ít nhất</!option>
+                    <!option value="stock_desc" @(ViewBag.SortBy == "stock_desc" ? "selected" : "")>Tồn kho nhiều nhất</!option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end justify-content-end">
+                <button type="submit" class="btn btn-teal btn-sm w-100 fw-bold"><i class="bi bi-filter"></i> Lọc</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-teal"><i class="bi bi-box-seam me-2"></i>Danh sách sản phẩm</h5>
+        <a asp-action="Add" class="btn btn-teal btn-sm"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0 compact-admin-table">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 80px;" class="ps-3">Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Thương hiệu</th>
+                    <th>Giá bán</th>
+                    <th>Tồn kho</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 130px;" class="text-center pe-3">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">Không tìm thấy sản phẩm nào phù hợp.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var p in Model)
+                    {
+                        <tr class="@(p.Stock == 0 ? "opacity-50 out-of-stock-row" : "")" style="@(p.Stock == 0 ? "opacity: 0.5;" : "")">
+                            <td class="ps-3">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border: 1px solid #eee;" />
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="width:50px;height:50px;border-radius:6px;">
+                                        <i class="bi bi-image fs-4"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@p.Name</div>
+                                @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
+                                {
+                                    <span class="badge bg-danger-soft text-danger small" style="font-size: 0.7rem; padding: 0.2em 0.5em;">Giảm giá</span>
+                                }
+                            </td>
+                            <td><span class="small">@p.Category?.Name</span></td>
+                            <td><span class="small">@p.Brand?.Name</span></td>
+                            <td>
+                                <div class="fw-bold text-teal">@p.Price.ToString("#,##0")đ</div>
+                                @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
+                                {
+                                    <del class="text-muted small" style="font-size: 0.75rem;">@p.OriginalPrice.Value.ToString("#,##0")đ</del>
+                                }
+                            </td>
+                            <td>
+                                @if (p.Stock == 0)
+                                {
+                                    <span class="badge bg-danger text-white"><i class="bi bi-x-circle-fill me-1"></i>Hết hàng</span>
+                                }
+                                else if (p.Stock <= 5)
+                                {
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i>Còn @p.Stock (Ít)</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-soft text-success"><i class="bi bi-check-circle-fill me-1"></i>@p.Stock</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input status-toggle" type="checkbox" data-id="@p.Id" @(p.IsActive ? "checked" : "")>
+                                </div>
+                            </td>
+                            <td class="text-center pe-3">
+                                <div class="btn-group">
+                                    <a asp-action="Display" asp-route-id="@p.Id" class="btn btn-sm btn-outline-info p-1 px-2" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                                    <a asp-action="Update" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary p-1 px-2" title="Chỉnh sửa"><i class="bi bi-pencil"></i></a>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-product p-1 px-2" data-id="@p.Id" data-name="@p.Name" title="Xóa"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white py-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = ViewBag.CurrentPage - 1 })"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                            <a class="page-link @(ViewBag.CurrentPage == i ? "bg-teal border-teal text-white" : "")" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = i })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = ViewBag.CurrentPage + 1 })"><i class="bi bi-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<!-- Modal Xóa -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName" class="text-danger"></strong>? Hành động này không thể hoàn tác.
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post" action="">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa sản phẩm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling to make the admin table highly compact */
+    .compact-admin-table th, 
+    .compact-admin-table td {
+        padding: 0.35rem 0.5rem !important;
+        font-size: 0.88rem;
+    }
+
+    /* Out of stock row styling helper */
+    .out-of-stock-row {
+        background-color: rgba(248, 215, 218, 0.15) !important;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Customize checkbox toggle switches to light up green/teal */
+    .status-toggle:checked {
+        background-color: var(--teal) !important;
+        border-color: var(--teal) !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Xử lý nút xóa mở Modal
+            const deleteButtons = document.querySelectorAll(".btn-delete-product");
+            const deleteModal = new bootstrap.Modal(document.getElementById("deleteConfirmModal"));
+            const deleteNameSpan = document.getElementById("deleteProductName");
+            const deleteForm = document.getElementById("deleteForm");
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    const name = this.getAttribute("data-name");
+                    deleteNameSpan.textContent = name;
+                    deleteForm.action = `/Admin/Product/Delete/${id}`;
+                    deleteModal.show();
+                });
+            });
+
+            // Xử lý Toggle Status qua AJAX
+            const statusToggles = document.querySelectorAll(".status-toggle");
+            statusToggles.forEach(toggle => {
+                toggle.addEventListener("change", function () {
+                    const id = this.getAttribute("data-id");
+                    const active = this.checked;
+
+                    fetch(`/Admin/Product/ToggleStatus`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `id=${id}&active=${active}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Thành công, có thể hiển thị thông báo toast nhỏ
+                        } else {
+                            alert("Có lỗi xảy ra khi cập nhật trạng thái!");
+                            this.checked = !active; // Hoàn tác
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Không thể kết nối đến máy chủ!");
+                        this.checked = !active; // Hoàn tác
+                    });
+                });
+            });
+        });
+    </script>
+}

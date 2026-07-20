@@ -1,0 +1,98 @@
+@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Đơn hàng", "")
+    };
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label small text-muted fw-bold">Tìm kiếm đơn hàng</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control border-start-0" placeholder="Tìm theo Mã ĐH, Tên KH hoặc Email..." />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-muted fw-bold">Trạng thái đơn hàng</label>
+                <select name="status" class="form-select">
+                    <!option value="" @(string.IsNullOrEmpty(ViewBag.Status) ? "selected" : "")>Tất cả trạng thái</!option>
+                    <!option value="Pending" @(ViewBag.Status == "Pending" ? "selected" : "")>Chờ xác nhận</!option>
+                    <!option value="Processing" @(ViewBag.Status == "Processing" ? "selected" : "")>Đang xử lý</!option>
+                    <!option value="Shipping" @(ViewBag.Status == "Shipping" ? "selected" : "")>Đang giao hàng</!option>
+                    <!option value="Delivered" @(ViewBag.Status == "Delivered" ? "selected" : "")>Đã giao hàng</!option>
+                    <!option value="Cancelled" @(ViewBag.Status == "Cancelled" ? "selected" : "")>Đã hủy</!option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-teal w-100"><i class="bi bi-filter"></i> Lọc kết quả</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0 text-teal"><i class="bi bi-receipt me-2"></i>Danh sách đơn hàng</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 100px;">Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Số sản phẩm</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 120px;" class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Không tìm thấy đơn hàng nào phù hợp.</td>
+                    </tr>
+                }
+                else
+                {
+                    var users = ViewBag.Users as Dictionary<string, ApplicationUser> ?? new();
+                    foreach (var o in Model)
+                    {
+                        var user = users.ContainsKey(o.UserId) ? users[o.UserId] : null;
+                        var itemCount = o.OrderDetails?.Sum(d => d.Quantity) ?? 0;
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@o.Id" class="fw-bold text-teal text-decoration-none">#@o.Id</a>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@(user?.FullName ?? "Khách vãng lai")</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">@(user?.Email ?? "")</div>
+                            </td>
+                            <td>
+                                <span class="small text-muted">@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-soft text-secondary">@itemCount món</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">@o.TotalPrice.ToString("#,##0")đ</div>
+                            </td>
+                            <td>
+                                <partial name="_OrderStatusBadge" model="o.Status" />
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-sm btn-outline-teal" title="Xem chi tiết & Cập nhật"><i class="bi bi-eye-fill me-1"></i>Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

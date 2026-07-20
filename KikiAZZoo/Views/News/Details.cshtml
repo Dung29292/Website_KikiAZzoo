@@ -1,0 +1,18 @@
+@model BlogPost
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-4">
+    <nav class="breadcrumb-kiki">
+        <a asp-action="Index">Tin tức</a> &gt; @Model.Title
+    </nav>
+    <h1 class="fw-bold">@Model.Title</h1>
+    <small class="text-muted">@Model.PublishedDate.ToString("dd/MM/yyyy")</small>
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded-4 my-4" style="max-height:400px;object-fit:cover;width:100%;" />
+    }
+    <div class="content">@Model.Content</div>
+    <a asp-action="Index" class="btn btn-teal mt-4">Quay lại</a>
+</div>

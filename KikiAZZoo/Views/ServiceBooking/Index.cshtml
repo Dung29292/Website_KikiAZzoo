@@ -1,0 +1,165 @@
+@model IEnumerable<PetServiceBooking>
+@{
+    ViewData["Title"] = "Lịch hẹn dịch vụ của tôi";
+}
+
+<div class="container py-4 profile-page">
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <div class="profile-nav-card p-3 rounded-4 shadow-sm border bg-white">
+                <div class="text-center py-3">
+                    <div class="avatar-placeholder bg-teal-light text-teal rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Hồ sơ của tôi</h5>
+                </div>
+                <hr />
+                <div class="list-group list-group-flush border-0">
+                    <a asp-controller="Account" asp-action="Profile" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-person-gear"></i> Thông tin tài khoản</a>
+                    <a asp-controller="Account" asp-action="Orders" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-receipt"></i> Đơn hàng đã mua</a>
+                    <a asp-controller="Pet" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3"><i class="bi bi-paw-fill"></i> Hồ sơ thú cưng</a>
+                    <a asp-controller="ServiceBooking" asp-action="Index" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3 active"><i class="bi bi-calendar-check"></i> Lịch hẹn dịch vụ</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <div class="checkout-card p-4 rounded-4 shadow-sm border bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-check text-teal"></i> Lịch hẹn chăm sóc</h3>
+                    <a asp-controller="Service" asp-action="Index" class="btn btn-teal rounded-pill px-4 btn-sm">
+                        <i class="bi bi-calendar-plus"></i> Đặt lịch mới
+                    </a>
+                </div>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+                        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 text-teal-light mb-3"><i class="bi bi-calendar2-x"></i></div>
+                        <p class="mb-3">Bạn chưa đặt lịch hẹn dịch vụ nào.</p>
+                        <a asp-controller="Service" asp-action="Index" class="btn btn-outline-teal rounded-pill px-4 btn-sm">Đặt lịch dịch vụ ngay</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-none d-md-block border rounded-3 overflow-hidden shadow-sm">
+                        <table class="table table-hover align-middle mb-0" style="background: transparent;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Dịch vụ</th>
+                                    <th>Ngày hẹn</th>
+                                    <th>Khung giờ</th>
+                                    <th>Thú cưng</th>
+                                    <th>Giá dự kiến</th>
+                                    <th>Trạng thái</th>
+                                    <th class="pe-3">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold ps-3">@booking.Service?.Name</td>
+                                        <td>@booking.BookingDate.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-nowrap"><i class="bi bi-clock"></i> @booking.TimeSlot</td>
+                                        <td>
+                                            <span class="badge bg-teal-light text-teal rounded-pill px-2 py-1 small">
+                                                @booking.PetName (@booking.PetType)
+                                            </span>
+                                        </td>
+                                        <td class="fw-bold text-dark">@(booking.Price == 0 ? "Miễn phí" : booking.Price.ToString("#,##0") + "đ")</td>
+                                        <td>
+                                            @if (booking.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning-light text-warning rounded-pill px-2 py-1 small"><i class="bi bi-hourglass-split"></i> Chờ duyệt</span>
+                                            }
+                                            else if (booking.Status == "Confirmed")
+                                            {
+                                                <span class="badge bg-primary-light text-primary rounded-pill px-2 py-1 small"><i class="bi bi-check-circle"></i> Đã duyệt</span>
+                                            }
+                                            else if (booking.Status == "Completed")
+                                            {
+                                                <span class="badge bg-success-light text-success rounded-pill px-2 py-1 small"><i class="bi bi-patch-check"></i> Đã xong</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger-light text-danger rounded-pill px-2 py-1 small"><i class="bi bi-x-circle"></i> Đã hủy</span>
+                                            }
+                                        </td>
+                                        <td class="pe-3">
+                                            @if (booking.Status == "Pending" || booking.Status == "Confirmed")
+                                            {
+                                                <form asp-action="Cancel" asp-route-id="@booking.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Hủy</button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-md-none">
+                        @foreach (var booking in Model)
+                        {
+                            <div class="order-mobile-card border rounded-4 p-3 mb-3 shadow-sm bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="fw-bold text-dark">@booking.Service?.Name</span>
+                                    @if (booking.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning-light text-warning rounded-pill px-2 py-1 small">Chờ duyệt</span>
+                                    }
+                                    else if (booking.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-primary-light text-primary rounded-pill px-2 py-1 small">Đã duyệt</span>
+                                    }
+                                    else if (booking.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success-light text-success rounded-pill px-2 py-1 small">Đã xong</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-light text-danger rounded-pill px-2 py-1 small">Đã hủy</span>
+                                    }
+                                </div>
+                                <p class="text-muted small mb-1"><i class="bi bi-calendar"></i> Ngày: @booking.BookingDate.ToString("dd/MM/yyyy")</p>
+                                <p class="text-muted small mb-1"><i class="bi bi-clock"></i> Giờ: @booking.TimeSlot</p>
+                                <p class="text-muted small mb-2"><i class="bi bi-paw"></i> Thú cưng: @booking.PetName (@booking.PetType)</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="product-price fs-6">@(booking.Price == 0 ? "Miễn phí" : booking.Price.ToString("#,##0") + "đ")</strong>
+                                    @if (booking.Status == "Pending" || booking.Status == "Confirmed")
+                                    {
+                                        <form asp-action="Cancel" asp-route-id="@booking.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Hủy lịch</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

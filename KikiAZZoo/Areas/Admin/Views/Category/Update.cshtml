@@ -1,0 +1,26 @@
+@model Category
+@{
+    ViewData["Title"] = "Sửa danh mục";
+}
+
+<h2 class="fw-bold mb-4">Sửa danh mục</h2>
+<form asp-action="Update" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3" style="max-width:450px;">
+        <label asp-for="CategoryGroupId" class="form-label">Nhóm danh mục</label>
+        <select asp-for="CategoryGroupId" asp-items="ViewBag.CategoryGroups" class="form-select"></select>
+    </div>
+    <div class="mb-3" style="max-width:450px;">
+        <label asp-for="Name" class="form-label">Tên danh mục</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3" style="max-width:450px;">
+        <label asp-for="Icon" class="form-label">Icon</label>
+        <input asp-for="Icon" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-teal">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

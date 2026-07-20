@@ -1,0 +1,199 @@
+@model IEnumerable<BlogPost>
+@{
+    ViewData["Title"] = "Tin tức";
+    var featured = Model.FirstOrDefault(p => p.IsFeatured) ?? Model.FirstOrDefault();
+    var others = Model.Where(p => p.Id != featured?.Id).ToList();
+}
+
+<style>
+    .news-container {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .news-header-title {
+        color: var(--dark);
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+    .news-header-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 50px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--teal), var(--orange));
+        border-radius: 2px;
+    }
+
+    .premium-news-card {
+        background: #ffffff;
+        border: 1px solid rgba(13, 148, 136, 0.08);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.03);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .premium-news-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(13, 148, 136, 0.1);
+        border-color: rgba(13, 148, 136, 0.2);
+    }
+
+    .news-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    .news-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .premium-news-card:hover .news-image-wrapper img {
+        transform: scale(1.05);
+    }
+
+    .news-card-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .news-card-title {
+        font-weight: 700;
+        color: var(--dark);
+        font-size: 1.15rem;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+        text-decoration: none;
+        transition: color 0.2s;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .news-card-title:hover {
+        color: var(--teal);
+    }
+
+    .news-card-summary {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .news-meta-bottom {
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+
+    body.dark-mode .premium-news-card {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark-mode .news-card-title {
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .news-card-summary {
+        color: #94a3b8;
+    }
+
+    body.dark-mode .news-meta-bottom {
+        border-top-color: rgba(255, 255, 255, 0.05);
+    }
+</style>
+
+<div class="container py-4 news-container">
+    <h1 class="fw-bold news-header-title"><i class="ph ph-newspaper"></i> Tin tức</h1>
+    
+    <div class="row g-4">
+        <!-- Featured Post -->
+        @if (featured != null)
+        {
+            <div class="col-lg-8">
+                <div class="premium-news-card">
+                    <div class="news-image-wrapper" style="height: 380px;">
+                        @if (!string.IsNullOrEmpty(featured.ImageUrl))
+                        {
+                            <img src="@featured.ImageUrl" alt="@featured.Title" />
+                        }
+                        else
+                        {
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted"><i class="ph ph-newspaper" style="font-size: 4rem;"></i></div>
+                        }
+                        
+                        <span class="badge bg-teal position-absolute top-0 start-0 m-3 rounded-pill px-3 py-1 shadow-sm d-flex align-items-center gap-1">
+                            <i class="ph ph-sparkle"></i> Nổi bật
+                        </span>
+                    </div>
+                    <div class="news-card-body">
+                        <a asp-action="Details" asp-route-id="@featured.Id" class="news-card-title fs-4">@featured.Title</a>
+                        <p class="news-card-summary fs-6">@featured.Summary</p>
+                        <div class="news-meta-bottom">
+                            <span><i class="ph ph-calendar-blank"></i> @featured.PublishedDate.ToString("dd/MM/yyyy")</span>
+                            <span class="text-teal fw-semibold"><i class="ph ph-arrow-right"></i> Đọc thêm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Sidebar / Other Posts List -->
+        <div class="col-lg-4">
+            <h4 class="fw-bold mb-3 text-dark"><i class="ph ph-list-bullets me-1 text-teal"></i> Bài viết khác</h4>
+            <div class="d-flex flex-column gap-3" style="max-height: 480px; overflow-y: auto; padding-right: 5px;">
+                @foreach (var post in others)
+                {
+                    <div class="premium-news-card flex-row" style="height: 110px;">
+                        <div class="news-image-wrapper flex-shrink-0" style="width: 110px; height: 110px;">
+                            @if (!string.IsNullOrEmpty(post.ImageUrl))
+                            {
+                                <img src="@post.ImageUrl" alt="@post.Title" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9;"><i class="ph ph-image" style="font-size: 1.5rem;"></i></div>
+                            }
+                        </div>
+                        <div class="news-card-body p-2 d-flex flex-column justify-content-between">
+                            <a asp-action="Details" asp-route-id="@post.Id" class="news-card-title small fw-bold mb-1" style="-webkit-line-clamp: 2;">@post.Title</a>
+                            <div class="d-flex align-items-center justify-content-between mt-auto" style="font-size: 0.75rem; color: #94a3b8;">
+                                <span><i class="ph ph-calendar-blank"></i> @post.PublishedDate.ToString("dd/MM/yyyy")</span>
+                                <span class="text-teal"><i class="ph ph-arrow-right"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <a asp-action="Index" class="btn btn-teal w-100 mt-3 shadow-sm">
+                <i class="ph ph-arrows-counter-clockwise"></i> TẢI LẠI TRANG
+            </a>
+        </div>
+    </div>
+</div>
+

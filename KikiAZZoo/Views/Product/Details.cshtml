@@ -1,0 +1,300 @@
+@model Product
+@{
+    ViewData["Title"] = Model.Name;
+    var features = Model.Features?.OrderBy(f => f.SortOrder).ToList() ?? new List<ProductFeature>();
+    var images = new List<string>();
+    if (!string.IsNullOrEmpty(Model.ImageUrl)) images.Add(Model.ImageUrl);
+    if (Model.Images?.Any() == true)
+        images.AddRange(Model.Images.Select(i => i.Url).Where(u => !string.IsNullOrEmpty(u)));
+    images = images.Distinct().ToList();
+}
+
+<div class="container py-4">
+    <nav class="breadcrumb-kiki">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> &gt;
+        <a asp-action="Index">Sản phẩm</a> &gt;
+        @if (Model.Category?.CategoryGroup != null)
+        {
+            <a asp-action="Index" asp-route-categoryGroupId="@Model.Category.CategoryGroupId">@Model.Category.CategoryGroup.Name</a> @:›
+        }
+        @Model.Name
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="product-gallery">
+                @if (images.Any())
+                {
+                    <img src="@images[0]" alt="@Model.Name" class="product-detail-img" id="mainProductImage" />
+                    @if (images.Count > 1)
+                    {
+                        <div class="product-gallery-thumbs mt-3">
+                            @for (int i = 0; i < images.Count; i++)
+                            {
+                                <button type="button" class="product-gallery-thumb @(i == 0 ? "active" : "")" data-src="@images[i]" aria-label="Ảnh @(i + 1)">
+                                    <img src="@images[i]" alt="" />
+                                </button>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="img-placeholder product-detail-img" style="height:400px;"><i class="bi bi-image"></i></div>
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (Model.PetType != null)
+            {
+                <span class="badge bg-teal-soft mb-2"><i class="bi @Model.PetType.Icon"></i> @Model.PetType.Name</span>
+            }
+            @if (Model.Category?.CategoryGroup != null)
+            {
+                <span class="badge bg-orange-soft mb-2">@Model.Category.CategoryGroup.Name</span>
+            }
+            <h2 class="fw-bold">@Model.Name</h2>
+            <div class="rating-stars mb-2">
+                @for (int i = 0; i < 5; i++)
+                {
+                    <i class="bi bi-star@(i < (int)Model.Rating ? "-fill" : "") text-warning"></i>
+                }
+                <span class="text-muted ms-1">(@Model.Rating)</span>
+                @if (Model.SalesCount >= 40)
+                {
+                    <span class="badge bg-orange-soft ms-2">Bán chạy</span>
+                }
+            </div>
+            <div class="mb-3">
+                <span class="product-price fs-3">@Model.Price.ToString("#,##0")đ</span>
+                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                {
+                    <span class="product-price-old">@Model.OriginalPrice.Value.ToString("#,##0")đ</span>
+                    var discount = (int)Math.Round((Model.OriginalPrice.Value - Model.Price) / Model.OriginalPrice.Value * 100);
+                    <span class="badge bg-danger ms-2">-@discount%</span>
+                }
+            </div>
+
+            @if (features.Any())
+            {
+                <div class="mb-4 product-feature-list">
+                    @foreach (var f in features)
+                    {
+                        <div class="feature-item"><i class="bi @f.Icon"></i> @f.Text</div>
+                    }
+                </div>
+            }
+
+            <!-- Product Specs & Trust Badges -->
+            <div class="product-trust-box p-3 bg-light rounded-3 mb-4 text-dark" style="border: 1.5px solid rgba(13, 148, 136, 0.15); font-size: 0.88rem;">
+                @if (Model.Category?.CategoryGroup?.Name == "Thức ăn" || Model.Category?.CategoryGroup?.Name == "Chăm sóc")
+                {
+                    <div class="mb-2"><i class="bi bi-calendar-event text-teal me-2"></i><strong>Hạn sử dụng:</strong> 12 tháng kể từ ngày sản xuất (HSD chi tiết in trên bao bì)</div>
+                    @if (!string.IsNullOrEmpty(Model.Ingredients))
+                    {
+                        <div class="mb-2"><i class="bi bi-journal-text text-teal me-2"></i><strong>Thành phần chính:</strong> @Model.Ingredients</div>
+                    }
+                }
+                <div class="mb-2"><i class="bi bi-shield-check text-teal me-2"></i><strong>Đổi trả & Bảo hành:</strong> Chính sách đổi trả miễn phí trong vòng 7 ngày nếu phát hiện lỗi.</div>
+                <div><i class="bi bi-truck text-teal me-2"></i><strong>Vận chuyển:</strong> Giao hàng nhanh toàn quốc, Freeship cho đơn hàng từ 300K.</div>
+            </div>
+
+            @if (Model.Category?.CategoryGroup?.Name != "Thú cưng")
+            {
+                <div class="product-detail-actions d-flex gap-2 flex-wrap mb-3">
+                    <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-teal btn-lg flex-grow-1 btn-add-cart py-3 fw-bold" style="box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
+                        <i class="bi bi-cart-plus-fill me-1"></i> THÊM VÀO GIỎ
+                    </a>
+                    <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-orange btn-lg btn-add-cart btn-buy-now py-3 fw-bold" data-buy-now="true" style="box-shadow: 0 4px 15px rgba(242, 141, 82, 0.3);">
+                        <i class="bi bi-lightning-fill me-1"></i> MUA NGAY
+                    </a>
+                </div>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Contact" class="btn btn-teal btn-lg mb-3 py-3 fw-bold w-100" style="box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
+                    <i class="bi bi-chat-heart-fill me-1"></i> LIÊN HỆ NHẬN NUÔI
+                </a>
+            }
+
+            <p class="text-muted small mb-0">
+                <strong>Danh mục:</strong> @Model.Category?.CategoryGroup?.Name › @Model.Category?.Name |
+                <strong>Thương hiệu:</strong> @(Model.Brand?.Name ?? "KikiAzoo")
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <ul class="nav nav-tabs nav-tabs-kiki" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab" aria-controls="desc" aria-selected="true">Mô tả</button>
+            </li>
+            @if (!string.IsNullOrEmpty(Model.Ingredients))
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="ingredients-tab" data-bs-toggle="tab" data-bs-target="#ingredients" type="button" role="tab" aria-controls="ingredients" aria-selected="false">Thành phần</button>
+                </li>
+            }
+            @if (!string.IsNullOrEmpty(Model.UsageGuide))
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="usage-tab" data-bs-toggle="tab" data-bs-target="#usage" type="button" role="tab" aria-controls="usage" aria-selected="false">Hướng dẫn</button>
+                </li>
+            }
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá (@(((List<ProductReview>)ViewBag.Reviews).Count))</button>
+            </li>
+        </ul>
+        <div class="tab-content p-4 border border-top-0 rounded-bottom bg-white">
+            <div class="tab-pane fade show active" id="desc" role="tabpanel" aria-labelledby="desc-tab">@Html.Raw(Model.Description)</div>
+            @if (!string.IsNullOrEmpty(Model.Ingredients))
+            {
+                <div class="tab-pane fade" id="ingredients" role="tabpanel" aria-labelledby="ingredients-tab">@Model.Ingredients</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.UsageGuide))
+            {
+                <div class="tab-pane fade" id="usage" role="tabpanel" aria-labelledby="usage-tab">@Model.UsageGuide</div>
+            }
+            <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                <div class="row g-4">
+                    <!-- Reviews list -->
+                    <div class="col-lg-7">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-chat-text text-teal"></i> Khách hàng nhận xét</h5>
+                        
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+                                <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show rounded-3 small py-2 mb-3" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        @if (!((List<ProductReview>)ViewBag.Reviews).Any())
+                        {
+                            <p class="text-muted py-3">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                        }
+                        else
+                        {
+                            <div class="reviews-list d-flex flex-column gap-3">
+                                @foreach (var review in (List<ProductReview>)ViewBag.Reviews)
+                                {
+                                    <div class="review-card p-3 rounded-4 bg-light border shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong class="text-dark d-block">@(review.ApplicationUser?.FullName ?? "Khách hàng ẩn danh")</strong>
+                                                <small class="text-muted small">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </div>
+                                            <div class="text-warning" style="font-size: 0.9rem;">
+                                                @for (int s = 1; s <= 5; s++)
+                                                {
+                                                    <i class="bi bi-star@(s <= review.Rating ? "-fill" : "")"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                        <p class="mb-0 text-muted small">@review.Content</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Add Review Form -->
+                    <div class="col-lg-5">
+                        <div class="bg-light p-4 rounded-4 border shadow-sm">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square text-teal"></i> Viết đánh giá của bạn</h5>
+                            
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="ProductReview" asp-action="AddReview" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@Model.Id" />
+
+                                    @if (ViewBag.HasPurchased == true)
+                                    {
+                                        <div class="badge bg-success-light text-success rounded-pill px-3 py-1 mb-3 small d-inline-block">
+                                            <i class="bi bi-patch-check-fill"></i> Đã mua hàng
+                                        </div>
+                                    }
+
+                                    <!-- Rating selection -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Chọn số sao đánh giá</label>
+                                        <div class="rating-picker d-flex gap-2 text-warning fs-4">
+                                            <i class="bi bi-star-fill rating-star" data-value="1" style="cursor:pointer;"></i>
+                                            <i class="bi bi-star-fill rating-star" data-value="2" style="cursor:pointer;"></i>
+                                            <i class="bi bi-star-fill rating-star" data-value="3" style="cursor:pointer;"></i>
+                                            <i class="bi bi-star-fill rating-star" data-value="4" style="cursor:pointer;"></i>
+                                            <i class="bi bi-star-fill rating-star" data-value="5" style="cursor:pointer;"></i>
+                                        </div>
+                                        <input type="hidden" name="rating" id="ratingInputValue" value="5" />
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Nội dung nhận xét</label>
+                                        <textarea name="content" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này..." required minlength="5"></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-teal rounded-pill px-4 btn-sm w-100 fw-semibold">
+                                        Gửi nhận xét
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="text-center py-3">
+                                    <p class="text-muted small mb-3">Vui lòng đăng nhập để đánh giá sản phẩm.</p>
+                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="btn btn-outline-teal btn-sm rounded-pill px-4">Đăng nhập</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Gallery thumbs clicker
+            document.querySelectorAll('.product-gallery-thumb').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('mainProductImage').src = btn.dataset.src;
+                    document.querySelectorAll('.product-gallery-thumb').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // Rating picker script
+            const stars = document.querySelectorAll('.rating-star');
+            const input = document.getElementById('ratingInputValue');
+            if (stars.length > 0 && input) {
+                stars.forEach(star => {
+                    star.addEventListener('click', function () {
+                        const val = parseInt(this.dataset.value);
+                        input.value = val;
+                        stars.forEach((s, idx) => {
+                            if (idx < val) {
+                                s.classList.remove('bi-star');
+                                s.classList.add('bi-star-fill');
+                            } else {
+                                s.classList.remove('bi-star-fill');
+                                s.classList.add('bi-star');
+                            }
+                        });
+                    });
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,206 @@
+@model ProductListViewModel
+@{
+    var prefix = ViewData["FilterPrefix"] as string ?? "";
+}
+
+<form method="get" asp-action="Index" id="filterForm@(prefix)" class="filter-form-modern">
+    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+
+    <!-- Search -->
+    <div class="filter-search-box">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" name="search" value="@Model.Search" placeholder="Tìm sản phẩm..." />
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a asp-action="Index" class="filter-search-clear"><i class="ph ph-x-circle"></i></a>
+        }
+    </div>
+
+    <!-- Loại thú cưng -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph-fill ph-paw-print"></i> Loại thú cưng
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.PetTypeId == null ? "active" : "")">
+                <input type="radio" name="petTypeId" value="" id="petAll@(prefix)" @(Model.PetTypeId == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="petAll@(prefix)">Tất cả</label>
+            </div>
+            @foreach (var petType in Model.PetTypes)
+            {
+                <div class="filter-chip @(Model.PetTypeId == petType.Id ? "active" : "")">
+                    <input type="radio" name="petTypeId" value="@petType.Id" id="pet@(prefix)@petType.Id" @(Model.PetTypeId == petType.Id ? "checked" : "") onchange="this.form.submit()" />
+                    <label for="pet@(prefix)@petType.Id"><i class="bi @petType.Icon"></i> @petType.Name</label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Danh mục -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-squares-four"></i> Danh mục
+        </div>
+        @foreach (var group in Model.CategoryGroups)
+        {
+            <div class="filter-subsection">
+                <div class="filter-subsection-title">@group.Name</div>
+                <div class="filter-options">
+                    <div class="filter-chip @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "active" : "")">
+                        <input type="radio" name="categoryGroupId" value="@group.Id" id="grp@(prefix)@group.Id" @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "checked" : "") onchange="this.form.submit()" />
+                        <label for="grp@(prefix)@group.Id">Tất cả</label>
+                    </div>
+                    @foreach (var category in group.Categories ?? [])
+                    {
+                        <div class="filter-chip @(Model.CategoryId == category.Id ? "active" : "")">
+                            <input type="radio" name="categoryId" value="@category.Id" id="cat@(prefix)@category.Id" @(Model.CategoryId == category.Id ? "checked" : "") onchange="this.form.submit()" />
+                            <label for="cat@(prefix)@category.Id">@category.Name</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Tình trạng -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-seal-check"></i> Tình trạng
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.StatusFilter == null ? "active" : "")">
+                <input type="radio" name="statusFilter" value="" id="statusAll@(prefix)" @(Model.StatusFilter == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="statusAll@(prefix)">Tất cả</label>
+            </div>
+            <div class="filter-chip @(Model.StatusFilter == "sale" ? "active" : "")">
+                <input type="radio" name="statusFilter" value="sale" id="statusSale@(prefix)" @(Model.StatusFilter == "sale" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="statusSale@(prefix)"><i class="ph-fill ph-percent"></i> Đang giảm giá</label>
+            </div>
+            <div class="filter-chip @(Model.StatusFilter == "bestseller" ? "active" : "")">
+                <input type="radio" name="statusFilter" value="bestseller" id="statusBest@(prefix)" @(Model.StatusFilter == "bestseller" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="statusBest@(prefix)"><i class="ph-fill ph-fire"></i> Bán chạy</label>
+            </div>
+            <div class="filter-chip @(Model.StatusFilter == "new" ? "active" : "")">
+                <input type="radio" name="statusFilter" value="new" id="statusNew@(prefix)" @(Model.StatusFilter == "new" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="statusNew@(prefix)"><i class="ph ph-sparkle"></i> Hàng mới</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đánh giá -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph-fill ph-star"></i> Đánh giá
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.RatingFilter == null ? "active" : "")">
+                <input type="radio" name="ratingFilter" value="" id="ratingAll@(prefix)" @(Model.RatingFilter == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ratingAll@(prefix)">Tất cả</label>
+            </div>
+            <div class="filter-chip @(Model.RatingFilter == 4 ? "active" : "")">
+                <input type="radio" name="ratingFilter" value="4" id="rating4@(prefix)" @(Model.RatingFilter == 4 ? "checked" : "") onchange="this.form.submit()" />
+                <label for="rating4@(prefix)"><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i> trở lên</label>
+            </div>
+            <div class="filter-chip @(Model.RatingFilter == 3 ? "active" : "")">
+                <input type="radio" name="ratingFilter" value="3" id="rating3@(prefix)" @(Model.RatingFilter == 3 ? "checked" : "") onchange="this.form.submit()" />
+                <label for="rating3@(prefix)"><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i> trở lên</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thương hiệu -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-tag"></i> Thương hiệu
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.BrandId == null ? "active" : "")">
+                <input type="radio" name="brandId" value="" id="brandAll@(prefix)" @(Model.BrandId == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="brandAll@(prefix)">Tất cả</label>
+            </div>
+            @foreach (var brand in Model.Brands)
+            {
+                <div class="filter-chip @(Model.BrandId == brand.Id ? "active" : "")">
+                    <input type="radio" name="brandId" value="@brand.Id" id="brand@(prefix)@brand.Id" @(Model.BrandId == brand.Id ? "checked" : "") onchange="this.form.submit()" />
+                    <label for="brand@(prefix)@brand.Id">@brand.Name</label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Khoảng giá -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-money"></i> Khoảng giá
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.PriceRangeId == null ? "active" : "")">
+                <input type="radio" name="priceRangeId" value="" id="priceAll@(prefix)" @(Model.PriceRangeId == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="priceAll@(prefix)">Tất cả</label>
+            </div>
+            @foreach (var priceRange in Model.PriceRanges)
+            {
+                <div class="filter-chip @(Model.PriceRangeId == priceRange.Id ? "active" : "")">
+                    <input type="radio" name="priceRangeId" value="@priceRange.Id" id="price@(prefix)@priceRange.Id" @(Model.PriceRangeId == priceRange.Id ? "checked" : "") onchange="this.form.submit()" />
+                    <label for="price@(prefix)@priceRange.Id">@priceRange.Label</label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Độ tuổi thú cưng -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-calendar"></i> Độ tuổi thú cưng
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.PetAge == null ? "active" : "")">
+                <input type="radio" name="petAge" value="" id="ageAll@(prefix)" @(Model.PetAge == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageAll@(prefix)">Tất cả</label>
+            </div>
+            <div class="filter-chip @(Model.PetAge == "young" ? "active" : "")">
+                <input type="radio" name="petAge" value="young" id="ageYoung@(prefix)" @(Model.PetAge == "young" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageYoung@(prefix)">Con non / Nhỏ</label>
+            </div>
+            <div class="filter-chip @(Model.PetAge == "adult" ? "active" : "")">
+                <input type="radio" name="petAge" value="adult" id="ageAdult@(prefix)" @(Model.PetAge == "adult" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageAdult@(prefix)">Trưởng thành</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dạng thức ăn -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-cookie"></i> Dạng thức ăn
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(Model.FoodType == null ? "active" : "")">
+                <input type="radio" name="foodType" value="" id="foodAll@(prefix)" @(Model.FoodType == null ? "checked" : "") onchange="this.form.submit()" />
+                <label for="foodAll@(prefix)">Tất cả</label>
+            </div>
+            <div class="filter-chip @(Model.FoodType == "hat" ? "active" : "")">
+                <input type="radio" name="foodType" value="hat" id="foodHat@(prefix)" @(Model.FoodType == "hat" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="foodHat@(prefix)">Thức ăn hạt</label>
+            </div>
+            <div class="filter-chip @(Model.FoodType == "pate" ? "active" : "")">
+                <input type="radio" name="foodType" value="pate" id="foodPate@(prefix)" @(Model.FoodType == "pate" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="foodPate@(prefix)">Pate / Đồ ướt</label>
+            </div>
+            <div class="filter-chip @(Model.FoodType == "snack" ? "active" : "")">
+                <input type="radio" name="foodType" value="snack" id="foodSnack@(prefix)" @(Model.FoodType == "snack" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="foodSnack@(prefix)">Snack / Bánh thưởng</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buttons (chỉ hiện trên mobile) -->
+    <div class="d-lg-none mt-4 d-flex flex-column gap-2">
+        <button type="submit" class="btn w-100" style="background: var(--teal); color: #fff; border-radius: 999px; font-weight: 600; padding: 0.7rem 1.5rem;">
+            <i class="ph ph-funnel me-1"></i> Áp dụng
+        </button>
+        <a asp-action="Index" class="btn w-100" style="border: 1.5px solid #e2e8f0; color: #64748b; border-radius: 999px; font-weight: 600; padding: 0.7rem 1.5rem;">
+            <i class="ph ph-x me-1"></i> Xóa bộ lọc
+        </a>
+    </div>
+</form>

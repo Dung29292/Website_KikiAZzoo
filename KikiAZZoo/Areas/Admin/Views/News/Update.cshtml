@@ -1,0 +1,44 @@
+@model BlogPost
+@{
+    ViewData["Title"] = "Sửa bài viết";
+}
+
+<h2 class="fw-bold mb-4">Sửa bài viết</h2>
+<form asp-action="Update" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+    <div class="row">
+        <div class="col-md-8">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Tiêu đề</label>
+                <input asp-for="Title" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Summary" class="form-label">Tóm tắt</label>
+                <textarea asp-for="Summary" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label">Nội dung</label>
+                <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PublishedDate" class="form-label">Ngày đăng</label>
+                <input asp-for="PublishedDate" type="datetime-local" class="form-control" />
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="IsFeatured" class="form-check-input" />
+                <label asp-for="IsFeatured" class="form-check-label">Bài nổi bật</label>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hình ảnh mới</label>
+                <input type="file" name="imageUrl" class="form-control" accept="image/*" />
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" style="max-width:200px;border-radius:8px;" class="mb-3" />
+            }
+            <button type="submit" class="btn btn-teal">Lưu</button>
+            <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+        </div>
+    </div>
+</form>

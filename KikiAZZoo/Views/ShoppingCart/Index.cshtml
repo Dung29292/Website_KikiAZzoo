@@ -1,0 +1,390 @@
+@model ShoppingCart
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var shipping = ShoppingCart.CalculateShipping(Model.SubTotal);
+    var total = Model.SubTotal + shipping;
+}
+
+<style>
+    .cart-container {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .cart-header-title {
+        color: var(--dark);
+        position: relative;
+        display: inline-block;
+    }
+    .cart-header-title::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--teal), var(--orange));
+        border-radius: 2px;
+    }
+
+    .cart-item-card {
+        background: #ffffff;
+        border: 1px solid rgba(13, 148, 136, 0.08);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.03);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cart-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(13, 148, 136, 0.08);
+        border-color: rgba(13, 148, 136, 0.2);
+    }
+
+    .cart-item-image-wrapper {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8fafc;
+        flex-shrink: 0;
+    }
+
+    .cart-item-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .cart-item-card:hover .cart-item-image {
+        transform: scale(1.08);
+    }
+
+    .cart-item-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .cart-item-name {
+        color: var(--dark);
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .cart-item-name:hover {
+        color: var(--teal);
+    }
+
+    .premium-qty-stepper {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 2px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .premium-qty-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: var(--dark);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: transparent;
+        transition: background-color 0.2s, color 0.2s, transform 0.1s;
+    }
+
+    .premium-qty-btn:hover {
+        background-color: #ffffff;
+        color: var(--teal);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .premium-qty-btn:active {
+        transform: scale(0.92);
+    }
+
+    .premium-qty-input {
+        width: 45px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-weight: 700;
+        color: var(--dark);
+        font-size: 0.95rem;
+    }
+
+    .premium-cart-remove {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ef4444;
+        background: #fef2f2;
+        border: 1px solid #fee2e2;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .premium-cart-remove:hover {
+        background: #ef4444;
+        color: #ffffff;
+        border-color: #ef4444;
+        transform: rotate(8deg);
+    }
+
+    /* Free Shipping Progress Indicator */
+    .premium-shipping-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(13, 148, 136, 0.08);
+        padding: 1.25rem;
+        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.03);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .shipping-truck-container {
+        position: relative;
+        height: 28px;
+        margin-bottom: 0.5rem;
+    }
+
+    .shipping-truck {
+        position: absolute;
+        top: 0;
+        font-size: 1.5rem;
+        color: var(--teal);
+        transform: translateX(-50%);
+        transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .shipping-progress-track {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .shipping-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--teal) 0%, var(--orange) 100%);
+        border-radius: 999px;
+        transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body.dark-mode .cart-item-card,
+    body.dark-mode .premium-shipping-card {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark-mode .cart-item-name {
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .premium-qty-stepper {
+        background: #0f172a;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .premium-qty-input {
+        color: #e2e8f0;
+    }
+
+    body.dark-mode .premium-qty-btn {
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .premium-qty-btn:hover {
+        background-color: #1e293b;
+    }
+
+    body.dark-mode .shipping-progress-track {
+        background: #334155;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container py-4 cart-container">
+    <nav class="breadcrumb-kiki mb-3">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> &gt; Giỏ hàng
+    </nav>
+
+    <h2 class="fw-bold mb-4 cart-header-title"><i class="ph ph-shopping-cart"></i> Giỏ hàng</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 small py-2 mb-3 mt-3" role="alert">
+            <i class="ph ph-warning-circle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+        </div>
+    }
+
+    @if (!Model.Items.Any())
+    {
+        <div class="empty-state-card text-center py-5 rounded-4 shadow-sm border bg-white">
+            <div class="empty-state-icon" style="font-size: 4rem; color: var(--teal); opacity: 0.7;"><i class="ph ph-shopping-cart-slash"></i></div>
+            <h4 class="fw-bold mt-3" style="color: var(--dark);">Giỏ hàng đang trống</h4>
+            <p class="text-muted">Hãy khám phá các sản phẩm dễ thương cho thú cưng của bạn!</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-teal btn-lg mt-3">
+                <i class="ph ph-storefront"></i> Tiếp tục mua sắm
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Cart Items Grid -->
+            <div class="col-lg-8">
+                <div class="cart-items-wrapper">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="cart-item-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" id="cart-item-@item.ProductId">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="cart-item-image-wrapper">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="cart-item-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9;"><i class="ph ph-image" style="font-size: 1.5rem;"></i></div>
+                                    }
+                                </div>
+                                <div class="cart-item-details">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@item.ProductId" class="cart-item-name">@item.Name</a>
+                                    <span class="text-teal fw-semibold mt-1" style="font-size: 0.95rem;">@item.Price.ToString("#,##0")đ</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-4 w-100 w-md-auto">
+                                <!-- Quantity Stepper -->
+                                <div class="premium-qty-stepper">
+                                    <a asp-action="UpdateQuantity" asp-route-productId="@item.ProductId" asp-route-quantity="@(item.Quantity - 1)" class="premium-qty-btn" onclick="animateChange(this)">−</a>
+                                    <input type="number" value="@item.Quantity" class="premium-qty-input" readonly />
+                                    <a asp-action="UpdateQuantity" asp-route-productId="@item.ProductId" asp-route-quantity="@(item.Quantity + 1)" class="premium-qty-btn" onclick="animateChange(this)">+</a>
+                                </div>
+
+                                <!-- Subtotal Price -->
+                                <span class="fw-bold text-dark fs-6 text-end min-w-100" style="min-width: 90px;">@((item.Price * item.Quantity).ToString("#,##0"))đ</span>
+
+                                <!-- Remove Button -->
+                                <a asp-action="RemoveFromCart" asp-route-productId="@item.ProductId" class="premium-cart-remove" title="Xóa khỏi giỏ" onclick="animateRemove(event, '@item.ProductId')">
+                                    <i class="ph ph-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-outline-teal px-4">
+                        <i class="ph ph-arrow-left"></i> Tiếp tục mua sắm
+                    </a>
+                </div>
+            </div>
+
+            <!-- Cart Summary Panel -->
+            <div class="col-lg-4">
+                <div class="cart-summary sticky-sidebar p-4 rounded-4 shadow-sm border bg-white">
+                    <h5 class="fw-bold mb-4" style="color: var(--dark); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem;"><i class="ph ph-receipt"></i> Tóm tắt đơn hàng</h5>
+                    
+                    <!-- Free Shipping Indicator -->
+                    @{
+                        var progressPercent = Math.Min(100, (int)(Model.SubTotal / ShoppingCart.FreeShippingThreshold * 100));
+                    }
+                    <div class="premium-shipping-card mb-4 bg-light">
+                        <div class="shipping-truck-container">
+                            <i class="ph ph-truck shipping-truck" style="left: @(progressPercent)%;"></i>
+                        </div>
+                        <div class="shipping-progress-track">
+                            <div class="shipping-progress-fill" style="width: @(progressPercent)%;"></div>
+                        </div>
+                        @if (shipping > 0)
+                        {
+                            <p class="small text-muted mt-2 mb-0 text-center">
+                                Mua thêm <strong class="text-teal">@((ShoppingCart.FreeShippingThreshold - Model.SubTotal).ToString("#,##0"))đ</strong> để được <strong>miễn phí giao hàng</strong>!
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="small text-success mt-2 mb-0 text-center fw-bold">
+                                🎉 Đơn hàng của bạn đã đủ điều kiện Miễn phí giao hàng!
+                            </p>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Tạm tính (@Model.TotalItems sản phẩm)</span>
+                        <span class="fw-semibold text-dark">@Model.SubTotal.ToString("#,##0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Phí vận chuyển</span>
+                        <span class="@(shipping == 0 ? "text-success fw-bold" : "text-dark fw-semibold")">
+                            @(shipping == 0 ? "Miễn phí" : shipping.ToString("#,##0") + "đ")
+                        </span>
+                    </div>
+                    
+                    <hr class="my-4" style="border-color: #e2e8f0;" />
+                    
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-4" style="color: var(--dark);">
+                        <span>Tổng thanh toán</span>
+                        <span class="text-orange">@total.ToString("#,##0")đ</span>
+                    </div>
+
+                    <a asp-action="Checkout" class="btn btn-teal w-100 btn-lg shadow-sm">
+                        <i class="ph ph-credit-card"></i> Tiến hành thanh toán
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function animateChange(btn) {
+        btn.closest('.premium-qty-stepper').style.transform = 'scale(0.97)';
+        setTimeout(() => {
+            btn.closest('.premium-qty-stepper').style.transform = '';
+        }, 100);
+    }
+
+    function animateRemove(event, productId) {
+        event.preventDefault();
+        const url = event.currentTarget.href;
+        const card = document.getElementById('cart-item-' + productId);
+        if (card) {
+            card.style.transition = 'all 0.4s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9) translateY(20px)';
+            setTimeout(() => {
+                window.location.href = url;
+            }, 400);
+        } else {
+            window.location.href = url;
+        }
+    }
+</script>
+

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" fill="none">
+  <rect width="600" height="700" fill="#E8F5F1"/>
+  <circle cx="300" cy="320" r="180" fill="#5EB49F" opacity="0.15"/>
+  <circle cx="300" cy="320" r="130" fill="#5EB49F" opacity="0.2"/>
+  <!-- Dog -->
+  <ellipse cx="220" cy="380" rx="70" ry="55" fill="#F28D52"/>
+  <circle cx="220" cy="310" r="45" fill="#F28D52"/>
+  <circle cx="200" cy="300" r="8" fill="#2C3E50"/>
+  <circle cx="240" cy="300" r="8" fill="#2C3E50"/>
+  <ellipse cx="220" cy="318" rx="12" ry="8" fill="#E07A3F"/>
+  <ellipse cx="175" cy="275" rx="18" ry="30" fill="#E07A3F" transform="rotate(-20 175 275)"/>
+  <ellipse cx="265" cy="275" rx="18" ry="30" fill="#E07A3F" transform="rotate(20 265 275)"/>
+  <!-- Cat -->
+  <ellipse cx="380" cy="400" rx="55" ry="45" fill="#5EB49F"/>
+  <circle cx="380" cy="345" r="38" fill="#5EB49F"/>
+  <polygon points="350,315 360,280 370,315" fill="#3D8B7A"/>
+  <polygon points="390,315 400,280 410,315" fill="#3D8B7A"/>
+  <circle cx="368" cy="340" r="6" fill="#2C3E50"/>
+  <circle cx="392" cy="340" r="6" fill="#2C3E50"/>
+  <path d="M375 352 Q380 358 385 352" stroke="#2C3E50" stroke-width="2" fill="none"/>
+  <!-- Hearts -->
+  <text x="260" y="200" font-size="40" fill="#F28D52">e</text>
+  <text x="330" y="230" font-size="28" fill="#5EB49F">e</text>
+  <!-- Brand -->
+  <text x="300" y="560" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="28" font-weight="700" fill="#5EB49F">Kiki</text>
+  <text x="355" y="560" font-family="Segoe UI,sans-serif" font-size="28" font-weight="700" fill="#F28D52">e</text>
+  <text x="380" y="560" font-family="Segoe UI,sans-serif" font-size="28" font-weight="700" fill="#5EB49F">zoo</text>
+  <text x="300" y="595" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="14" fill="#888">Th� gi�i pet D�ng y�u</text>
+</svg>
