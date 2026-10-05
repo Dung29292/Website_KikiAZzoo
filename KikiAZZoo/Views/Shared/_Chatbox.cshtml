@@ -1,0 +1,694 @@
+<div id="kiki-chatbox-container" class="kiki-chatbox-wrapper">
+    <!-- Cloud Bubble -->
+    <div class="kiki-cloud-bubble shadow-sm" id="kiki-cloud-bubble">
+        <div class="d-flex align-items-center gap-2">
+            <span>Trợ lý tư vấn 🐾</span>
+            <button class="btn-close btn-close-sm" style="font-size: 0.5rem;" onclick="closeCloudBubble(event)"></button>
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button id="kiki-chat-toggle" class="kiki-chat-toggle shadow-lg">
+        <div class="kiki-avatar-wrapper">
+            <img src="/images/cho-con.png" alt="KiKi" class="kiki-avatar-img" />
+        </div>
+    </button>
+
+    <!-- Chatbox Modal -->
+    <div id="kiki-chatbox" class="kiki-chatbox d-none shadow-lg">
+        <div class="kiki-chat-header">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="kiki-chat-title">
+                    <img src="/images/cho-con.png" alt="KiKi" class="kiki-header-avatar me-2" />
+                    <div class="d-flex flex-column">
+                        <strong>KiKiAZOO AI</strong>
+                        <small class="text-white-50"><span class="kiki-online-dot"></span> Đang hoạt động</small>
+                    </div>
+                </div>
+                <button id="kiki-chat-close" class="btn-close btn-close-white" aria-label="Close"></button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="kiki-chat-tabs">
+                <div class="kiki-tab active" onclick="switchTab('ai')">Chat AI</div>
+                <div class="kiki-tab" onclick="switchTab('contact')">Liên hệ trực tiếp</div>
+            </div>
+        </div>
+        
+        <!-- Tab Content: AI Chat -->
+        <div class="kiki-tab-content" id="tab-ai">
+            <div class="kiki-chat-body" id="kiki-chat-body">
+                <!-- Welcome message -->
+                <div class="kiki-msg-ai">
+                    <div class="kiki-bubble kiki-bubble-ai">
+                        Dạ xin chào ạ! 🐾 Mình là trợ lý chó con KiKiAZOO. Mình có thể giúp gì cho bạn hôm nay nè?
+                    </div>
+                </div>
+            </div>
+
+            <div class="kiki-chat-suggestions px-3 py-2" id="kiki-chat-suggestions">
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('🐶 Tư vấn thức ăn cho chó')">🐶 Thức ăn cho chó</span>
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('🐱 Tư vấn thức ăn cho mèo')">🐱 Thức ăn cho mèo</span>
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('🛍️ Tìm sản phẩm cho thú cưng')">🛍️ Tìm sản phẩm</span>
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('🧴 Các dịch vụ chăm sóc có gì?')">🧴 Dịch vụ chăm sóc</span>
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('📅 Tôi muốn đặt lịch chăm sóc')">📅 Đặt lịch</span>
+                <span class="kiki-suggestion" onclick="kikiSendSuggestion('🛒 Hướng dẫn đặt hàng')">🛒 Hướng dẫn đặt hàng</span>
+            </div>
+
+            <div class="kiki-chat-footer p-2">
+                <div class="kiki-input-group d-flex align-items-end">
+                    <textarea id="kiki-chat-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
+                    <button id="kiki-chat-send" class="btn kiki-btn-send ms-2">
+                        <i class="ph ph-paper-plane-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Contact -->
+        <div class="kiki-tab-content d-none" id="tab-contact">
+            <div class="kiki-contact-body p-4 text-center">
+                <h6 class="mb-3 text-secondary">Liên hệ trực tiếp với chúng tôi</h6>
+                
+                <a href="https://zalo.me/0369623216" target="_blank" class="kiki-contact-btn z-alo mb-3">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1024px-Icon_of_Zalo.svg.png" width="24" class="me-2" />
+                    Chat qua Zalo (0369623216)
+                </a>
+                
+                <a href="https://www.facebook.com/kao.ky.851044?locale=vi_VN" target="_blank" class="kiki-contact-btn f-acebook mb-3">
+                    <i class="ph-fill ph-facebook-logo me-2" style="font-size:24px;"></i>
+                    Chat qua Facebook
+                </a>
+                
+                <a href="https://www.instagram.com/kyc.catafrican/" target="_blank" class="kiki-contact-btn i-nstagram mb-3">
+                    <i class="ph-fill ph-instagram-logo me-2" style="font-size:24px;"></i>
+                    Chat qua Instagram
+                </a>
+                
+                <a href="tel:0369623216" class="kiki-contact-btn p-hone">
+                    <i class="ph-fill ph-phone me-2" style="font-size:24px;"></i>
+                    Gọi điện thoại (0369623216)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --kiki-teal: #1abc9c;
+        --kiki-teal-dark: #16a085;
+        --kiki-orange: #ff9f43;
+        --kiki-orange-light: #feca57;
+        --kiki-pink: #ff9ff3;
+    }
+    .kiki-chatbox-wrapper {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 9999;
+        font-family: 'Nunito', inherit;
+    }
+    
+    .kiki-cloud-bubble {
+        position: absolute;
+        bottom: 75px;
+        right: 0;
+        background: white;
+        color: var(--kiki-teal-dark);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        animation: kikiFloat 3s ease-in-out infinite;
+        border: 2px solid var(--kiki-teal);
+        box-shadow: 0 4px 15px rgba(26,188,156,0.2);
+    }
+    .kiki-cloud-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: 24px;
+        border-width: 8px 8px 0;
+        border-style: solid;
+        border-color: var(--kiki-teal) transparent transparent transparent;
+    }
+    @@keyframes kikiFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .kiki-chat-toggle {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--kiki-teal), var(--kiki-teal-dark));
+        border: 3px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        padding: 0;
+        overflow: hidden;
+    }
+    .kiki-avatar-wrapper {
+        width: 100%;
+        height: 100%;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .kiki-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 50%;
+    }
+    .kiki-header-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        object-fit: contain;
+    }
+    .kiki-chat-toggle:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 10px 20px rgba(26, 188, 156, 0.4);
+    }
+    .kiki-chatbox {
+        width: 380px;
+        max-width: 90vw;
+        height: 580px;
+        max-height: 85vh;
+        background: white;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: absolute;
+        bottom: 85px;
+        right: 0;
+        transform-origin: bottom right;
+        animation: kikiScaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        border: 1px solid rgba(26,188,156,0.1);
+    }
+    @@keyframes kikiScaleUp {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .kiki-chatbox.d-none {
+        display: none !important;
+    }
+    .kiki-chat-header {
+        background: linear-gradient(135deg, var(--kiki-teal), var(--kiki-teal-dark));
+        color: white;
+        padding: 16px 20px 0 20px;
+    }
+    .kiki-chat-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.15rem;
+    }
+    .kiki-chat-title strong {
+        line-height: 1.2;
+        letter-spacing: 0.5px;
+    }
+    .kiki-chat-title small {
+        font-size: 0.8rem;
+        font-weight: 300;
+        display: flex;
+        align-items: center;
+    }
+    .kiki-online-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #2ecc71;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+        box-shadow: 0 0 5px #2ecc71;
+    }
+    .kiki-chat-tabs {
+        display: flex;
+        margin-top: 10px;
+    }
+    .kiki-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 0;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.7);
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .kiki-tab.active {
+        color: white;
+        border-bottom: 3px solid white;
+    }
+    .kiki-tab-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .kiki-chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fdfbf7;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .kiki-chat-body::-webkit-scrollbar { width: 6px; }
+    .kiki-chat-body::-webkit-scrollbar-track { background: transparent; }
+    .kiki-chat-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    .kiki-bubble {
+        padding: 12px 16px;
+        border-radius: 20px;
+        max-width: 85%;
+        word-wrap: break-word;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        position: relative;
+    }
+    .kiki-msg-ai {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    .kiki-bubble-ai {
+        background: white;
+        color: #4a4a4a;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid #f1f2f6;
+    }
+    .kiki-msg-user {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .kiki-bubble-user {
+        background: linear-gradient(135deg, var(--kiki-orange), var(--kiki-orange-light));
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 15px rgba(255, 159, 67, 0.25);
+    }
+    .kiki-chat-suggestions {
+        background: white;
+        border-top: 1px solid #f1f2f6;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-bottom: 12px;
+        padding-top: 12px;
+        justify-content: center;
+    }
+    .kiki-suggestion {
+        background: #fff;
+        color: var(--kiki-teal-dark);
+        padding: 6px 12px;
+        border-radius: 24px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid var(--kiki-teal);
+        box-shadow: 0 2px 5px rgba(26,188,156,0.1);
+    }
+    .kiki-suggestion:hover {
+        background: var(--kiki-teal);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .kiki-chat-footer {
+        background: white;
+        border-top: 1px solid #f1f2f6;
+        padding: 12px;
+    }
+    .kiki-input-group {
+        background: #f8f9fa;
+        border-radius: 24px;
+        padding: 6px 12px;
+        border: 1.5px solid #e2e8f0;
+        transition: border-color 0.3s;
+    }
+    .kiki-input-group:focus-within {
+        border-color: var(--kiki-teal);
+    }
+    .kiki-input-group textarea {
+        border: none;
+        background: transparent;
+        resize: none;
+        box-shadow: none !important;
+        padding: 8px;
+        max-height: 100px;
+        font-size: 0.95rem;
+        outline: none;
+    }
+    .kiki-btn-send {
+        background: var(--kiki-teal);
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: none;
+        transition: transform 0.2s, background 0.2s;
+        margin-bottom: 2px;
+    }
+    .kiki-btn-send:hover {
+        background: var(--kiki-teal-dark);
+        transform: scale(1.1);
+    }
+    .kiki-typing-indicator {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px 18px;
+        background: white;
+        border-radius: 20px;
+        border-bottom-left-radius: 4px;
+        width: fit-content;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid #f1f2f6;
+    }
+    .kiki-typing-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .kiki-typing-dots {
+        display: flex;
+        gap: 5px;
+    }
+    .kiki-typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--kiki-teal);
+        border-radius: 50%;
+        animation: kikiTyping 1.4s infinite ease-in-out both;
+    }
+    .kiki-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .kiki-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @@keyframes kikiTyping {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+    
+    /* Contact tab styles */
+    .kiki-contact-body {
+        flex: 1;
+        background: #fdfbf7;
+        overflow-y: auto;
+    }
+    .kiki-contact-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 12px;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kiki-contact-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        color: white;
+    }
+    .z-alo { background: #0068FF; }
+    .f-acebook { background: #1877F2; }
+    .i-nstagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+    .p-hone { background: #2ecc71; }
+    
+    /* Dark mode support */
+    body.dark-mode .kiki-chatbox, body.dark-mode .kiki-cloud-bubble {
+        background: #1e293b;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+    body.dark-mode .kiki-chat-body, body.dark-mode .kiki-contact-body {
+        background: #0f172a;
+    }
+    body.dark-mode .kiki-bubble-ai {
+        background: #1e293b;
+        color: #f1f5f9;
+        border-color: #334155;
+    }
+    body.dark-mode .kiki-chat-footer, body.dark-mode .kiki-chat-suggestions {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    body.dark-mode .kiki-suggestion {
+        background: #334155;
+        color: #cbd5e1;
+        border-color: var(--kiki-teal);
+    }
+    body.dark-mode .kiki-input-group {
+        background: #0f172a;
+        border-color: #334155;
+    }
+    body.dark-mode .kiki-input-group textarea {
+        color: #f1f5f9;
+    }
+    body.dark-mode .kiki-typing-indicator {
+        background: #1e293b;
+        border-color: #334155;
+    }
+</style>
+
+<script>
+    const chatHistory = [];
+    
+    function closeCloudBubble(event) {
+        event.stopPropagation();
+        const cloudBubble = document.getElementById("kiki-cloud-bubble");
+        if (cloudBubble) cloudBubble.style.display = "none";
+    }
+
+    function switchTab(tab) {
+        const tabs = document.querySelectorAll('.kiki-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        
+        const contents = document.querySelectorAll('.kiki-tab-content');
+        contents.forEach(c => c.classList.add('d-none'));
+
+        if(tab === 'ai') {
+            tabs[0].classList.add('active');
+            document.getElementById('tab-ai').classList.remove('d-none');
+        } else {
+            tabs[1].classList.add('active');
+            document.getElementById('tab-contact').classList.remove('d-none');
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("kiki-chat-toggle");
+        const closeBtn = document.getElementById("kiki-chat-close");
+        const chatbox = document.getElementById("kiki-chatbox");
+        const sendBtn = document.getElementById("kiki-chat-send");
+        const inputField = document.getElementById("kiki-chat-input");
+        const cloudBubble = document.getElementById("kiki-cloud-bubble");
+
+        toggleBtn.addEventListener("click", () => {
+            chatbox.classList.toggle("d-none");
+            if (cloudBubble) cloudBubble.style.display = "none";
+            if (!chatbox.classList.contains("d-none")) {
+                inputField.focus();
+            }
+        });
+
+        closeBtn.addEventListener("click", () => {
+            chatbox.classList.add("d-none");
+        });
+
+        sendBtn.addEventListener("click", handleSend);
+
+        inputField.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+        
+        // Auto-resize textarea
+        inputField.addEventListener("input", function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+
+    window.kikiSendSuggestion = function(text) {
+        const inputField = document.getElementById("kiki-chat-input");
+        inputField.value = text;
+        const sendBtn = document.getElementById("kiki-chat-send");
+        sendBtn.click();
+    };
+
+    async function handleSend() {
+        const inputField = document.getElementById("kiki-chat-input");
+        const message = inputField.value.trim();
+        if (!message) return;
+
+        inputField.value = "";
+        inputField.style.height = 'auto';
+        
+        // Hide suggestions after first message
+        const suggestionsBox = document.getElementById("kiki-chat-suggestions");
+        if (suggestionsBox) {
+            suggestionsBox.style.display = 'none';
+        }
+
+        appendMessage("user", message);
+        chatHistory.push({ role: "user", content: message });
+
+        showTyping();
+
+        try {
+            const response = await fetch('/api/Chat/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    history: chatHistory.slice(-10)
+                })
+            });
+
+            removeTyping();
+
+            if (response.ok) {
+                const data = await response.json();
+                appendMessage("ai", data.answer, true);
+                chatHistory.push({ role: "model", content: data.answer });
+            } else {
+                const errorData = await response.json().catch(() => null);
+                let errText = "Dạ xin lỗi ạ, hệ thống đang gặp chút trục trặc nhỏ. Bạn vui lòng thử lại xíu nữa nhé! 😿";
+                if (errorData && errorData.error) {
+                     errText = "Dạ hệ thống báo lỗi: " + errorData.error;
+                     if (errorData.details) {
+                         errText += "<br><br><small style='color:red;'>Chi tiết: " + errorData.details + "</small>";
+                     }
+                }
+                appendMessage("ai", errText, true);
+            }
+        } catch (error) {
+            removeTyping();
+            appendMessage("ai", "Dạ xin lỗi ạ, không thể kết nối tới máy chủ. Bạn kiểm tra lại mạng giúp mình nha. 😿", true);
+        }
+    }
+
+    function appendMessage(sender, text, typewriter = false) {
+        const body = document.getElementById("kiki-chat-body");
+        const msgDiv = document.createElement("div");
+        
+        // Convert URLs to clickable links and line breaks to <br>
+        const formattedText = text
+            .replace(/\n/g, '<br>')
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--kiki-teal);text-decoration:underline;">$1</a>');
+
+        if (sender === "user") {
+            msgDiv.className = "kiki-msg-user";
+            msgDiv.innerHTML = `<div class="kiki-bubble kiki-bubble-user">${formattedText}</div>`;
+            body.appendChild(msgDiv);
+            scrollToBottom();
+        } else {
+            msgDiv.className = "kiki-msg-ai";
+            const bubble = document.createElement("div");
+            bubble.className = "kiki-bubble kiki-bubble-ai";
+            msgDiv.appendChild(bubble);
+            body.appendChild(msgDiv);
+            
+            if (typewriter) {
+                typeWriterEffect(bubble, formattedText);
+            } else {
+                bubble.innerHTML = formattedText;
+                scrollToBottom();
+            }
+        }
+    }
+
+    function typeWriterEffect(element, htmlContent) {
+        // Create a temporary element to parse the HTML string
+        const temp = document.createElement("div");
+        temp.innerHTML = htmlContent;
+        
+        element.innerHTML = "";
+        
+        let nodeIndex = 0;
+        let charIndex = 0;
+        
+        function typeNode() {
+            if (nodeIndex < temp.childNodes.length) {
+                const node = temp.childNodes[nodeIndex];
+                
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (charIndex < node.textContent.length) {
+                        element.appendChild(document.createTextNode(node.textContent.charAt(charIndex)));
+                        charIndex++;
+                        scrollToBottom();
+                        setTimeout(typeNode, 15);
+                    } else {
+                        charIndex = 0;
+                        nodeIndex++;
+                        typeNode();
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    element.appendChild(node.cloneNode(true));
+                    nodeIndex++;
+                    scrollToBottom();
+                    setTimeout(typeNode, 15);
+                }
+            }
+        }
+        
+        typeNode();
+    }
+
+    function showTyping() {
+        const body = document.getElementById("kiki-chat-body");
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "kiki-msg-ai";
+        typingDiv.id = "kiki-typing-indicator";
+        typingDiv.innerHTML = `
+            <div class="kiki-typing-indicator">
+                <span class="kiki-typing-text">Trợ lý đang trả lời...</span>
+                <div class="kiki-typing-dots">
+                    <div class="kiki-typing-dot"></div>
+                    <div class="kiki-typing-dot"></div>
+                    <div class="kiki-typing-dot"></div>
+                </div>
+            </div>
+        `;
+        body.appendChild(typingDiv);
+        scrollToBottom();
+    }
+
+    function removeTyping() {
+        const typingIndicator = document.getElementById("kiki-typing-indicator");
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    function scrollToBottom() {
+        const body = document.getElementById("kiki-chat-body");
+        body.scrollTop = body.scrollHeight;
+    }
+</script>

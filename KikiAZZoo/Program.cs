@@ -46,6 +46,7 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
