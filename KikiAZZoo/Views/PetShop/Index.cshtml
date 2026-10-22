@@ -231,7 +231,6 @@
                             <li><a class="dropdown-item @(Model.SortBy == "newest" ? "active" : "")" asp-action="Index" asp-route-sortBy="newest" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Mới về nhất</a></li>
                             <li><a class="dropdown-item @(Model.SortBy == "price_asc" ? "active" : "")" asp-action="Index" asp-route-sortBy="price_asc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Giá: Thấp đến Cao</a></li>
                             <li><a class="dropdown-item @(Model.SortBy == "price_desc" ? "active" : "")" asp-action="Index" asp-route-sortBy="price_desc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Giá: Cao đến Thấp</a></li>
-                            <li><a class="dropdown-item @(Model.SortBy == "age_asc" ? "active" : "")" asp-action="Index" asp-route-sortBy="age_asc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Tuổi: Nhỏ nhất</a></li>
                             <li><a class="dropdown-item @(Model.SortBy == "name" ? "active" : "")" asp-action="Index" asp-route-sortBy="name" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Tên A-Z</a></li>
                         </ul>
                     </div>
@@ -245,85 +244,99 @@
                     @foreach (var pet in Model.Pets)
                     {
                         <div class="col-md-6 col-lg-4">
-                            <div class="pet-card-modern h-100 d-flex flex-column rounded-4 bg-white shadow-sm overflow-hidden border">
-                                <!-- Card Image Area -->
-                                <div class="pet-card-thumb position-relative overflow-hidden" style="height: 230px; background: #f8fafc;">
-                                    <a asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
-                                        <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
-                                             alt="@pet.Name" 
-                                             class="w-100 h-100 object-fit-cover pet-img-hover" 
-                                             loading="lazy" />
-                                    </a>
+                            <div class="product-card-wrapper h-100">
+                                <div class="pet-card-modern kiki-card @(!pet.IsAvailable ? "product-out-of-stock" : "")">
+                                    <!-- Card Image Area -->
+                                    <div class="product-card__img position-relative overflow-hidden mb-2" style="height: 200px;">
+                                        <a asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
+                                            <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
+                                                 alt="@pet.Name" 
+                                                 class="product-image pet-img-hover w-100 h-100 object-fit-cover" 
+                                                 loading="lazy" />
+                                        </a>
 
-                                    <!-- Top Badges -->
-                                    <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1">
-                                        <span class="badge rounded-pill px-2 py-1 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
-                                            <i class="ph ph-paw-print me-1"></i>@(pet.Breed?.PetType?.Name ?? "Thú cưng")
-                                        </span>
-                                        @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
-                                        {
-                                            var pct = (int)Math.Round((1 - (pet.Price / pet.OriginalPrice.Value)) * 100);
-                                            <span class="badge bg-danger rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">-@pct%</span>
-                                        }
-                                    </div>
-
-                                    <!-- Top Right Info (Gender) -->
-                                    <div class="position-absolute top-0 end-0 m-2">
-                                        @if (pet.Gender == "Đực")
-                                        {
-                                            <span class="badge bg-info-subtle text-info border border-info rounded-pill px-2 py-1 shadow-sm" title="Giới tính: Đực">
-                                                <i class="ph-bold ph-gender-male"></i> Đực
+                                        <!-- Top Left Badges -->
+                                        <div class="product-badges d-flex flex-column gap-1 position-absolute top-0 start-0 m-2">
+                                            <span class="badge rounded-pill px-2 py-1 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
+                                                <i class="ph ph-paw-print me-1"></i>@(pet.Breed?.PetType?.Name ?? "Thú cưng")
                                             </span>
-                                        }
-                                        else if (pet.Gender == "Cái")
-                                        {
-                                            <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-2 py-1 shadow-sm" title="Giới tính: Cái">
-                                                <i class="ph-bold ph-gender-female"></i> Cái
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-light text-muted border rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
-                                                <i class="ph ph-sparkle"></i> @pet.Gender
-                                            </span>
-                                        }
-                                    </div>
-
-                                    <!-- Quick View Overlay Button -->
-                                    <button type="button" 
-                                            class="btn btn-sm btn-light position-absolute bottom-0 start-50 translate-middle-x mb-2 rounded-pill px-3 py-1 shadow quick-view-btn d-flex align-items-center gap-1 opacity-0"
-                                            onclick="openPetQuickView(@pet.Id)" 
-                                            title="Xem nhanh">
-                                        <i class="ph ph-eye"></i> Xem nhanh
-                                    </button>
-
-                                    @if (!pet.IsAvailable)
-                                    {
-                                        <div class="position-absolute inset-0 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.55); backdrop-filter: blur(1.5px);">
-                                            <span class="badge bg-dark px-3 py-2 rounded-pill fs-7 text-white fw-bold">Đã về nhà mới</span>
+                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
+                                            {
+                                                var pct = (int)Math.Round((1 - (pet.Price / pet.OriginalPrice.Value)) * 100);
+                                                <span class="badge-discount">-@pct%</span>
+                                            }
                                         </div>
-                                    }
-                                </div>
 
-                                <!-- Card Body Info -->
-                                <div class="pet-card-content p-3 d-flex flex-column flex-grow-1">
-                                    <div class="d-flex align-items-center justify-content-between mb-1">
-                                        <span class="text-muted small fw-medium">
-                                            Giống: @(pet.Breed?.Name ?? "Thuần chủng")
+                                        <!-- Gender Badge (Bottom Left) -->
+                                        <div class="position-absolute bottom-0 start-0 m-2">
+                                            @if (pet.Gender == "Đực")
+                                            {
+                                                <span class="badge bg-info-subtle text-info border border-info rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;" title="Giới tính: Đực">
+                                                    <i class="ph-bold ph-gender-male"></i> Đực
+                                                </span>
+                                            }
+                                            else if (pet.Gender == "Cái")
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;" title="Giới tính: Cái">
+                                                    <i class="ph-bold ph-gender-female"></i> Cái
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted border rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
+                                                    <i class="ph ph-sparkle"></i> @pet.Gender
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <!-- Quick hover action buttons overlay on image (Top Right) -->
+                                        <div class="product-image-hover-actions d-flex flex-column gap-2 position-absolute end-0 top-0 m-2 opacity-0 transition">
+                                            <button type="button" class="btn btn-quick-view btn-light btn-sm rounded-circle p-2 shadow-sm" onclick="openPetQuickView(@pet.Id)" title="Xem nhanh">
+                                                <i class="ph ph-eye fs-5"></i>
+                                            </button>
+                                            <a asp-action="Details" asp-route-id="@pet.Id" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" title="Xem chi tiết bé">
+                                                <i class="ph ph-arrow-up-right fs-5"></i>
+                                            </a>
+                                        </div>
+
+                                        @if (!pet.IsAvailable)
+                                        {
+                                            <div class="out-of-stock-overlay d-flex align-items-center justify-content-center position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 text-white fw-bold">
+                                                <span class="badge bg-dark px-3 py-2 fs-6 shadow">Đã về nhà mới</span>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h3 class="product-card__title mt-1 mb-1">
+                                        <a asp-action="Details" asp-route-id="@pet.Id" title="@pet.Name">
+                                            @pet.Name
+                                        </a>
+                                    </h3>
+
+                                    <!-- Price -->
+                                    <div class="product-card__price-section mb-1">
+                                        <p class="product-card__price mb-0">
+                                            <span class="price-current">@pet.Price.ToString("N0")đ</span>
+                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
+                                            {
+                                                <span class="price-original">@pet.OriginalPrice.Value.ToString("N0")đ</span>
+                                            }
+                                        </p>
+                                    </div>
+
+                                    <!-- Breed & Age Info -->
+                                    <div class="d-flex align-items-center justify-content-between my-1">
+                                        <span class="pet-badge">
+                                            <i class="ph ph-paw-print"></i> @(pet.Breed?.Name ?? "Thuần chủng")
                                         </span>
-                                        <span class="badge bg-light text-teal border rounded-pill" style="font-size: 0.7rem;">
+                                        <span class="badge bg-light text-teal border rounded-pill" style="font-size: 0.72rem;">
                                             @(pet.AgeMonths == 0 ? "Cá non" : $"{pet.AgeMonths} tháng")
                                         </span>
                                     </div>
 
-                                    <h6 class="fw-bold mb-2 text-truncate" title="@pet.Name" style="color: var(--dark);">
-                                        <a asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none text-reset">
-                                            @pet.Name
-                                        </a>
-                                    </h6>
-
                                     <!-- Health / Feature highlights -->
-                                    <div class="pet-features d-flex flex-wrap gap-1 mb-3">
+                                    <div class="pet-features d-flex flex-wrap gap-1 mt-1 mb-2">
                                         @if (pet.IsVaccinated)
                                         {
                                             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small" style="font-size: 0.68rem;">
@@ -350,37 +363,23 @@
                                         }
                                     </div>
 
-                                    <!-- Price & CTA -->
-                                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <span class="d-block fw-bold fs-5" style="color: var(--orange-dark);">
-                                                @pet.Price.ToString("N0")đ
-                                            </span>
-                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
-                                            {
-                                                <span class="text-muted text-decoration-line-through small" style="font-size: 0.75rem;">
-                                                    @pet.OriginalPrice.Value.ToString("N0")đ
-                                                </span>
-                                            }
-                                        </div>
-
-                                        <div class="d-flex gap-1">
-                                            @if (pet.IsAvailable)
-                                            {
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-teal rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                                                        style="width: 36px; height: 36px;" 
-                                                        onclick="addToCartPetAjax(@pet.Id)" 
-                                                        title="Đón bé về nhà (Thêm giỏ hàng)">
-                                                    <i class="ph ph-shopping-cart-simple"></i>
-                                                </button>
-                                            }
-                                            <a asp-action="Details" asp-route-id="@pet.Id" 
-                                               class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold d-flex align-items-center" 
-                                               title="Xem chi tiết bé">
-                                                Xem bé
-                                            </a>
-                                        </div>
+                                    <!-- Action Buttons (reveal on hover) -->
+                                    <div class="product-card__actions mt-auto pt-2">
+                                        @if (pet.IsAvailable)
+                                        {
+                                            <button type="button" class="btn btn-buy btn-add-cart w-100" onclick="addToCartPetAjax(@pet.Id)" title="Đón bé về nhà (Thêm giỏ hàng)">
+                                                <i class="ph ph-shopping-cart-simple"></i> Đón bé về nhà
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-secondary w-100 disabled" disabled>
+                                                <i class="ph ph-house"></i> Đã về nhà mới
+                                            </button>
+                                        }
+                                        <a asp-action="Details" asp-route-id="@pet.Id" class="btn btn-detail" title="Xem chi tiết bé">
+                                            <i class="ph ph-eye"></i> Xem bé
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -528,29 +527,46 @@
         box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
     }
 
-    /* Card styling */
+    /* Card styling & hover interactions matching product cards */
     .pet-card-modern {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     }
     .pet-card-modern:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+        transform: translateY(-8px) scale(1.015);
+        box-shadow: 0 20px 45px rgba(13, 148, 136, 0.18) !important;
+        border-color: var(--teal) !important;
     }
     .pet-img-hover {
-        transition: transform 0.4s ease;
+        transition: transform 0.5s ease;
     }
     .pet-card-modern:hover .pet-img-hover {
-        transform: scale(1.05);
+        transform: scale(1.08);
     }
-    .pet-card-modern:hover .quick-view-btn {
+    .pet-card-modern .product-image-hover-actions {
+        opacity: 0;
+        transform: translateX(8px);
+        transition: all 0.25s ease;
+        z-index: 5;
+    }
+    .pet-card-modern:hover .product-image-hover-actions,
+    .product-card__img:hover .product-image-hover-actions {
         opacity: 1 !important;
+        transform: translateX(0) !important;
     }
-    .quick-view-btn {
-        transition: opacity 0.25s ease, transform 0.25s ease;
+    .product-image-hover-actions .btn:hover {
+        background-color: var(--teal) !important;
+        color: white !important;
     }
-    .quick-view-btn:hover {
-        background: var(--teal) !important;
-        color: #fff !important;
+    .pet-card-modern .product-card__actions {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pet-card-modern:hover .product-card__actions {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
     }
 
     /* Switch styling */

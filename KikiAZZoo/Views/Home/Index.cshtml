@@ -178,35 +178,49 @@
                 @foreach (var pet in featuredPets)
                 {
                     <div class="col-md-6 col-lg-3">
-                        <div class="pet-card-modern h-100 d-flex flex-column rounded-4 bg-white shadow-sm overflow-hidden border">
-                            <div class="position-relative overflow-hidden" style="height: 200px; background: #f8fafc;">
-                                <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
-                                    <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
-                                         alt="@pet.Name" 
-                                         class="w-100 h-100 object-fit-cover pet-img-hover" />
-                                </a>
-                                <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
-                                    @(pet.Breed?.Name ?? "Thú cưng")
-                                </span>
-                                <span class="badge bg-light text-muted border position-absolute top-0 end-0 m-2 rounded-pill px-2 py-1" style="font-size: 0.7rem;">
-                                    @pet.Gender
-                                </span>
-                            </div>
-                            <div class="p-3 d-flex flex-column flex-grow-1">
-                                <h6 class="fw-bold mb-1 text-truncate">
-                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none text-reset">
+                        <div class="product-card-wrapper h-100">
+                            <div class="pet-card-modern kiki-card @(!pet.IsAvailable ? "product-out-of-stock" : "")">
+                                <div class="product-card__img position-relative overflow-hidden mb-2" style="height: 190px;">
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
+                                        <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
+                                             alt="@pet.Name" 
+                                             class="product-image pet-img-hover w-100 h-100 object-fit-cover" 
+                                             loading="lazy" />
+                                    </a>
+                                    <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
+                                        @(pet.Breed?.Name ?? "Thú cưng")
+                                    </span>
+                                    <span class="badge bg-light text-muted border position-absolute bottom-0 start-0 m-2 rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
+                                        @pet.Gender
+                                    </span>
+                                    <div class="product-image-hover-actions d-flex flex-column gap-2 position-absolute end-0 top-0 m-2 opacity-0 transition">
+                                        <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" title="Xem chi tiết bé">
+                                            <i class="ph ph-arrow-up-right fs-5"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <h3 class="product-card__title mt-1 mb-1">
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none text-reset" title="@pet.Name">
                                         @pet.Name
                                     </a>
-                                </h6>
+                                </h3>
+                                <div class="product-card__price-section mb-1">
+                                    <p class="product-card__price mb-0">
+                                        <span class="price-current">@pet.Price.ToString("N0")đ</span>
+                                    </p>
+                                </div>
                                 <div class="text-muted small mb-2">
                                     @(pet.AgeMonths == 0 ? "Cá non" : $"{pet.AgeMonths} tháng tuổi") • @pet.Color
                                 </div>
-                                <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
-                                    <span class="fw-bold fs-6" style="color: var(--orange-dark);">
-                                        @pet.Price.ToString("N0")đ
-                                    </span>
-                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold">
-                                        Xem bé
+                                <div class="product-card__actions mt-auto pt-2">
+                                    @if (pet.IsAvailable)
+                                    {
+                                        <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@pet.Id" class="btn btn-buy btn-add-cart w-100" title="Đón bé về nhà">
+                                            <i class="ph ph-shopping-cart-simple"></i> Đón bé
+                                        </a>
+                                    }
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="btn btn-detail" title="Xem chi tiết">
+                                        <i class="ph ph-eye"></i> Xem bé
                                     </a>
                                 </div>
                             </div>

@@ -78,10 +78,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki nav-link-pets @(isPetShop ? "active" : "")" asp-area="" asp-controller="PetShop" asp-action="Index">
+                            <a class="nav-link nav-link-kiki @(isPetShop ? "active" : "")" asp-area="" asp-controller="PetShop" asp-action="Index">
                                 <i class="ph-fill ph-paw-print"></i>
                                 <span>Thú cưng</span>
-                                <span class="badge-nav-new">MỚI</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -120,7 +119,7 @@
                     <div class="header-right-zone d-flex align-items-center gap-1 gap-xl-2 ms-lg-auto flex-shrink-0">
                         <!-- Desktop Header Search Bar -->
                         <form class="d-none d-lg-flex header-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
-                            <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm thú cưng, thức ăn..." autocomplete="off" />
+                            <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm kiếm..." autocomplete="off" />
                             <button type="submit" class="header-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
                             <div id="searchSuggestions" class="search-suggestions-box d-none"></div>
                         </form>
