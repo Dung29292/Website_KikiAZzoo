@@ -97,25 +97,91 @@
 
         <!-- Product grid -->
         <div class="col-lg-9">
-            @if (ViewBag.MatchingPetsCount != null && (int)ViewBag.MatchingPetsCount > 0)
+            @{
+                var matchingPets = ViewBag.MatchingPets as List<Pet> ?? new List<Pet>();
+                int matchingPetsCount = ViewBag.MatchingPetsCount != null ? (int)ViewBag.MatchingPetsCount : 0;
+            }
+
+            @if (matchingPetsCount > 0)
             {
-                <div class="alert border-0 rounded-4 p-3 mb-4 shadow-sm d-flex align-items-center justify-content-between flex-wrap gap-3" 
-                     style="background: linear-gradient(135deg, rgba(13,148,136,0.12), rgba(249,115,22,0.12)); border: 1.5px dashed var(--teal) !important;">
+                <div class="smart-redirect-banner mb-4 p-3 p-md-4 rounded-4 shadow-sm position-relative overflow-hidden">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <span class="badge rounded-pill bg-teal text-white px-3 py-1 fw-bold small">
+                            <i class="ph-fill ph-sparkle me-1"></i> GỢI Ý THÔNG MINH
+                        </span>
+                        <span class="small text-muted fw-semibold">
+                            <i class="ph ph-shield-check text-success me-1"></i>100% Thuần chủng & Bảo hành sức khỏe
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="smart-redirect-icon-wrap rounded-circle d-flex align-items-center justify-content-center shadow-sm">
+                                <i class="ph-fill ph-paw-print fs-3 text-teal"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 smart-redirect-title">
+                                    Tìm thấy <span class="text-orange">@matchingPetsCount thú cưng</span> phù hợp với "@ViewBag.SearchKeyword"
+                                </h5>
+                                <p class="small text-muted mb-0">
+                                    Bạn đang tìm kiếm các bé cún, mèo hoặc sinh vật cảnh thay vì sản phẩm phụ kiện?
+                                </p>
+                            </div>
+                        </div>
+                        <a asp-controller="PetShop" asp-action="Index" asp-route-search="@ViewBag.SearchKeyword" 
+                           class="btn btn-teal rounded-pill px-4 py-2 fw-bold shadow-sm smart-redirect-cta">
+                            Xem tất cả @matchingPetsCount bé cưng <i class="ph ph-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+
+                    @if (matchingPets.Any())
+                    {
+                        <div class="row g-2 g-md-3 mt-1 smart-pet-preview-grid">
+                            @foreach (var pet in matchingPets)
+                            {
+                                <div class="col-6 col-md-3">
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="smart-pet-preview-card d-block text-decoration-none h-100">
+                                        <div class="smart-pet-img-wrap rounded-3 overflow-hidden position-relative">
+                                            <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/pet-dog.svg" : pet.ImageUrl)" 
+                                                 alt="@pet.Name" 
+                                                 class="w-100 h-100 object-fit-cover" />
+                                            <span class="badge rounded-pill position-absolute top-0 start-0 m-1 px-2 py-0.5 fw-bold bg-dark bg-opacity-75 text-white" style="font-size: 0.68rem;">
+                                                @(pet.Breed?.Name ?? "Thú cưng")
+                                            </span>
+                                        </div>
+                                        <div class="smart-pet-info pt-2">
+                                            <div class="smart-pet-name text-truncate fw-bold small text-dark">@pet.Name</div>
+                                            <div class="d-flex align-items-center justify-content-between gap-1 mt-1">
+                                                <span class="smart-pet-price fw-bold text-teal small">@pet.Price.ToString("N0")đ</span>
+                                                <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem;">@pet.Gender</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else if (string.IsNullOrEmpty(Model.Search) && !Model.CategoryId.HasValue && !Model.CategoryGroupId.HasValue)
+            {
+                <!-- Discovery banner for live pets -->
+                <div class="pet-discovery-callout mb-4 p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between flex-wrap gap-3">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm" style="width: 46px; height: 46px; min-width: 46px;">
-                            <i class="ph-fill ph-paw-print text-teal fs-4"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm" style="width: 44px; height: 44px; min-width: 44px;">
+                            <i class="ph-fill ph-heart text-danger fs-4"></i>
                         </div>
                         <div>
-                            <h6 class="fw-bold mb-1" style="color: var(--teal-dark);">
-                                Tìm thấy @ViewBag.MatchingPetsCount thú cưng / cá cảnh phù hợp với "@ViewBag.SearchKeyword"
+                            <h6 class="fw-bold mb-0 text-dark">
+                                Bạn muốn đón thêm thành viên bốn chân đáng yêu về nhà?
                             </h6>
                             <p class="small text-muted mb-0" style="font-size: 0.82rem;">
-                                Bạn đang tìm kiếm bé cưng sinh vật sống hoặc cá cảnh thuần chủng?
+                                Khám phá các bé chó, mèo, cá cảnh thuần chủng đã tiêm chủng và bảo hành sức khỏe tại Gian hàng Thú cưng KikiAzoo!
                             </p>
                         </div>
                     </div>
-                    <a asp-controller="PetShop" asp-action="Index" asp-route-search="@ViewBag.SearchKeyword" class="btn btn-teal rounded-pill px-4 fw-bold shadow-sm" style="font-size: 0.88rem;">
-                        Xem gian hàng Thú cưng <i class="ph ph-arrow-right ms-1"></i>
+                    <a asp-controller="PetShop" asp-action="Index" class="btn btn-outline-teal rounded-pill px-3 py-1 fw-bold small">
+                        Khám phá Thú cưng <i class="ph ph-arrow-right ms-1"></i>
                     </a>
                 </div>
             }
@@ -164,13 +230,25 @@
             }
             else
             {
-                <div class="text-center py-5" style="background:#fff;border-radius:24px;padding:3rem 2rem !important">
+                <div class="text-center py-5 rounded-4 shadow-sm p-4" style="background:#fff;">
                     <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;background:rgba(13,148,136,.1);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--teal)">
                         <i class="ph ph-magnifying-glass"></i>
                     </div>
-                    <h5 class="fw-bold mt-4 mb-2" style="color:var(--dark)">Không tìm thấy sản phẩm</h5>
-                    <p class="text-muted small">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
-                    <a asp-action="Index" class="btn" style="background:var(--teal);color:#fff;border-radius:999px;font-weight:600">Xóa bộ lọc</a>
+                    <h5 class="fw-bold mt-4 mb-2 text-dark">Không tìm thấy sản phẩm phụ kiện phù hợp</h5>
+                    @if (matchingPetsCount > 0)
+                    {
+                        <p class="text-muted small mb-3">
+                            Tuy nhiên, chúng tôi tìm thấy <strong>@matchingPetsCount bé thú cưng / cá cảnh</strong> phù hợp với từ khóa "@ViewBag.SearchKeyword"!
+                        </p>
+                        <a asp-controller="PetShop" asp-action="Index" asp-route-search="@ViewBag.SearchKeyword" class="btn btn-teal rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="ph-fill ph-paw-print me-1"></i> Xem các bé thú cưng tại PetShop ngay
+                        </a>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-3">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác.</p>
+                        <a asp-action="Index" class="btn btn-teal rounded-pill px-4 fw-bold">Xóa bộ lọc</a>
+                    }
                 </div>
             }
 

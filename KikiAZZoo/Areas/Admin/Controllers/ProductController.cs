@@ -76,7 +76,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Populate filter options
-            ViewBag.CategoriesList = await _context.Categories.Include(c => c.CategoryGroup).OrderBy(c => c.Name).ToListAsync();
+            ViewBag.CategoriesList = (await _categoryRepository.GetAllAsync()).ToList();
             ViewBag.BrandsList = await _context.Brands.OrderBy(b => b.Name).ToListAsync();
             ViewBag.PetTypesList = await _context.PetTypes.OrderBy(p => p.SortOrder).ToListAsync();
 

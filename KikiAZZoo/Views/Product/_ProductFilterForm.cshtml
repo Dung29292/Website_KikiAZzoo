@@ -55,7 +55,7 @@
         <div class="filter-section-title">
             <i class="ph ph-squares-four"></i> Danh mục
         </div>
-        @foreach (var group in Model.CategoryGroups.Where(g => g.Id != 1 && g.Name != "Thú cưng"))
+        @foreach (var group in Model.CategoryGroups.Where(g => g.Name != "Thú cưng"))
         {
             <div class="filter-subsection">
                 <div class="filter-subsection-title">@group.Name</div>

@@ -9,16 +9,20 @@ namespace KikiAZZoo.Controllers
     public class HomeController : Controller
     {
         private readonly IProductRepository _productRepository;
+        private readonly IPetRepository _petRepository;
         private readonly ICatalogService _catalogService;
         private readonly IContentService _contentService;
-        private readonly ApplicationDbContext _context;
 
-        public HomeController(IProductRepository productRepository, ICatalogService catalogService, IContentService contentService, ApplicationDbContext context)
+        public HomeController(
+            IProductRepository productRepository,
+            IPetRepository petRepository,
+            ICatalogService catalogService,
+            IContentService contentService)
         {
             _productRepository = productRepository;
+            _petRepository = petRepository;
             _catalogService = catalogService;
             _contentService = contentService;
-            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -26,9 +30,7 @@ namespace KikiAZZoo.Controllers
             ViewBag.Services = (await _contentService.GetAllServicesAsync()).Take(4);
             ViewBag.PetTypes = await _catalogService.GetPetTypesAsync();
             ViewBag.CategoryGroups = await _catalogService.GetCategoryGroupsAsync();
-            ViewBag.FeaturedPets = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
-                _context.Pets.Include(p => p.Breed).Where(p => p.Status == "Available").Take(4)
-            );
+            ViewBag.FeaturedPets = (await _petRepository.GetFeaturedAsync(4)).ToList();
             var products = (await _productRepository.GetAllAsync()).Take(8);
             return View(products);
         }

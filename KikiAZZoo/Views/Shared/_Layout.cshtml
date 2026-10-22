@@ -23,100 +23,151 @@
             }
         })();
     </script>
+    @{
+        var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+        bool isHome = curCtrl == "Home" && curAct == "Index";
+        bool isPetShop = curCtrl == "PetShop";
+        bool isProduct = curCtrl == "Product";
+        bool isService = curCtrl == "Service";
+        bool isNews = curCtrl == "News";
+        bool isAbout = curCtrl == "Home" && curAct == "About";
+        bool isContact = curCtrl == "Home" && curAct == "Contact";
+    }
     <header class="site-header">
-        <nav class="navbar navbar-expand-lg py-2">
-            <div class="container-fluid px-3 px-md-4 px-xl-5">
-                <a class="navbar-brand-kiki d-flex align-items-center me-2 me-xl-4" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 150px; height: 42px; object-fit: contain;" />
+        <nav class="navbar navbar-expand-lg py-2 p-0">
+            <div class="header-container container-xxl px-2 px-md-3 px-xl-4">
+                <!-- Brand Logo -->
+                <a class="navbar-brand-kiki d-flex align-items-center flex-shrink-0 me-2 me-xl-3" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" class="site-logo-img" />
                 </a>
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+
+                <!-- Mobile Header Right Actions (Visible < 992px) -->
+                <div class="d-flex d-lg-none align-items-center gap-2 ms-auto me-2">
+                    <button class="header-icon-btn border-0 bg-transparent p-1" title="Chuyển giao diện" onclick="toggleDarkMode()">
+                        <i class="ph ph-moon mobile-dark-icon" id="darkModeIconMobile"></i>
+                    </button>
+                    <a href="javascript:void(0)" onclick="openMiniCart()" class="header-icon-btn header-cart p-1" title="Giỏ hàng">
+                        <i class="ph ph-shopping-cart"></i>
+                        <span class="cart-badge @(cartCount > 0 ? "" : "d-none")">@cartCount</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Toggle Button -->
+                <button class="navbar-toggler border-0 shadow-none px-2 py-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
+                <!-- Collapsible Navbar Content -->
                 <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+                    <!-- Mobile Search Bar (Visible only inside collapsed menu on mobile) -->
+                    <div class="d-lg-none py-2 px-1 mb-2">
+                        <form class="mobile-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
+                            <input type="text" id="mobileSearchInput" name="search" class="form-control mobile-search-input" placeholder="Tìm thú cưng, thức ăn, phụ kiện..." autocomplete="off" />
+                            <button type="submit" class="mobile-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
+                            <div id="mobileSearchSuggestions" class="search-suggestions-box d-none"></div>
+                        </form>
+                    </div>
+
+                    <!-- Main Navigation Links (Center, Evenly Distributed, Anti-wrap) -->
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center header-nav-list">
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="ph ph-house"></i> Trang chủ
+                            <a class="nav-link nav-link-kiki @(isHome ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="ph ph-house"></i>
+                                <span>Trang chủ</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="PetShop" asp-action="Index">
-                                <i class="ph-fill ph-paw-print text-teal"></i> Thú cưng
+                            <a class="nav-link nav-link-kiki nav-link-pets @(isPetShop ? "active" : "")" asp-area="" asp-controller="PetShop" asp-action="Index">
+                                <i class="ph-fill ph-paw-print"></i>
+                                <span>Thú cưng</span>
                                 <span class="badge-nav-new">MỚI</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Product" asp-action="Index">
-                                <i class="ph ph-storefront"></i> Sản phẩm
+                            <a class="nav-link nav-link-kiki @(isProduct ? "active" : "")" asp-area="" asp-controller="Product" asp-action="Index">
+                                <i class="ph ph-storefront"></i>
+                                <span>Sản phẩm</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Service" asp-action="Index">
-                                <i class="ph ph-scissors"></i> Dịch vụ
+                            <a class="nav-link nav-link-kiki @(isService ? "active" : "")" asp-area="" asp-controller="Service" asp-action="Index">
+                                <i class="ph ph-scissors"></i>
+                                <span>Dịch vụ</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="News" asp-action="Index">
-                                <i class="ph ph-newspaper"></i> Tin tức
+                            <a class="nav-link nav-link-kiki @(isNews ? "active" : "")" asp-area="" asp-controller="News" asp-action="Index">
+                                <i class="ph ph-newspaper"></i>
+                                <span>Tin tức</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="About">
-                                <i class="ph ph-info"></i> Về chúng tôi
+                            <a class="nav-link nav-link-kiki @(isAbout ? "active" : "")" asp-area="" asp-controller="Home" asp-action="About">
+                                <i class="ph ph-info"></i>
+                                <span>Về chúng tôi</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Contact">
-                                <i class="ph ph-chat-circle-dots"></i> Liên hệ
+                            <a class="nav-link nav-link-kiki @(isContact ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Contact">
+                                <i class="ph ph-chat-circle-dots"></i>
+                                <span>Liên hệ</span>
                             </a>
                         </li>
                     </ul>
 
-                    <div class="header-right-zone d-flex align-items-center gap-2 gap-xl-3 ms-lg-auto">
-                        <!-- Header Search Bar -->
+                    <!-- Right Action Zone (Desktop) -->
+                    <div class="header-right-zone d-flex align-items-center gap-1 gap-xl-2 ms-lg-auto flex-shrink-0">
+                        <!-- Desktop Header Search Bar -->
                         <form class="d-none d-lg-flex header-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
-                            <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm sản phẩm, thức ăn..." autocomplete="off" />
+                            <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm thú cưng, thức ăn..." autocomplete="off" />
                             <button type="submit" class="header-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
                             <div id="searchSuggestions" class="search-suggestions-box d-none"></div>
                         </form>
 
-                        <!-- Dark Mode Toggle -->
-                        <button id="darkModeToggle" class="header-icon-btn border-0 bg-transparent" title="Chuyển giao diện" onclick="toggleDarkMode()">
+                        <!-- Dark Mode Toggle (Desktop) -->
+                        <button id="darkModeToggle" class="header-icon-btn d-none d-lg-inline-flex border-0 bg-transparent" title="Chuyển giao diện sáng/tối" onclick="toggleDarkMode()">
                             <i class="ph ph-moon" id="darkModeIcon"></i>
                         </button>
 
-                        <!-- Account / Auth -->
+                        <!-- Account / Auth Dropdown or Buttons -->
                         @if (SignInManager.IsSignedIn(User))
                         {
-                            <div class="dropdown">
-                                <button type="button" class="header-icon-btn dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown" aria-expanded="false" title="Tài khoản">
-                                    <i class="ph-fill ph-user-circle-check"></i>
+                            <div class="dropdown header-auth-zone">
+                                <button type="button" class="header-icon-btn dropdown-toggle border-0 bg-transparent d-flex align-items-center gap-1" data-bs-toggle="dropdown" aria-expanded="false" title="Tài khoản">
+                                    <i class="ph-fill ph-user-circle-check fs-5"></i>
+                                    <span class="d-none d-xxl-inline small fw-semibold text-truncate" style="max-width: 90px;">@User.Identity?.Name</span>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                    <li><span class="dropdown-item-text small fw-bold text-teal">@User.Identity?.Name</span></li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile"><i class="ph ph-user me-2"></i>Tài khoản</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Orders"><i class="ph ph-shopping-bag me-2"></i>Đơn hàng</a></li>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2">
+                                    <li>
+                                        <div class="px-3 py-2 border-bottom mb-1">
+                                            <div class="small text-muted">Đăng nhập bởi</div>
+                                            <div class="fw-bold text-teal text-truncate">@User.Identity?.Name</div>
+                                        </div>
+                                    </li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-area="" asp-controller="Account" asp-action="Profile"><i class="ph ph-user me-2 text-teal"></i>Tài khoản cá nhân</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-area="" asp-controller="Account" asp-action="Orders"><i class="ph ph-shopping-bag me-2 text-orange"></i>Lịch sử đơn hàng</a></li>
                                     @if (User.IsInRole(SD.Role_Admin))
                                     {
-                                        <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="ph ph-gear me-2"></i>Quản trị</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item rounded-3 py-2 text-primary fw-semibold" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="ph ph-gear me-2"></i>Trang Quản trị</a></li>
                                     }
                                     <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item text-danger" asp-area="" asp-controller="Account" asp-action="Logout"><i class="ph ph-sign-out me-2"></i>Đăng xuất</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 text-danger fw-semibold" asp-area="" asp-controller="Account" asp-action="Logout"><i class="ph ph-sign-out me-2"></i>Đăng xuất</a></li>
                                 </ul>
                             </div>
                         }
                         else
                         {
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="header-auth-buttons d-flex align-items-center gap-1 gap-xl-2">
                                 <a asp-area="" asp-controller="Account" asp-action="Login" class="btn-header-login">Đăng nhập</a>
                                 <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-header-register">Đăng ký</a>
                             </div>
                         }
 
-                        <!-- Cart -->
-                        <a href="javascript:void(0)" onclick="openMiniCart()" class="header-icon-btn header-cart" title="Giỏ hàng">
-                            <i class="ph ph-shopping-cart"></i>
+                        <!-- Cart Button (Desktop) -->
+                        <a href="javascript:void(0)" onclick="openMiniCart()" class="header-icon-btn header-cart d-none d-lg-inline-flex" title="Giỏ hàng">
+                            <i class="ph ph-shopping-cart fs-5"></i>
                             <span class="cart-badge @(cartCount > 0 ? "" : "d-none")">@cartCount</span>
                         </a>
                     </div>
@@ -237,21 +288,26 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
+        function updateDarkModeIcons(isDark) {
+            const icon = document.getElementById('darkModeIcon');
+            const iconMobile = document.getElementById('darkModeIconMobile');
+            if (icon) icon.className = isDark ? 'ph ph-sun text-warning' : 'ph ph-moon';
+            if (iconMobile) iconMobile.className = isDark ? 'ph ph-sun text-warning mobile-dark-icon' : 'ph ph-moon mobile-dark-icon';
+        }
+
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('kikiDarkMode', isDark ? '1' : '0');
-            const icon = document.getElementById('darkModeIcon');
-            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+            updateDarkModeIcons(isDark);
         }
+
         document.addEventListener("DOMContentLoaded", function () {
             const isDark = document.body.classList.contains('dark-mode');
-            const icon = document.getElementById('darkModeIcon');
-            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+            updateDarkModeIcons(isDark);
 
             // Listen for system theme changes dynamically
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-                // Only follow system changes if the user hasn't explicitly set a preference
                 if (localStorage.getItem('kikiDarkMode') === null) {
                     const shouldBeDark = e.matches;
                     if (shouldBeDark) {
@@ -259,8 +315,7 @@
                     } else {
                         document.body.classList.remove('dark-mode');
                     }
-                    const newIcon = document.getElementById('darkModeIcon');
-                    if (newIcon) newIcon.className = shouldBeDark ? 'ph ph-sun' : 'ph ph-moon';
+                    updateDarkModeIcons(shouldBeDark);
                 }
             });
         });

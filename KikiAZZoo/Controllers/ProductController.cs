@@ -11,13 +11,20 @@ namespace KikiAZZoo.Controllers
     public class ProductController : Controller
     {
         private readonly IProductRepository _productRepository;
+        private readonly IPetRepository _petRepository;
         private readonly ICatalogService _catalogService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductController(IProductRepository productRepository, ICatalogService catalogService, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ProductController(
+            IProductRepository productRepository,
+            IPetRepository petRepository,
+            ICatalogService catalogService,
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _productRepository = productRepository;
+            _petRepository = petRepository;
             _catalogService = catalogService;
             _context = context;
             _userManager = userManager;
@@ -129,25 +136,36 @@ namespace KikiAZZoo.Controllers
 
             // Get all catalog data using service (excluding live pets category group)
             var categoryGroups = await _catalogService.GetCategoryGroupsAsync();
-            var categories = await _context.Categories.Where(c => c.CategoryGroupId != 1).OrderBy(c => c.SortOrder).ToListAsync();
+            var categories = await _context.Categories
+                .Include(c => c.CategoryGroup)
+                .Where(c => c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng"))
+                .OrderBy(c => c.SortOrder)
+                .ToListAsync();
             var petTypes = await _catalogService.GetPetTypesAsync();
             var brands = await _catalogService.GetBrandsAsync();
             var priceRanges = await _catalogService.GetPriceRangesAsync();
 
+            var matchingPets = new List<Pet>();
             var matchingPetsCount = 0;
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var s = search.Trim();
-                matchingPetsCount = await _context.Pets
+                var s = search.Trim().ToLower();
+                var petQuery = _context.Pets
                     .Include(p => p.Breed)
                     .ThenInclude(b => b!.PetType)
                     .Where(p => (p.Status == "Available" || p.Status == "Còn hàng") && p.Quantity > 0 &&
-                                (EF.Functions.Like(p.Name, $"%{s}%") ||
-                                 (p.Breed != null && EF.Functions.Like(p.Breed.Name, $"%{s}%")) ||
-                                 (p.Breed != null && p.Breed.PetType != null && EF.Functions.Like(p.Breed.PetType.Name, $"%{s}%"))))
-                    .CountAsync();
+                                (p.Name.ToLower().Contains(s) ||
+                                 (p.Description != null && p.Description.ToLower().Contains(s)) ||
+                                 (p.Color != null && p.Color.ToLower().Contains(s)) ||
+                                 (p.Breed != null && p.Breed.Name.ToLower().Contains(s)) ||
+                                 (p.Breed != null && p.Breed.PetType != null && p.Breed.PetType.Name.ToLower().Contains(s))));
+
+                matchingPetsCount = await petQuery.CountAsync();
+                matchingPets = await petQuery.Take(4).ToListAsync();
             }
+
             ViewBag.MatchingPetsCount = matchingPetsCount;
+            ViewBag.MatchingPets = matchingPets;
             ViewBag.SearchKeyword = search;
 
             var model = new ProductListViewModel
@@ -231,22 +249,62 @@ namespace KikiAZZoo.Controllers
         public async Task<IActionResult> Autocomplete(string term)
         {
             if (string.IsNullOrWhiteSpace(term))
-                return Json(Array.Empty<object>());
+                return Json(new { term = "", totalProducts = 0, totalPets = 0, products = Array.Empty<object>(), pets = Array.Empty<object>() });
 
-            var matches = await _context.Products
+            var cleanTerm = term.Trim().ToLower();
+
+            var productsQuery = _context.Products
                 .Include(p => p.Category)
-                .Where(p => p.Name.Contains(term))
-                .Take(5)
+                .Where(p => p.IsActive && (p.Category == null || p.Category.CategoryGroup == null || p.Category.CategoryGroup.Name != "Thú cưng") &&
+                            (p.Name.ToLower().Contains(cleanTerm) ||
+                             (p.Category != null && p.Category.Name.ToLower().Contains(cleanTerm))));
+
+            var totalProducts = await productsQuery.CountAsync();
+            var products = await productsQuery
+                .Take(4)
                 .Select(p => new
                 {
                     id = p.Id,
                     name = p.Name,
                     price = p.Price,
-                    imageUrl = p.ImageUrl
+                    originalPrice = p.OriginalPrice,
+                    imageUrl = p.ImageUrl ?? "/images/product-food.svg",
+                    categoryName = p.Category != null ? p.Category.Name : "Sản phẩm"
                 })
                 .ToListAsync();
 
-            return Json(matches);
+            var petsQuery = _context.Pets
+                .Include(p => p.Breed)
+                .ThenInclude(b => b!.PetType)
+                .Where(p => (p.Status == "Available" || p.Status == "Còn hàng") && p.Quantity > 0 &&
+                            (p.Name.ToLower().Contains(cleanTerm) ||
+                             (p.Breed != null && p.Breed.Name.ToLower().Contains(cleanTerm)) ||
+                             (p.Breed != null && p.Breed.PetType != null && p.Breed.PetType.Name.ToLower().Contains(cleanTerm))));
+
+            var totalPets = await petsQuery.CountAsync();
+            var pets = await petsQuery
+                .Take(3)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = p.Name,
+                    price = p.Price,
+                    imageUrl = p.ImageUrl ?? "/images/pet-dog.svg",
+                    breedName = p.Breed != null ? p.Breed.Name : "Thú cưng",
+                    petTypeName = p.Breed != null && p.Breed.PetType != null ? p.Breed.PetType.Name : "Pet",
+                    gender = p.Gender,
+                    ageMonths = p.AgeMonths
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                term = term.Trim(),
+                totalProducts,
+                totalPets,
+                products,
+                pets
+            });
         }
     }
 }

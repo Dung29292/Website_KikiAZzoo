@@ -38,6 +38,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, EFBrandRepository>();
+builder.Services.AddScoped<IPetRepository, EFPetRepository>();
 
 // Add Services
 builder.Services.AddScoped<ICatalogService, CatalogService>();

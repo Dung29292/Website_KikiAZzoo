@@ -268,13 +268,29 @@ function removeMiniCartItem(productId) {
     .catch(err => console.error(err));
 }
 
-// Live Autocomplete Search implementation
+// Smart Multi-Category Live Autocomplete Search implementation
 document.addEventListener("DOMContentLoaded", function () {
-  const searchInput = document.getElementById("headerSearchInput");
-  const suggestionsBox = document.getElementById("searchSuggestions");
+  function setupSmartSearch(inputId, boxId) {
+    const searchInput = document.getElementById(inputId);
+    const suggestionsBox = document.getElementById(boxId);
 
-  if (searchInput && suggestionsBox) {
+    if (!searchInput || !suggestionsBox) return;
+
     let debounceTimer;
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>"']/g, function (m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+      });
+    }
+
+    function highlightTerm(text, term) {
+      if (!text || !term) return escapeHtml(text);
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(${escapedTerm})`, "gi");
+      return escapeHtml(text).replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
 
     searchInput.addEventListener("input", function () {
       clearTimeout(debounceTimer);
@@ -290,40 +306,133 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(`/Product/Autocomplete?term=${encodeURIComponent(query)}`)
           .then(res => res.json())
           .then(data => {
-            if (data && data.length > 0) {
-              suggestionsBox.innerHTML = "";
-              data.forEach(item => {
-                const imgHtml = item.imageUrl 
-                  ? `<img src="${item.imageUrl}" class="suggestion-img" alt="${item.name}" />`
-                  : `<div style="width:40px; height:40px; background:#eee;" class="d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image"></i></div>`;
-                
-                const itemLink = document.createElement("a");
-                itemLink.href = `/Product/Details/${item.id}`;
-                itemLink.className = "suggestion-item";
-                itemLink.innerHTML = `
-                  ${imgHtml}
-                  <div class="suggestion-info">
-                    <span class="suggestion-name">${item.name}</span>
-                    <span class="suggestion-price">${item.price.toLocaleString("vi-VN")}đ</span>
-                  </div>
-                `;
-                suggestionsBox.appendChild(itemLink);
-              });
+            suggestionsBox.innerHTML = "";
+
+            // Handle structured response { products, pets, totalProducts, totalPets, term }
+            const products = data.products || (Array.isArray(data) ? data : []);
+            const pets = data.pets || [];
+            const hasProducts = products && products.length > 0;
+            const hasPets = pets && pets.length > 0;
+
+            if (!hasProducts && !hasPets) {
+              suggestionsBox.innerHTML = `
+                <div class="p-3 text-center">
+                  <div class="text-muted small mb-2"><i class="ph ph-magnifying-glass fs-4 d-block mb-1"></i>Không tìm thấy kết quả phù hợp cho <strong>"${escapeHtml(query)}"</strong></div>
+                  <div class="small text-secondary" style="font-size:0.78rem;">Gợi ý: Thử gõ <em>poodle, mèo, thức ăn, pate, cát...</em></div>
+                </div>`;
               suggestionsBox.classList.remove("d-none");
-            } else {
-              suggestionsBox.innerHTML = '<div class="p-3 text-muted text-center small">Không tìm thấy sản phẩm</div>';
-              suggestionsBox.classList.remove("d-none");
+              return;
             }
+
+            let html = '<div class="smart-search-results-wrapper">';
+
+            // 1. Live Pets Section (Top priority if pets matched!)
+            if (hasPets) {
+              html += `
+                <div class="smart-search-header d-flex align-items-center justify-content-between px-3 pt-2 pb-1">
+                  <span class="small fw-bold text-teal"><i class="ph-fill ph-paw-print me-1"></i> THÚ CƯNG & CÁ CẢNH (${data.totalPets || pets.length})</span>
+                  <a href="/thu-cung?search=${encodeURIComponent(query)}" class="small fw-semibold text-orange text-decoration-none">Xem tất cả →</a>
+                </div>
+                <div class="smart-search-pet-list">`;
+
+              pets.forEach(pet => {
+                const img = pet.imageUrl || "/images/pet-dog.svg";
+                const priceFormatted = Number(pet.price || 0).toLocaleString("vi-VN") + "đ";
+                html += `
+                  <a href="/thu-cung/Details/${pet.id}" class="suggestion-item suggestion-pet-item">
+                    <img src="${img}" class="suggestion-img suggestion-pet-img" alt="${escapeHtml(pet.name)}" />
+                    <div class="suggestion-info flex-grow-1">
+                      <div class="d-flex align-items-center gap-1">
+                        <span class="suggestion-name">${highlightTerm(pet.name, query)}</span>
+                        <span class="badge bg-teal text-white rounded-pill ms-auto" style="font-size:0.62rem;">${escapeHtml(pet.breedName || "Thú cưng")}</span>
+                      </div>
+                      <div class="d-flex align-items-center justify-content-between mt-1">
+                        <span class="suggestion-price">${priceFormatted}</span>
+                        <span class="small text-muted" style="font-size:0.72rem;">${pet.gender || ""} • ${pet.ageMonths || 2} tháng</span>
+                      </div>
+                    </div>
+                  </a>`;
+              });
+
+              html += '</div>';
+            }
+
+            // Divider if both exist
+            if (hasPets && hasProducts) {
+              html += '<hr class="my-1 border-secondary border-opacity-10" />';
+            }
+
+            // 2. Merchandise Products Section
+            if (hasProducts) {
+              html += `
+                <div class="smart-search-header d-flex align-items-center justify-content-between px-3 pt-2 pb-1">
+                  <span class="small fw-bold text-secondary"><i class="ph ph-storefront me-1"></i> SẢN PHẨM & PHỤ KIỆN (${data.totalProducts || products.length})</span>
+                  <a href="/Product?search=${encodeURIComponent(query)}" class="small fw-semibold text-teal text-decoration-none">Xem tất cả →</a>
+                </div>
+                <div class="smart-search-product-list">`;
+
+              products.forEach(p => {
+                const img = p.imageUrl || "/images/product-food.svg";
+                const priceFormatted = Number(p.price || 0).toLocaleString("vi-VN") + "đ";
+                const categoryBadge = p.categoryName ? `<span class="badge bg-light text-muted border ms-auto" style="font-size:0.65rem;">${escapeHtml(p.categoryName)}</span>` : "";
+
+                html += `
+                  <a href="/Product/Details/${p.id}" class="suggestion-item">
+                    <img src="${img}" class="suggestion-img" alt="${escapeHtml(p.name)}" />
+                    <div class="suggestion-info flex-grow-1">
+                      <div class="d-flex align-items-center gap-1">
+                        <span class="suggestion-name">${highlightTerm(p.name, query)}</span>
+                        ${categoryBadge}
+                      </div>
+                      <div class="d-flex align-items-center justify-content-between mt-1">
+                        <span class="suggestion-price">${priceFormatted}</span>
+                        ${p.originalPrice && p.originalPrice > p.price ? `<span class="small text-decoration-line-through text-muted" style="font-size:0.7rem;">${Number(p.originalPrice).toLocaleString("vi-VN")}đ</span>` : ""}
+                      </div>
+                    </div>
+                  </a>`;
+              });
+
+              html += '</div>';
+            }
+
+            // 3. Footer Search Actions
+            html += `
+              <div class="smart-search-footer p-2 bg-light d-flex align-items-center justify-content-between border-top">
+                <a href="/Product?search=${encodeURIComponent(query)}" class="btn btn-sm btn-outline-teal rounded-pill py-1 px-3 fw-semibold" style="font-size:0.76rem;">
+                  <i class="ph ph-storefront me-1"></i>Tìm Sản phẩm
+                </a>
+                <a href="/thu-cung?search=${encodeURIComponent(query)}" class="btn btn-sm btn-teal rounded-pill py-1 px-3 fw-semibold" style="font-size:0.76rem;">
+                  <i class="ph-fill ph-paw-print me-1"></i>Tìm Thú cưng
+                </a>
+              </div>`;
+
+            html += '</div>';
+
+            suggestionsBox.innerHTML = html;
+            suggestionsBox.classList.remove("d-none");
           })
-          .catch(err => console.error("Autocomplete error:", err));
-      }, 300);
+          .catch(err => {
+            console.error("Autocomplete error:", err);
+          });
+      }, 250);
     });
 
-    // Close suggestion box on clicking outside
+    // Close on click outside
     document.addEventListener("click", function (e) {
       if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
         suggestionsBox.classList.add("d-none");
       }
     });
+
+    // Close on Escape key
+    searchInput.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        suggestionsBox.classList.add("d-none");
+      }
+    });
   }
+
+  // Setup both desktop and mobile header search
+  setupSmartSearch("headerSearchInput", "searchSuggestions");
+  setupSmartSearch("mobileSearchInput", "mobileSearchSuggestions");
 });

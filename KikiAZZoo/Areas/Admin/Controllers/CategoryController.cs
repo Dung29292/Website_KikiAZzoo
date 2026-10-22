@@ -85,7 +85,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         private async Task LoadGroupsAsync(int? selected = null)
         {
             ViewBag.CategoryGroups = new SelectList(
-                await _context.CategoryGroups.OrderBy(g => g.SortOrder).ToListAsync(),
+                await _context.CategoryGroups.Where(g => g.Name != "Thú cưng").OrderBy(g => g.SortOrder).ToListAsync(),
                 "Id", "Name", selected);
         }
     }

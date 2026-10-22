@@ -10,10 +10,19 @@ namespace KikiAZZoo.Repositories
         public EFCategoryRepository(ApplicationDbContext context) => _context = context;
 
         public async Task<IEnumerable<Category>> GetAllAsync() =>
-            await _context.Categories.Include(c => c.CategoryGroup).Include(c => c.Products).OrderBy(c => c.CategoryGroup!.SortOrder).ThenBy(c => c.Name).ToListAsync();
+            await _context.Categories
+                .Include(c => c.CategoryGroup)
+                .Include(c => c.Products)
+                .Where(c => c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng"))
+                .OrderBy(c => c.CategoryGroup!.SortOrder)
+                .ThenBy(c => c.Name)
+                .ToListAsync();
 
         public async Task<Category?> GetByIdAsync(int id) =>
-            await _context.Categories.Include(c => c.CategoryGroup).Include(c => c.Products).FirstOrDefaultAsync(c => c.Id == id);
+            await _context.Categories
+                .Include(c => c.CategoryGroup)
+                .Include(c => c.Products)
+                .FirstOrDefaultAsync(c => c.Id == id && (c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng")));
 
         public async Task AddAsync(Category category)
         {
