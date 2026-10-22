@@ -143,10 +143,15 @@
             <div class="sticky-sidebar d-none d-lg-block">
                 <div class="filter-card-modern shadow-sm">
                     <div class="filter-card-header d-flex align-items-center justify-content-between">
-                        <span><i class="ph ph-funnel-simple me-2"></i>Bộ lọc thú cưng</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ph ph-funnel-simple fs-5"></i>
+                            <span>Bộ lọc thú cưng</span>
+                        </div>
                         @if (hasFilters)
                         {
-                            <a asp-action="Index" class="small text-decoration-none fw-normal" style="color: var(--teal); font-size: 0.8rem;">Đặt lại</a>
+                            <a asp-action="Index" class="btn-clear-filter-quick text-decoration-none" title="Đặt lại bộ lọc">
+                                <i class="ph ph-arrow-counter-clockwise me-1"></i>Đặt lại
+                            </a>
                         }
                     </div>
                     <div class="filter-card-body">

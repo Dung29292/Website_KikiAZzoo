@@ -11,13 +11,43 @@
         <a asp-controller="Home" asp-action="Index">Trang chủ</a> > Sản phẩm
     </nav>
 
-    <!-- Header -->
-    <div class="text-center mb-5">
-        <h1 class="fw-bold mb-2" style="color: var(--dark);">Sản phẩm</h1>
-        <p class="text-muted" style="max-width: 500px; margin: 0 auto;">
-            @Model.TotalCount kết quả
-            @if (hasFilters) { <span>– đang lọc</span> }
-        </p>
+    <!-- Hero Showcase Banner -->
+    <div class="product-hero-banner p-4 p-md-5 mb-4 rounded-4 position-relative overflow-hidden shadow-sm" 
+         style="background: linear-gradient(135deg, #0d9488 0%, #134e4a 100%); color: #fff;">
+        <div class="position-absolute end-0 bottom-0 opacity-25 pe-none d-none d-lg-block" style="transform: translate(10%, 20%); font-size: 16rem; line-height: 1;">
+            <i class="ph ph-shopping-bag-open"></i>
+        </div>
+        <div class="row align-items-center position-relative">
+            <div class="col-lg-8">
+                <span class="badge rounded-pill px-3 py-2 mb-3 fw-bold" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: #fff;">
+                    🛒 KIKIAZOO - SIÊU THỊ THỨC ĂN & PHỤ KIỆN UY TÍN
+                </span>
+                <h1 class="display-6 fw-bold mb-3">Thức Ăn & Phụ Kiện Thú Cưng Chất Lượng Cao</h1>
+                <p class="lead mb-0 text-white-50" style="max-width: 650px; font-size: 0.98rem; line-height: 1.6;">
+                    Chào mừng bạn đến với KikiAzoo, nơi cung cấp các sản phẩm <strong class="text-white">thức ăn cho thú cưng</strong> chất lượng cao cùng hàng ngàn mẫu <strong class="text-white">phụ kiện giá tốt</strong>. Giải pháp dinh dưỡng tối ưu và vật dụng cần thiết để bạn chăm sóc thú cưng chu đáo nhất!
+                </p>
+                <div class="mt-3 small text-white-50">
+                    <span class="badge bg-white text-teal rounded-pill px-3 py-1 fw-bold me-2">@Model.TotalCount sản phẩm</span>
+                    @if (hasFilters) { <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="ph ph-funnel-simple me-1"></i>Đang lọc</span> }
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <div class="d-inline-flex flex-column gap-2 text-start p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15);">
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-seal-check text-warning fs-5"></i>
+                        <span>100% Chính hãng & Đầy đủ hóa đơn</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-truck text-info fs-5"></i>
+                        <span>Giao hàng siêu tốc hỏa tốc trong 2h</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-arrows-clockwise text-success fs-5"></i>
+                        <span>Đổi trả linh hoạt, dễ dàng trong 7 ngày</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Filter tags -->
@@ -83,9 +113,18 @@
         <!-- Sidebar filter - Desktop -->
         <div class="col-lg-3">
             <div class="sticky-sidebar d-none d-lg-block">
-                <div class="filter-card-modern">
-                    <div class="filter-card-header">
-                        <i class="ph ph-funnel-simple me-2"></i>Bộ lọc
+                <div class="filter-card-modern shadow-sm">
+                    <div class="filter-card-header d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ph ph-funnel-simple fs-5"></i>
+                            <span>Bộ lọc sản phẩm</span>
+                        </div>
+                        @if (hasFilters)
+                        {
+                            <a asp-action="Index" class="btn-clear-filter-quick text-decoration-none" title="Đặt lại bộ lọc">
+                                <i class="ph ph-arrow-counter-clockwise me-1"></i>Đặt lại
+                            </a>
+                        }
                     </div>
                     <div class="filter-card-body">
                         @{ ViewData["FilterPrefix"] = "Desktop"; }
@@ -335,13 +374,6 @@
         </div>
     </div>
 
-    <!-- SEO Content Section at the bottom -->
-    <div class="card border-0 shadow-sm rounded-4 p-4 mt-5 bg-white">
-        <h5 class="fw-bold text-teal mb-3"><i class="bi bi-info-circle-fill me-2"></i>KikiAzoo - Siêu thị thức ăn và phụ kiện thú cưng uy tín</h5>
-        <p class="text-muted mb-0 small" style="line-height: 1.6;">
-            Chào mừng bạn đến với KikiAzoo, nơi cung cấp các sản phẩm <strong>thức ăn cho thú cưng</strong> chất lượng cao cùng hàng ngàn mẫu <strong>phụ kiện giá tốt</strong>. Chúng tôi tự hào mang đến các giải pháp dinh dưỡng tối ưu và vật dụng cần thiết để bạn chăm sóc thú cưng của mình một cách chu đáo nhất. Hãy khám phá ngay các chương trình ưu đãi hấp dẫn dành riêng cho chó mèo và tận hưởng dịch vụ giao hàng nhanh chóng, tiện lợi của KikiAzoo!
-        </p>
-    </div>
 </div>
 
 <!-- Mobile filter offcanvas -->
