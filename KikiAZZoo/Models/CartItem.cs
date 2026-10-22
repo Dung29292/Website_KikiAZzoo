@@ -5,6 +5,8 @@ namespace KikiAZZoo.Models
     public class CartItem
     {
         public int ProductId { get; set; }
+        public int? PetId { get; set; }
+        public string ItemType { get; set; } = "product"; // "product" | "pet"
         
         [Required, StringLength(200, MinimumLength = 1)]
         public string Name { get; set; } = string.Empty;

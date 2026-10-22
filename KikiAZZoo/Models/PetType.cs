@@ -14,5 +14,6 @@ namespace KikiAZZoo.Models
         public int SortOrder { get; set; }
 
         public List<Product>? Products { get; set; }
+        public List<Breed>? Breeds { get; set; }
     }
 }

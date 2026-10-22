@@ -5,6 +5,7 @@
     var services = ViewBag.Services as IEnumerable<Service> ?? Array.Empty<Service>();
     var petTypes = ViewBag.PetTypes as List<PetType> ?? new();
     var categoryGroups = ViewBag.CategoryGroups as List<CategoryGroup> ?? new();
+    var featuredPets = ViewBag.FeaturedPets as List<Pet> ?? new();
 
     string GetPetIcon(PetType pt) => pt.Name switch
     {
@@ -12,6 +13,7 @@
         "Mèo" => "fa-solid fa-cat",
         "Chim" => "fa-solid fa-dove",
         "Hamster" => "fa-solid fa-otter",
+        "Cá cảnh" => "fa-solid fa-fish",
         "Thỏ" => "fa-solid fa-carrot",
         _ => !string.IsNullOrEmpty(pt.Icon) ? pt.Icon : "fa-solid fa-paw"
     };
@@ -53,9 +55,12 @@
                 <br />
                 <span class="hero-badge"><i class="fa-solid fa-star text-warning"></i> Cửa hàng thú cưng #1</span>
                 <h1 class="hero-title">THẾ GIỚI PET<br /><span class="hero-title-accent">ĐÁNG YÊU</span></h1>
-                <p class="hero-subtitle">Mua sắm, nhận nuôi thú cưng và đặt dịch vụ chăm sóc tại KikiAzoo – nơi thú cưng được yêu thương.</p>
+                <p class="hero-subtitle">Mua sắm thú cưng, cá cảnh và phụ kiện cao cấp tại KikiAzoo – nơi mọi sinh linh nhỏ đều được yêu thương.</p>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a asp-controller="Product" asp-action="Index" class="btn btn-teal btn-lg">MUA SẮM NGAY</a>
+                    <a asp-controller="PetShop" asp-action="Index" class="btn btn-teal btn-lg">
+                        <i class="ph ph-paw-print me-1"></i> THÚ CƯNG & CÁ CẢNH
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-outline-teal btn-lg">SẢN PHẨM</a>
                     <a asp-controller="Service" asp-action="Index" class="btn btn-orange btn-lg">DỊCH VỤ</a>
                 </div>
             </div>
@@ -142,11 +147,70 @@
                 {
                     petIdx++;
                     <div class="col-4 col-md-2">
-                        <a asp-controller="Product" asp-action="Index" asp-route-petTypeId="@pt.Id"
+                        <a asp-controller="PetShop" asp-action="Index" asp-route-petTypeId="@pt.Id"
                            class="pet-pill pet-pill-@(petIdx % 5 + 1)">
                             <span class="pill-icon-wrap"><i class="@GetPetIcon(pt)"></i></span>
                             <span class="pill-label">@pt.Name</span>
                         </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (featuredPets.Any())
+{
+    <section class="home-section section-featured-pets reveal py-5" style="background: linear-gradient(180deg, rgba(13,148,136,0.04) 0%, rgba(255,255,255,0) 100%);">
+        <div class="container">
+            <div class="section-heading-row d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <span class="section-tag" style="background: rgba(13,148,136,0.1); color: var(--teal); font-weight: 700; padding: 0.35rem 1rem; border-radius: 999px; font-size: 0.8rem;">
+                        🐾 THÚ CƯNG & CÁ CẢNH MỚI VỀ
+                    </span>
+                    <h2 class="section-title mb-0 mt-2">Bé Yêu Đang Chờ Đón Về Nhà</h2>
+                </div>
+                <a asp-controller="PetShop" asp-action="Index" class="btn btn-teal rounded-pill px-4 fw-semibold">
+                    Xem tất cả thú cưng <i class="ph ph-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="row g-4">
+                @foreach (var pet in featuredPets)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="pet-card-modern h-100 d-flex flex-column rounded-4 bg-white shadow-sm overflow-hidden border">
+                            <div class="position-relative overflow-hidden" style="height: 200px; background: #f8fafc;">
+                                <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
+                                    <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
+                                         alt="@pet.Name" 
+                                         class="w-100 h-100 object-fit-cover pet-img-hover" />
+                                </a>
+                                <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
+                                    @(pet.Breed?.Name ?? "Thú cưng")
+                                </span>
+                                <span class="badge bg-light text-muted border position-absolute top-0 end-0 m-2 rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                    @pet.Gender
+                                </span>
+                            </div>
+                            <div class="p-3 d-flex flex-column flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-truncate">
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none text-reset">
+                                        @pet.Name
+                                    </a>
+                                </h6>
+                                <div class="text-muted small mb-2">
+                                    @(pet.AgeMonths == 0 ? "Cá non" : $"{pet.AgeMonths} tháng tuổi") • @pet.Color
+                                </div>
+                                <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold fs-6" style="color: var(--orange-dark);">
+                                        @pet.Price.ToString("N0")đ
+                                    </span>
+                                    <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold">
+                                        Xem bé
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 }
             </div>

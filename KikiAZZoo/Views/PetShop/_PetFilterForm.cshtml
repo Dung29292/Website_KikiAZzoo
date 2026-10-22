@@ -1,0 +1,209 @@
+@model KikiAZZoo.Models.ViewModels.PetListViewModel
+@{
+    var prefix = ViewData["FilterPrefix"] as string ?? "";
+}
+
+<form method="get" asp-action="Index" id="petFilterForm@(prefix)" class="filter-form-modern">
+    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+
+    <!-- Search box -->
+    <div class="filter-search-box mb-3">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" name="search" value="@Model.Search" placeholder="Tìm theo tên, giống, màu..." />
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a asp-action="Index" class="filter-search-clear"><i class="ph ph-x-circle"></i></a>
+        }
+    </div>
+
+    <!-- Loại thú cưng (Pet Types) -->
+    <div class="filter-section">
+        <div class="filter-section-title d-flex align-items-center justify-content-between">
+            <span><i class="ph-fill ph-paw-print text-teal"></i> Loại thú cưng</span>
+            @if (Model.PetTypeId.HasValue)
+            {
+                <span class="badge bg-teal-subtle text-teal rounded-pill" style="font-size: 0.7rem;">1 đã chọn</span>
+            }
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(!Model.PetTypeId.HasValue ? "active" : "")">
+                <input type="radio" name="petTypeId" value="" id="petTypeAll@(prefix)" @(!Model.PetTypeId.HasValue ? "checked" : "") onchange="this.form.submit()" />
+                <label for="petTypeAll@(prefix)">Tất cả thú cưng</label>
+            </div>
+            @foreach (var pt in Model.PetTypes)
+            {
+                var iconClass = pt.Name switch
+                {
+                    "Cá cảnh" => "bi-water text-primary",
+                    "Chó" => "bi-paw-fill text-warning",
+                    "Mèo" => "bi-heart-fill text-danger",
+                    "Chim" => "bi-feather text-success",
+                    _ => pt.Icon
+                };
+                <div class="filter-chip @(Model.PetTypeId == pt.Id ? "active" : "")">
+                    <input type="radio" name="petTypeId" value="@pt.Id" id="pt@(prefix)@pt.Id" @(Model.PetTypeId == pt.Id ? "checked" : "") onchange="this.form.submit()" />
+                    <label for="pt@(prefix)@pt.Id">
+                        <i class="bi @iconClass me-1"></i> @pt.Name
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Giống loài (Breeds) -->
+    @if (Model.Breeds.Any())
+    {
+        <div class="filter-section">
+            <div class="filter-section-title d-flex align-items-center justify-content-between">
+                <span><i class="ph ph-tag text-teal"></i> Giống loài</span>
+                @if (Model.BreedId.HasValue)
+                {
+                    <span class="badge bg-teal-subtle text-teal rounded-pill" style="font-size: 0.7rem;">1 đã chọn</span>
+                }
+            </div>
+            <div class="filter-options" style="max-height: 220px; overflow-y: auto;">
+                <div class="filter-chip @(!Model.BreedId.HasValue ? "active" : "")">
+                    <input type="radio" name="breedId" value="" id="breedAll@(prefix)" @(!Model.BreedId.HasValue ? "checked" : "") onchange="this.form.submit()" />
+                    <label for="breedAll@(prefix)">Tất cả giống</label>
+                </div>
+                @foreach (var breed in Model.Breeds)
+                {
+                    <div class="filter-chip @(Model.BreedId == breed.Id ? "active" : "")">
+                        <input type="radio" name="breedId" value="@breed.Id" id="breed@(prefix)@breed.Id" @(Model.BreedId == breed.Id ? "checked" : "") onchange="this.form.submit()" />
+                        <label for="breed@(prefix)@breed.Id">@breed.Name</label>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Giới tính -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-gender-intersex text-teal"></i> Giới tính
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(string.IsNullOrEmpty(Model.Gender) || Model.Gender == "all" ? "active" : "")">
+                <input type="radio" name="gender" value="" id="genderAll@(prefix)" @(string.IsNullOrEmpty(Model.Gender) ? "checked" : "") onchange="this.form.submit()" />
+                <label for="genderAll@(prefix)">Tất cả</label>
+            </div>
+            <div class="filter-chip @(Model.Gender == "Đực" ? "active" : "")">
+                <input type="radio" name="gender" value="Đực" id="genderMale@(prefix)" @(Model.Gender == "Đực" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="genderMale@(prefix)"><i class="ph ph-gender-male text-info me-1"></i> Đực</label>
+            </div>
+            <div class="filter-chip @(Model.Gender == "Cái" ? "active" : "")">
+                <input type="radio" name="gender" value="Cái" id="genderFemale@(prefix)" @(Model.Gender == "Cái" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="genderFemale@(prefix)"><i class="ph ph-gender-female text-danger me-1"></i> Cái</label>
+            </div>
+            <div class="filter-chip @(Model.Gender == "Không rõ" ? "active" : "")">
+                <input type="radio" name="gender" value="Không rõ" id="genderNone@(prefix)" @(Model.Gender == "Không rõ" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="genderNone@(prefix)">Thủy sinh / Không rõ</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Độ tuổi -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-calendar text-teal"></i> Độ tuổi
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(string.IsNullOrEmpty(Model.AgeRange) ? "active" : "")">
+                <input type="radio" name="ageRange" value="" id="ageAll@(prefix)" @(string.IsNullOrEmpty(Model.AgeRange) ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageAll@(prefix)">Mọi lứa tuổi</label>
+            </div>
+            <div class="filter-chip @(Model.AgeRange == "baby" ? "active" : "")">
+                <input type="radio" name="ageRange" value="baby" id="ageBaby@(prefix)" @(Model.AgeRange == "baby" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageBaby@(prefix)">Dưới 3 tháng (Baby/Cá non)</label>
+            </div>
+            <div class="filter-chip @(Model.AgeRange == "young" ? "active" : "")">
+                <input type="radio" name="ageRange" value="young" id="ageYoung@(prefix)" @(Model.AgeRange == "young" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageYoung@(prefix)">3 - 6 tháng tuổi</label>
+            </div>
+            <div class="filter-chip @(Model.AgeRange == "adult" ? "active" : "")">
+                <input type="radio" name="ageRange" value="adult" id="ageAdult@(prefix)" @(Model.AgeRange == "adult" ? "checked" : "") onchange="this.form.submit()" />
+                <label for="ageAdult@(prefix)">Trên 6 tháng (Trưởng thành)</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Y tế & Chứng nhận -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-shield-check text-teal"></i> Y tế & Kiểm định
+        </div>
+        <div class="d-flex flex-column gap-2 mt-2">
+            <div class="form-check form-switch custom-kiki-switch">
+                <input class="form-check-input" type="checkbox" name="isVaccinated" value="true" id="vacCheck@(prefix)" @(Model.IsVaccinated == true ? "checked" : "") onchange="this.form.submit()">
+                <label class="form-check-label small fw-semibold" for="vacCheck@(prefix)">
+                    <i class="ph ph-syringe text-teal me-1"></i> Đã tiêm phòng đủ
+                </label>
+            </div>
+            <div class="form-check form-switch custom-kiki-switch">
+                <input class="form-check-input" type="checkbox" name="hasMicrochip" value="true" id="chipCheck@(prefix)" @(Model.HasMicrochip == true ? "checked" : "") onchange="this.form.submit()">
+                <label class="form-check-label small fw-semibold" for="chipCheck@(prefix)">
+                    <i class="ph ph-cpu text-warning me-1"></i> Có mã định danh / Chip CITES
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khoảng giá -->
+    <div class="filter-section">
+        <div class="filter-section-title">
+            <i class="ph ph-currency-circle-dollar text-teal"></i> Khoảng giá
+        </div>
+        <div class="filter-options">
+            <div class="filter-chip @(!Model.MinPrice.HasValue && !Model.MaxPrice.HasValue ? "active" : "")">
+                <input type="radio" name="priceOption" id="pAll@(prefix)" checked onchange="clearPrice(this.form)" />
+                <label for="pAll@(prefix)">Tất cả mức giá</label>
+            </div>
+            <div class="filter-chip @(Model.MaxPrice == 500000 ? "active" : "")">
+                <input type="radio" name="priceOption" id="p500k@(prefix)" @(Model.MaxPrice == 500000 ? "checked" : "") onchange="setPrice(this.form, 0, 500000)" />
+                <label for="p500k@(prefix)">Dưới 500.000đ</label>
+            </div>
+            <div class="filter-chip @(Model.MinPrice == 500000 && Model.MaxPrice == 2000000 ? "active" : "")">
+                <input type="radio" name="priceOption" id="p2m@(prefix)" @(Model.MinPrice == 500000 && Model.MaxPrice == 2000000 ? "checked" : "") onchange="setPrice(this.form, 500000, 2000000)" />
+                <label for="p2m@(prefix)">500.000đ - 2.000.000đ</label>
+            </div>
+            <div class="filter-chip @(Model.MinPrice == 2000000 && Model.MaxPrice == 5000000 ? "active" : "")">
+                <input type="radio" name="priceOption" id="p5m@(prefix)" @(Model.MinPrice == 2000000 && Model.MaxPrice == 5000000 ? "checked" : "") onchange="setPrice(this.form, 2000000, 5000000)" />
+                <label for="p5m@(prefix)">2.000.000đ - 5.000.000đ</label>
+            </div>
+            <div class="filter-chip @(Model.MinPrice == 5000000 && !Model.MaxPrice.HasValue ? "active" : "")">
+                <input type="radio" name="priceOption" id="pOver5m@(prefix)" @(Model.MinPrice == 5000000 && !Model.MaxPrice.HasValue ? "checked" : "") onchange="setPrice(this.form, 5000000, null)" />
+                <label for="pOver5m@(prefix)">Trên 5.000.000đ</label>
+            </div>
+        </div>
+        <input type="hidden" name="minPrice" id="minPriceInput@(prefix)" value="@Model.MinPrice" />
+        <input type="hidden" name="maxPrice" id="maxPriceInput@(prefix)" value="@Model.MaxPrice" />
+    </div>
+
+    <!-- Nút hành động mobile -->
+    <div class="d-lg-none mt-4 d-flex flex-column gap-2">
+        <button type="submit" class="btn w-100" style="background: var(--teal); color: #fff; border-radius: 999px; font-weight: 600; padding: 0.7rem 1.5rem;">
+            <i class="ph ph-funnel me-1"></i> Áp dụng bộ lọc
+        </button>
+        <a asp-action="Index" class="btn w-100" style="border: 1.5px solid #e2e8f0; color: #64748b; border-radius: 999px; font-weight: 600; padding: 0.7rem 1.5rem;">
+            <i class="ph ph-x me-1"></i> Xóa lọc
+        </a>
+    </div>
+</form>
+
+<script>
+    function setPrice(form, min, max) {
+        var minInput = form.querySelector('[name="minPrice"]');
+        var maxInput = form.querySelector('[name="maxPrice"]');
+        if (minInput) minInput.value = min !== null ? min : '';
+        if (maxInput) maxInput.value = max !== null ? max : '';
+        form.submit();
+    }
+    function clearPrice(form) {
+        var minInput = form.querySelector('[name="minPrice"]');
+        var maxInput = form.querySelector('[name="maxPrice"]');
+        if (minInput) minInput.value = '';
+        if (maxInput) maxInput.value = '';
+        form.submit();
+    }
+</script>

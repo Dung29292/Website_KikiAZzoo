@@ -81,6 +81,54 @@ namespace KikiAZZoo.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddToCartPet(int petId)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null || !pet.IsAvailable)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Thú cưng này hiện không còn sẵn sàng hoặc đã được bán!" });
+                TempData["Error"] = "Thú cưng này hiện không còn sẵn sàng hoặc đã được bán!";
+                return RedirectToAction("Index", "PetShop");
+            }
+
+            var cart = GetCart();
+            var existing = cart.Items.FirstOrDefault(i => i.PetId == petId);
+            if (existing != null)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = $"Bé '{pet.Name}' đã có trong giỏ hàng của bạn!" });
+                TempData["Info"] = $"Bé '{pet.Name}' đã có trong giỏ hàng!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            cart.AddItem(new CartItem
+            {
+                ProductId = pet.Id,
+                PetId = pet.Id,
+                ItemType = "pet",
+                Name = pet.Name,
+                ImageUrl = pet.ImageUrl,
+                Price = pet.Price,
+                Quantity = 1
+            });
+            SaveCart(cart);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = $"Đã thêm bé '{pet.Name}' vào giỏ hàng thành công!",
+                    cartCount = cart.TotalItems
+                });
+            }
+
+            TempData["Success"] = $"Đã thêm bé '{pet.Name}' vào giỏ hàng!";
+            return RedirectToAction(nameof(Index));
+        }
+
         public IActionResult Index()
         {
             var cart = GetCart();
@@ -140,9 +188,11 @@ namespace KikiAZZoo.Controllers
             {
                 cart.AddItem(new CartItem
                 {
-                    ProductId = detail.ProductId,
-                    Name = detail.Product?.Name ?? "Sản phẩm",
-                    ImageUrl = detail.Product?.ImageUrl,
+                    ProductId = detail.ProductId ?? (detail.PetId ?? 0),
+                    PetId = detail.PetId,
+                    ItemType = detail.PetId.HasValue ? "pet" : "product",
+                    Name = detail.Product?.Name ?? detail.Pet?.Name ?? "Sản phẩm",
+                    ImageUrl = detail.Product?.ImageUrl ?? detail.Pet?.ImageUrl,
                     Price = detail.Price,
                     Quantity = detail.Quantity
                 });
@@ -258,16 +308,28 @@ namespace KikiAZZoo.Controllers
             // Check stock of all items
             foreach (var item in cart.Items)
             {
-                var prod = await _context.Products.FindAsync(item.ProductId);
-                if (prod == null || !prod.IsActive || prod.Stock <= 0)
+                if (item.PetId.HasValue)
                 {
-                    TempData["Error"] = $"Sản phẩm '{item.Name}' hiện đã hết hàng. Vui lòng cập nhật lại giỏ hàng.";
-                    return RedirectToAction(nameof(Index));
+                    var pet = await _context.Pets.FindAsync(item.PetId.Value);
+                    if (pet == null || !pet.IsAvailable)
+                    {
+                        TempData["Error"] = $"Bé thú cưng '{item.Name}' hiện đã có chủ hoặc không còn sẵn sàng.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
-                if (item.Quantity > prod.Stock)
+                else
                 {
-                    TempData["Error"] = $"Sản phẩm '{item.Name}' chỉ còn {prod.Stock} sản phẩm trong kho. Vui lòng cập nhật số lượng.";
-                    return RedirectToAction(nameof(Index));
+                    var prod = await _context.Products.FindAsync(item.ProductId);
+                    if (prod == null || !prod.IsActive || prod.Stock <= 0)
+                    {
+                        TempData["Error"] = $"Sản phẩm '{item.Name}' hiện đã hết hàng. Vui lòng cập nhật lại giỏ hàng.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    if (item.Quantity > prod.Stock)
+                    {
+                        TempData["Error"] = $"Sản phẩm '{item.Name}' chỉ còn {prod.Stock} sản phẩm trong kho. Vui lòng cập nhật số lượng.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
             }
 
@@ -307,16 +369,28 @@ namespace KikiAZZoo.Controllers
             // Check stock of all items
             foreach (var item in cart.Items)
             {
-                var prod = await _context.Products.FindAsync(item.ProductId);
-                if (prod == null || !prod.IsActive || prod.Stock <= 0)
+                if (item.PetId.HasValue)
                 {
-                    TempData["Error"] = $"Sản phẩm '{item.Name}' hiện đã hết hàng. Vui lòng cập nhật lại giỏ hàng.";
-                    return RedirectToAction(nameof(Index));
+                    var pet = await _context.Pets.FindAsync(item.PetId.Value);
+                    if (pet == null || !pet.IsAvailable)
+                    {
+                        TempData["Error"] = $"Bé thú cưng '{item.Name}' hiện đã có chủ hoặc không còn sẵn sàng.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
-                if (item.Quantity > prod.Stock)
+                else
                 {
-                    TempData["Error"] = $"Sản phẩm '{item.Name}' chỉ còn {prod.Stock} sản phẩm trong kho. Vui lòng cập nhật số lượng.";
-                    return RedirectToAction(nameof(Index));
+                    var prod = await _context.Products.FindAsync(item.ProductId);
+                    if (prod == null || !prod.IsActive || prod.Stock <= 0)
+                    {
+                        TempData["Error"] = $"Sản phẩm '{item.Name}' hiện đã hết hàng. Vui lòng cập nhật lại giỏ hàng.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    if (item.Quantity > prod.Stock)
+                    {
+                        TempData["Error"] = $"Sản phẩm '{item.Name}' chỉ còn {prod.Stock} sản phẩm trong kho. Vui lòng cập nhật số lượng.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
             }
 
@@ -335,13 +409,6 @@ namespace KikiAZZoo.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach (var state in ModelState)
-                {
-                    foreach (var error in state.Value.Errors)
-                    {
-                        Console.WriteLine($"[MODELSTATE ERROR] Key: {state.Key}, Error: {error.ErrorMessage}");
-                    }
-                }
                 model.Cart = cart;
                 ApplicationUser? currUser = null;
                 if (User.Identity?.IsAuthenticated == true)
@@ -349,7 +416,6 @@ namespace KikiAZZoo.Controllers
                     currUser = await _userManager.GetUserAsync(User);
                 }
                 model.AvailableLoyaltyPoints = currUser?.LoyaltyPoints ?? 0;
-                model.ShippingFee = CalculateShippingFee(model.Order.Province, cart.SubTotal);
                 return View(model);
             }
 
@@ -402,13 +468,28 @@ namespace KikiAZZoo.Controllers
                 orderNotes = string.IsNullOrEmpty(orderNotes) ? guestInfo : $"{guestInfo} | Ghi chú: {orderNotes}";
             }
 
-            // Deduct stock
+            // Deduct stock / mark pet as sold
             foreach (var item in cart.Items)
             {
-                var prod = await _context.Products.FindAsync(item.ProductId);
-                if (prod != null)
+                if (item.PetId.HasValue)
                 {
-                    prod.Stock -= item.Quantity;
+                    var pet = await _context.Pets.FindAsync(item.PetId.Value);
+                    if (pet != null)
+                    {
+                        pet.Quantity = Math.Max(0, pet.Quantity - item.Quantity);
+                        if (pet.Quantity <= 0)
+                        {
+                            pet.Status = "Sold";
+                        }
+                    }
+                }
+                else
+                {
+                    var prod = await _context.Products.FindAsync(item.ProductId);
+                    if (prod != null)
+                    {
+                        prod.Stock -= item.Quantity;
+                    }
                 }
             }
 
@@ -433,7 +514,8 @@ namespace KikiAZZoo.Controllers
                 CompanyAddress = model.Order.CompanyAddress,
                 OrderDetails = cart.Items.Select(i => new OrderDetail
                 {
-                    ProductId = i.ProductId,
+                    ProductId = i.PetId.HasValue ? null : (int?)i.ProductId,
+                    PetId = i.PetId,
                     Quantity = i.Quantity,
                     Price = i.Price
                 }).ToList()

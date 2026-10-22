@@ -40,6 +40,8 @@
                             </div>
                         </div>
                     }
+
+                    <h5 class="checkout-section-title"><i class="bi bi-geo-alt"></i> Thông tin giao hàng</h5>
                     <!-- Address Selectors -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
@@ -320,48 +322,6 @@
                     wardSelect.appendChild(opt);
                 }
             });
-            
-            // Restore previous values after validation reload
-            if (provinceSelect.value) {
-                const selectedProvince = provinceSelect.value;
-                districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-                const prevDistrict = '@Html.Raw(Model.Order.District)';
-                const prevWard = '@Html.Raw(Model.Order.Ward)';
-
-                if (locations[selectedProvince]) {
-                    Object.keys(locations[selectedProvince]).forEach(dist => {
-                        const opt = document.createElement("option");
-                        opt.value = dist;
-                        opt.textContent = dist;
-                        if (dist === prevDistrict) opt.selected = true;
-                        districtSelect.appendChild(opt);
-                    });
-                } else {
-                    const opt = document.createElement("option");
-                    opt.value = "Quận trung tâm";
-                    opt.textContent = "Quận trung tâm";
-                    opt.selected = true;
-                    districtSelect.appendChild(opt);
-                }
-
-                const selectedDistrict = districtSelect.value;
-                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-                if (locations[selectedProvince] && locations[selectedProvince][selectedDistrict]) {
-                    locations[selectedProvince][selectedDistrict].forEach(ward => {
-                        const opt = document.createElement("option");
-                        opt.value = ward;
-                        opt.textContent = ward;
-                        if (ward === prevWard) opt.selected = true;
-                        wardSelect.appendChild(opt);
-                    });
-                } else if (selectedDistrict) {
-                    const opt = document.createElement("option");
-                    opt.value = "Phường 1";
-                    opt.textContent = "Phường 1";
-                    opt.selected = true;
-                    wardSelect.appendChild(opt);
-                }
-            }
 
             // Handles Payment Option Click Styling
             const paymentOptions = document.querySelectorAll(".payment-option input[type='radio']");

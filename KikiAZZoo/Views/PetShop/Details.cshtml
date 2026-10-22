@@ -1,0 +1,315 @@
+@model KikiAZZoo.Models.Pet
+@{
+    ViewData["Title"] = $"{Model.Name} - KikiAzoo";
+    var relatedPets = ViewBag.RelatedPets as List<KikiAZZoo.Models.Pet> ?? new List<KikiAZZoo.Models.Pet>();
+    var isFish = Model.Breed?.PetTypeId == 5;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-kiki mb-4">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> >
+        <a asp-controller="PetShop" asp-action="Index">Thú cưng & Cá cảnh</a> >
+        <span>@Model.Name</span>
+    </nav>
+
+    <div class="row g-4 mb-5">
+        <!-- Ảnh & Thư viện ảnh -->
+        <div class="col-lg-6">
+            <div class="position-sticky" style="top: 100px;">
+                <div class="pet-detail-main-img rounded-4 overflow-hidden shadow-sm position-relative border bg-light" style="height: 460px;">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/kikiazoo-removebg.png" : Model.ImageUrl)" 
+                         alt="@Model.Name" 
+                         class="w-100 h-100 object-fit-cover" 
+                         id="mainPetImage" />
+
+                    @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                    {
+                        var pct = (int)Math.Round((1 - (Model.Price / Model.OriginalPrice.Value)) * 100);
+                        <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fs-6 fw-bold shadow">
+                            -@pct% ƯU ĐÃI
+                        </span>
+                    }
+
+                    @if (!Model.IsAvailable)
+                    {
+                        <div class="position-absolute inset-0 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);">
+                            <span class="badge bg-dark px-4 py-2 rounded-pill fs-5 text-white fw-bold">Đã về nhà mới</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- 3 cam kết vàng -->
+                <div class="row g-2 mt-3">
+                    <div class="col-4">
+                        <div class="p-2 text-center rounded-3 border bg-white small h-100">
+                            <i class="ph-fill ph-shield-check text-teal fs-4 mb-1 d-block"></i>
+                            <span class="fw-bold d-block" style="font-size: 0.78rem;">Bảo hành @Model.HealthGuaranteeDays ngày</span>
+                            <span class="text-muted" style="font-size: 0.7rem;">Sức khỏe toàn diện</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 text-center rounded-3 border bg-white small h-100">
+                            <i class="ph-fill ph-certificate text-warning fs-4 mb-1 d-block"></i>
+                            <span class="fw-bold d-block" style="font-size: 0.78rem;">Thuần chủng 100%</span>
+                            <span class="text-muted" style="font-size: 0.7rem;">Rõ ràng nguồn gốc</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 text-center rounded-3 border bg-white small h-100">
+                            <i class="ph-fill ph-truck text-info fs-4 mb-1 d-block"></i>
+                            <span class="fw-bold d-block" style="font-size: 0.78rem;">Vận chuyển y tế</span>
+                            <span class="text-muted" style="font-size: 0.7rem;">Có oxy / lồng êm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin chi tiết & Mua hàng -->
+        <div class="col-lg-6">
+            <div class="pet-detail-info">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: var(--teal-light); color: var(--teal-dark);">
+                        <i class="ph ph-paw-print me-1"></i>@(Model.Breed?.PetType?.Name ?? "Thú cưng")
+                    </span>
+                    <span class="badge rounded-pill px-3 py-1 bg-light text-secondary border">
+                        Giống: @(Model.Breed?.Name ?? "Thuần chủng")
+                    </span>
+                    @if (!string.IsNullOrEmpty(Model.SkuCode))
+                    {
+                        <span class="badge rounded-pill px-3 py-1 bg-light text-muted border">
+                            Mã: @Model.SkuCode
+                        </span>
+                    }
+                </div>
+
+                <h1 class="display-7 fw-bold mb-3" style="color: var(--dark); font-size: 1.85rem;">@Model.Name</h1>
+
+                <!-- Giá -->
+                <div class="p-3 mb-4 rounded-4 d-flex align-items-baseline gap-3" style="background: #fdfaf6; border: 1px solid #fee2e2;">
+                    <span class="display-6 fw-bold" style="color: var(--orange-dark); font-size: 2.1rem;">
+                        @Model.Price.ToString("N0")đ
+                    </span>
+                    @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                    {
+                        <span class="text-muted text-decoration-line-through fs-5">
+                            @Model.OriginalPrice.Value.ToString("N0")đ
+                        </span>
+                    }
+                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-auto px-3 py-1 rounded-pill">
+                        @(Model.IsAvailable ? "Đang có sẵn tại cửa hàng" : "Tạm hết hàng")
+                    </span>
+                </div>
+
+                <!-- Thẻ Hộ chiếu sức khỏe & Sinh trắc học -->
+                <div class="card rounded-4 border mb-4 shadow-sm overflow-hidden">
+                    <div class="card-header bg-light py-2 px-3 fw-bold small text-teal d-flex align-items-center">
+                        <i class="ph-fill ph-identification-card me-2 fs-5"></i>
+                        HỒ SƠ SINH HỌC & SỨC KHỎE CỦA BÉ
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3" style="font-size: 0.9rem;">
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Giới tính:</span>
+                                <strong class="text-dark">
+                                    @if (Model.Gender == "Đực") { <span class="text-info"><i class="ph-bold ph-gender-male me-1"></i>Đực</span> }
+                                    else if (Model.Gender == "Cái") { <span class="text-danger"><i class="ph-bold ph-gender-female me-1"></i>Cái</span> }
+                                    else { <span>@Model.Gender</span> }
+                                </strong>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Độ tuổi:</span>
+                                <strong class="text-dark">@(Model.AgeMonths == 0 ? "Cá non" : $"{Model.AgeMonths} tháng tuổi")</strong>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Màu sắc lông / vảy:</span>
+                                <strong class="text-dark">@Model.Color</strong>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Xuất xứ giống:</span>
+                                <strong class="text-dark">@(Model.Breed?.Origin ?? "Việt Nam")</strong>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Tiêm chủng vắc-xin:</span>
+                                <strong class="@(Model.IsVaccinated ? "text-success" : "text-muted")">
+                                    <i class="ph-fill @(Model.IsVaccinated ? "ph-check-circle" : "ph-x-circle") me-1"></i>
+                                    @(Model.IsVaccinated ? "Đã tiêm phòng" : "Thuần dưỡng sinh học")
+                                </strong>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <span class="text-muted d-block small">Tẩy giun / Khử khuẩn:</span>
+                                <strong class="text-success">
+                                    <i class="ph-fill ph-check-circle me-1"></i>Đã tẩy giun định kỳ
+                                </strong>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.VaccinationDetails))
+                        {
+                            <div class="mt-3 pt-2 border-top small text-muted">
+                                <strong class="text-dark">Ghi chú y tế:</strong> @Model.VaccinationDetails
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.MicrochipCode))
+                        {
+                            <div class="mt-2 small text-primary fw-medium">
+                                <i class="ph-fill ph-cpu me-1"></i>Mã Microchip / CITES định danh: <code>@Model.MicrochipCode</code>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Mô tả chi tiết -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-2" style="color: var(--dark);">Về bé thú cưng này</h5>
+                    <p class="text-secondary" style="line-height: 1.7;">
+                        @Model.Description
+                    </p>
+                </div>
+
+                <!-- Hướng dẫn chăm sóc đặc thù (đặc biệt cho cá cảnh & thú cưng) -->
+                @if (isFish)
+                {
+                    <div class="alert alert-info border-0 rounded-4 p-3 mb-4" style="background: #e0f2fe; color: #0369a1;">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-water me-2"></i>Hướng dẫn chăm sóc cá cảnh & thủy sinh:</h6>
+                        <ul class="mb-0 ps-3 small" style="line-height: 1.6;">
+                            <li><strong>Nhiệt độ nước lý tưởng:</strong> 26°C - 30°C (ổn định).</li>
+                            <li><strong>Độ pH khuyến nghị:</strong> 6.5 - 7.5. Duy trì hệ vi sinh ổn định.</li>
+                            <li><strong>Chế độ cho ăn:</strong> Cho ăn lượng vừa đủ 1-2 lần/ngày, tránh để thức ăn thừa gây đục nước.</li>
+                            <li><strong>Vận chuyển:</strong> Shop đóng bao oxy chuyên dụng đảm bảo cá khỏe mạnh trong suốt 48 giờ.</li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success border-0 rounded-4 p-3 mb-4" style="background: #ecfdf5; color: #047857;">
+                        <h6 class="fw-bold mb-2"><i class="ph ph-heart-straight me-2"></i>Chế độ dinh dưỡng & Chăm sóc khi đón bé:</h6>
+                        <ul class="mb-0 ps-3 small" style="line-height: 1.6;">
+                            <li>Bé đã được ăn dặm hạt khô ngâm sữa/pate và ăn thức ăn chuyên dụng quen dạ.</li>
+                            <li>Tặng kèm cẩm nang hướng dẫn nuôi dạy, khay vệ sinh và lịch tiêm phòng mũi tiếp theo.</li>
+                            <li>Bác sĩ thú y KikiAzoo đồng hành tư vấn 24/7 trong suốt quá trình bé lớn lên.</li>
+                        </ul>
+                    </div>
+                }
+
+                <!-- Nút hành động Mua hàng -->
+                <div class="d-flex flex-wrap gap-3 mb-4 pt-2">
+                    @if (Model.IsAvailable)
+                    {
+                        <button type="button" class="btn btn-teal btn-lg px-4 py-3 fw-bold rounded-pill flex-grow-1 shadow" onclick="addToCartPetAjax(@Model.Id)">
+                            <i class="ph ph-shopping-cart-simple me-2"></i> ĐÓN BÉ VỀ NHÀ NGAY
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg px-4 py-3 fw-bold rounded-pill flex-grow-1" disabled>
+                            BÉ ĐÃ CÓ CHỦ
+                        </button>
+                    }
+                    <a href="tel:19001234" class="btn btn-orange btn-lg px-4 py-3 fw-bold rounded-pill d-flex align-items-center gap-2 shadow-sm">
+                        <i class="ph ph-phone-call"></i> Tư vấn: 1900 1234
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bé cùng loài có thể bạn thích -->
+    @if (relatedPets.Any())
+    {
+        <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <span class="badge rounded-pill px-3 py-1 mb-1 fw-bold" style="background: var(--teal-light); color: var(--teal-dark);">
+                        Gợi ý thêm
+                    </span>
+                    <h3 class="fw-bold mb-0" style="color: var(--dark);">Những bé cùng loài đáng yêu khác</h3>
+                </div>
+                <a asp-action="Index" asp-route-petTypeId="@Model.Breed?.PetTypeId" class="btn btn-outline-teal rounded-pill px-4 fw-semibold">
+                    Xem tất cả <i class="ph ph-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var rel in relatedPets)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="pet-card-modern h-100 d-flex flex-column rounded-4 bg-white shadow-sm overflow-hidden border">
+                            <div class="position-relative overflow-hidden" style="height: 190px; background: #f8fafc;">
+                                <a asp-action="Details" asp-route-id="@rel.Id" class="d-block w-100 h-100">
+                                    <img src="@(string.IsNullOrEmpty(rel.ImageUrl) ? "/images/kikiazoo-removebg.png" : rel.ImageUrl)" 
+                                         alt="@rel.Name" 
+                                         class="w-100 h-100 object-fit-cover pet-img-hover" />
+                                </a>
+                                <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold" style="background: var(--teal); color: #fff; font-size: 0.7rem;">
+                                    @(rel.Breed?.Name ?? "Thú cưng")
+                                </span>
+                            </div>
+                            <div class="p-3 d-flex flex-column flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-truncate">
+                                    <a asp-action="Details" asp-route-id="@rel.Id" class="text-decoration-none text-reset">
+                                        @rel.Name
+                                    </a>
+                                </h6>
+                                <div class="text-muted small mb-2">@(rel.AgeMonths == 0 ? "Cá non" : $"{rel.AgeMonths} tháng") • @rel.Gender</div>
+                                <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold fs-6" style="color: var(--orange-dark);">
+                                        @rel.Price.ToString("N0")đ
+                                    </span>
+                                    <a asp-action="Details" asp-route-id="@rel.Id" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold">
+                                        Xem bé
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    function addToCartPetAjax(petId) {
+        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        var formData = new FormData();
+        formData.append('petId', petId);
+        if (token) formData.append('__RequestVerificationToken', token);
+
+        fetch('/ShoppingCart/AddToCartPet', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                var badges = document.querySelectorAll('.cart-badge');
+                badges.forEach(b => {
+                    b.innerText = data.cartCount;
+                    b.classList.remove('d-none');
+                });
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'error');
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(err => {
+            alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+        });
+    }
+</script>
+}

@@ -127,12 +127,28 @@ namespace KikiAZZoo.Controllers
             var totalCount = allProducts.Count;
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
 
-            // Get all catalog data using service
+            // Get all catalog data using service (excluding live pets category group)
             var categoryGroups = await _catalogService.GetCategoryGroupsAsync();
-            var categories = await _context.Categories.OrderBy(c => c.SortOrder).ToListAsync();
+            var categories = await _context.Categories.Where(c => c.CategoryGroupId != 1).OrderBy(c => c.SortOrder).ToListAsync();
             var petTypes = await _catalogService.GetPetTypesAsync();
             var brands = await _catalogService.GetBrandsAsync();
             var priceRanges = await _catalogService.GetPriceRangesAsync();
+
+            var matchingPetsCount = 0;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim();
+                matchingPetsCount = await _context.Pets
+                    .Include(p => p.Breed)
+                    .ThenInclude(b => b!.PetType)
+                    .Where(p => (p.Status == "Available" || p.Status == "Còn hàng") && p.Quantity > 0 &&
+                                (EF.Functions.Like(p.Name, $"%{s}%") ||
+                                 (p.Breed != null && EF.Functions.Like(p.Breed.Name, $"%{s}%")) ||
+                                 (p.Breed != null && p.Breed.PetType != null && EF.Functions.Like(p.Breed.PetType.Name, $"%{s}%"))))
+                    .CountAsync();
+            }
+            ViewBag.MatchingPetsCount = matchingPetsCount;
+            ViewBag.SearchKeyword = search;
 
             var model = new ProductListViewModel
             {

@@ -1,0 +1,112 @@
+@model KikiAZZoo.Models.Pet
+
+<div class="modal-body p-4">
+    <div class="row g-4 align-items-center">
+        <!-- Ảnh thú cưng -->
+        <div class="col-md-6 text-center">
+            <div class="position-relative overflow-hidden rounded-4 shadow-sm" style="background: #f8fafc; border: 1px solid #e2e8f0; height: 320px;">
+                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/kikiazoo-removebg.png" : Model.ImageUrl)" 
+                     alt="@Model.Name" 
+                     class="w-100 h-100 object-fit-cover" 
+                     style="transition: transform 0.4s ease;" />
+                
+                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                {
+                    var discountPercent = (int)Math.Round((1 - (Model.Price / Model.OriginalPrice.Value)) * 100);
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fw-bold shadow">
+                        -@discountPercent%
+                    </span>
+                }
+
+                @if (!Model.IsAvailable)
+                {
+                    <div class="position-absolute inset-0 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);">
+                        <span class="badge bg-dark px-4 py-2 rounded-pill fs-6 text-white fw-bold">Đã về nhà mới</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Thông tin chi tiết -->
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-1" style="background: var(--teal-light); color: var(--teal-dark); font-weight: 600;">
+                    <i class="ph ph-paw-print me-1"></i>@(Model.Breed?.PetType?.Name ?? "Thú cưng")
+                </span>
+                <span class="badge rounded-pill px-3 py-1 bg-light text-secondary border">
+                    Giống: @(Model.Breed?.Name ?? "Thuần chủng")
+                </span>
+            </div>
+
+            <h3 class="fw-bold mb-2" style="color: var(--dark); font-size: 1.45rem;">@Model.Name</h3>
+            
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+                <span class="fs-4 fw-bold" style="color: var(--orange-dark);">@Model.Price.ToString("N0")đ</span>
+                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                {
+                    <span class="text-decoration-line-through text-muted small">@Model.OriginalPrice.Value.ToString("N0")đ</span>
+                }
+            </div>
+
+            <!-- Thuộc tính đặc thù sinh vật sống -->
+            <div class="row g-2 mb-3 p-3 rounded-4" style="background: #f8fafc; border: 1px solid #edf2f7; font-size: 0.85rem;">
+                <div class="col-6">
+                    <span class="text-muted d-block">Giới tính:</span>
+                    <strong class="text-dark">
+                        @if (Model.Gender == "Đực") { <span class="text-info"><i class="ph ph-gender-male me-1"></i>Đực</span> }
+                        else if (Model.Gender == "Cái") { <span class="text-danger"><i class="ph ph-gender-female me-1"></i>Cái</span> }
+                        else { <span>@Model.Gender</span> }
+                    </strong>
+                </div>
+                <div class="col-6">
+                    <span class="text-muted d-block">Độ tuổi:</span>
+                    <strong class="text-dark">@(Model.AgeMonths == 0 ? "Cá non" : $"{Model.AgeMonths} tháng tuổi")</strong>
+                </div>
+                <div class="col-6">
+                    <span class="text-muted d-block">Màu sắc:</span>
+                    <strong class="text-dark">@Model.Color</strong>
+                </div>
+                <div class="col-6">
+                    <span class="text-muted d-block">Bảo hành SK:</span>
+                    <strong class="text-teal">@Model.HealthGuaranteeDays ngày</strong>
+                </div>
+            </div>
+
+            <!-- Tình trạng y tế -->
+            <div class="mb-3 small">
+                @if (Model.IsVaccinated)
+                {
+                    <div class="text-success mb-1 fw-semibold"><i class="ph-fill ph-check-circle me-1"></i>@(!string.IsNullOrEmpty(Model.VaccinationDetails) ? Model.VaccinationDetails : "Đã tiêm phòng đầy đủ")</div>
+                }
+                else if (Model.Breed?.PetTypeId == 5)
+                {
+                    <div class="text-success mb-1 fw-semibold"><i class="ph-fill ph-check-circle me-1"></i>Đã thuần dưỡng nước ngọt, khử khuẩn sinh học khỏe mạnh</div>
+                }
+                @if (Model.IsDewormed)
+                {
+                    <div class="text-success mb-1 fw-semibold"><i class="ph-fill ph-check-circle me-1"></i>Đã tẩy giun & kiểm tra tiêu hóa</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.MicrochipCode))
+                {
+                    <div class="text-primary mb-1 fw-semibold"><i class="ph-fill ph-cpu me-1"></i>Mã định danh/CITES: <code>@Model.MicrochipCode</code></div>
+                }
+            </div>
+
+            <p class="text-muted small mb-4" style="line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                @Model.Description
+            </p>
+
+            <div class="d-flex gap-2">
+                @if (Model.IsAvailable)
+                {
+                    <button type="button" class="btn btn-teal flex-grow-1 py-2 fw-semibold rounded-pill" onclick="addToCartPetAjax(@Model.Id)">
+                        <i class="ph ph-shopping-cart-simple me-1"></i> Đón bé về nhà
+                    </button>
+                }
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-teal px-4 py-2 fw-semibold rounded-pill">
+                    Xem chi tiết bé
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

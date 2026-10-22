@@ -46,7 +46,19 @@ namespace KikiAZZoo.Models
         public List<ProductImage>? Images { get; set; }
         public List<ProductFeature>? Features { get; set; }
 
+        public string? TargetLifeStage { get; set; }
+        public string? Unit { get; set; }
+
+        [Column("Quantity")]
         public int Stock { get; set; } = 10;
+
+        [NotMapped]
+        public int Quantity
+        {
+            get => Stock;
+            set => Stock = value;
+        }
+
         public bool IsActive { get; set; } = true;
     }
 }

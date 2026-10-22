@@ -20,6 +20,7 @@ namespace KikiAZZoo.Services
         public async Task<List<CategoryGroup>> GetCategoryGroupsAsync()
         {
             return await _context.CategoryGroups
+                .Where(g => g.Id != 1 && g.Name != "Thú cưng")
                 .OrderBy(g => g.SortOrder)
                 .Include(g => g.Categories)
                 .ToListAsync();

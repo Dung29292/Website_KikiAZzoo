@@ -1,0 +1,621 @@
+@model KikiAZZoo.Models.ViewModels.PetListViewModel
+@{
+    ViewData["Title"] = "Thú Cưng & Cá Cảnh";
+    var hasFilters = Model.PetTypeId.HasValue || Model.BreedId.HasValue || !string.IsNullOrEmpty(Model.Gender)
+        || !string.IsNullOrEmpty(Model.AgeRange) || Model.IsVaccinated == true || Model.HasMicrochip == true
+        || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || !string.IsNullOrEmpty(Model.Search)
+        || Model.StatusFilter != "available";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-kiki mb-3">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> > <span>Thú cưng & Cá cảnh</span>
+    </nav>
+
+    <!-- Hero Showcase Banner -->
+    <div class="pet-hero-banner p-4 p-md-5 mb-4 rounded-4 position-relative overflow-hidden shadow-sm" 
+         style="background: linear-gradient(135deg, #0d9488 0%, #134e4a 100%); color: #fff;">
+        <div class="position-absolute end-0 bottom-0 opacity-25 pe-none d-none d-lg-block" style="transform: translate(10%, 20%); font-size: 16rem; line-height: 1;">
+            <i class="ph ph-paw-print"></i>
+        </div>
+        <div class="row align-items-center position-relative">
+            <div class="col-lg-8">
+                <span class="badge rounded-pill px-3 py-2 mb-3 fw-bold" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: #fff;">
+                    🐾 THẾ GIỚI THÚ CƯNG & CÁ CẢNH KIKIAZOO
+                </span>
+                <h1 class="display-6 fw-bold mb-3">Những Bé Thú Cưng Đang Chờ Về Nhà Mới</h1>
+                <p class="lead mb-0 text-white-50" style="max-width: 650px; font-size: 1rem;">
+                    100% thú cưng và cá cảnh được tuyển chọn nghiêm ngặt, thuần dưỡng khỏe mạnh, kiểm tra y tế định kỳ và bảo hành sức khỏe lên đến 45 ngày.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-inline-flex flex-column gap-2 text-start p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15);">
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-shield-check text-warning fs-5"></i>
+                        <span>Bảo hành sức khỏe & thuần chủng</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-heart-straight text-danger fs-5"></i>
+                        <span>Miễn phí tư vấn dinh dưỡng trọn đời</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 small text-white">
+                        <i class="ph-fill ph-truck text-info fs-5"></i>
+                        <span>Vận chuyển an toàn có oxy / chuồng lạnh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Pet Type Navigation Bar -->
+    <div class="pet-quick-pills d-flex align-items-center gap-2 overflow-auto pb-3 mb-4">
+        <a asp-action="Index" class="quick-pill @(!Model.PetTypeId.HasValue ? "active" : "")">
+            <i class="ph ph-squares-four me-1"></i> Tất cả thú cưng
+        </a>
+        @foreach (var pt in Model.PetTypes)
+        {
+            var isCurrent = Model.PetTypeId == pt.Id;
+            var pillIcon = pt.Name switch
+            {
+                "Cá cảnh" => "bi-water",
+                "Chó" => "bi-paw-fill",
+                "Mèo" => "bi-heart-fill",
+                "Chim" => "bi-feather",
+                _ => pt.Icon
+            };
+            <a asp-action="Index" asp-route-petTypeId="@pt.Id" class="quick-pill @(isCurrent ? "active" : "")">
+                <i class="bi @pillIcon me-1"></i> @pt.Name
+                @if (pt.Name == "Cá cảnh")
+                {
+                    <span class="badge bg-warning text-dark rounded-pill ms-1" style="font-size: 0.65rem;">MỚI</span>
+                }
+            </a>
+        }
+    </div>
+
+    <!-- Active Filters Tag Bar -->
+    @if (hasFilters)
+    {
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-4 p-3 rounded-4" style="background: var(--teal-light); border: 1px solid rgba(13,148,136,0.15);">
+            <span class="fw-semibold small" style="color: var(--teal-dark);"><i class="ph ph-funnel-simple me-1"></i>Đang lọc theo:</span>
+            
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <span class="badge rounded-pill px-3 py-2 bg-white text-dark border">Từ khóa: "@Model.Search"</span>
+            }
+            @if (Model.PetTypeId.HasValue)
+            {
+                var pt = Model.PetTypes.FirstOrDefault(x => x.Id == Model.PetTypeId);
+                if (pt != null)
+                {
+                    <span class="badge rounded-pill px-3 py-2 bg-white text-teal border fw-bold">Loài: @pt.Name</span>
+                }
+            }
+            @if (Model.BreedId.HasValue)
+            {
+                var br = Model.Breeds.FirstOrDefault(x => x.Id == Model.BreedId);
+                if (br != null)
+                {
+                    <span class="badge rounded-pill px-3 py-2 bg-white text-dark border">Giống: @br.Name</span>
+                }
+            }
+            @if (!string.IsNullOrEmpty(Model.Gender) && Model.Gender != "all")
+            {
+                <span class="badge rounded-pill px-3 py-2 bg-white text-dark border">Giới tính: @Model.Gender</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.AgeRange))
+            {
+                var ageLbl = Model.AgeRange switch { "baby" => "< 3 tháng (Baby)", "young" => "3 - 6 tháng", "adult" => "> 6 tháng", _ => Model.AgeRange };
+                <span class="badge rounded-pill px-3 py-2 bg-white text-dark border">Độ tuổi: @ageLbl</span>
+            }
+            @if (Model.IsVaccinated == true)
+            {
+                <span class="badge rounded-pill px-3 py-2 bg-white text-success border"><i class="ph ph-check me-1"></i>Đã tiêm phòng</span>
+            }
+            @if (Model.HasMicrochip == true)
+            {
+                <span class="badge rounded-pill px-3 py-2 bg-white text-warning border"><i class="ph ph-cpu me-1"></i>Có chip định danh</span>
+            }
+            @if (Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+            {
+                var pText = (Model.MinPrice, Model.MaxPrice) switch
+                {
+                    (null, 500000) => "Dưới 500k",
+                    (500000, 2000000) => "500k - 2tr",
+                    (2000000, 5000000) => "2tr - 5tr",
+                    (5000000, null) => "Trên 5tr",
+                    _ => $"{Model.MinPrice?.ToString("N0") ?? "0"}đ - {Model.MaxPrice?.ToString("N0") ?? "..."}đ"
+                };
+                <span class="badge rounded-pill px-3 py-2 bg-white text-dark border">Giá: @pText</span>
+            }
+
+            <a asp-action="Index" class="btn btn-sm ms-auto" style="background: var(--teal); color: #fff; border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem; font-weight: 600;">
+                <i class="ph ph-x me-1"></i>Xóa tất cả
+            </a>
+        </div>
+    }
+
+    <!-- Content Layout Grid -->
+    <div class="row g-4">
+        <!-- Desktop Sidebar Filter -->
+        <div class="col-lg-3">
+            <div class="sticky-sidebar d-none d-lg-block">
+                <div class="filter-card-modern shadow-sm">
+                    <div class="filter-card-header d-flex align-items-center justify-content-between">
+                        <span><i class="ph ph-funnel-simple me-2"></i>Bộ lọc thú cưng</span>
+                        @if (hasFilters)
+                        {
+                            <a asp-action="Index" class="small text-decoration-none fw-normal" style="color: var(--teal); font-size: 0.8rem;">Đặt lại</a>
+                        }
+                    </div>
+                    <div class="filter-card-body">
+                        @{ ViewData["FilterPrefix"] = "Desktop"; }
+                        <partial name="_PetFilterForm" model="Model" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pet Grid Main Area -->
+        <div class="col-lg-9">
+            <!-- Sort and Control Bar -->
+            <div class="sort-bar d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 rounded-4 shadow-sm" style="background: #fff; border: 1px solid #e2e8f0;">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-teal d-lg-none rounded-pill px-3 py-1 btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilePetFilter">
+                        <i class="ph ph-funnel me-1"></i> Bộ lọc
+                    </button>
+                    <span class="fw-semibold text-muted small">
+                        Hiển thị <strong>@Model.Pets.Count()</strong> trong số <strong>@Model.TotalCount</strong> bé
+                    </span>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Status Filter Tabs -->
+                    <div class="btn-group btn-group-sm rounded-pill p-1" style="background: #f1f5f9;">
+                        <a asp-action="Index" 
+                           asp-route-petTypeId="@Model.PetTypeId" 
+                           asp-route-breedId="@Model.BreedId" 
+                           asp-route-gender="@Model.Gender" 
+                           asp-route-ageRange="@Model.AgeRange" 
+                           asp-route-minPrice="@Model.MinPrice" 
+                           asp-route-maxPrice="@Model.MaxPrice" 
+                           asp-route-search="@Model.Search" 
+                           asp-route-sortBy="@Model.SortBy" 
+                           asp-route-statusFilter="available"
+                           class="btn rounded-pill @(Model.StatusFilter == "available" ? "btn-teal text-white" : "btn-light text-muted border-0")">
+                            Còn hàng
+                        </a>
+                        <a asp-action="Index" 
+                           asp-route-petTypeId="@Model.PetTypeId" 
+                           asp-route-breedId="@Model.BreedId" 
+                           asp-route-gender="@Model.Gender" 
+                           asp-route-ageRange="@Model.AgeRange" 
+                           asp-route-minPrice="@Model.MinPrice" 
+                           asp-route-maxPrice="@Model.MaxPrice" 
+                           asp-route-search="@Model.Search" 
+                           asp-route-sortBy="@Model.SortBy" 
+                           asp-route-statusFilter="sale"
+                           class="btn rounded-pill @(Model.StatusFilter == "sale" ? "btn-teal text-white" : "btn-light text-muted border-0")">
+                            Ưu đãi 🔥
+                        </a>
+                        <a asp-action="Index" 
+                           asp-route-petTypeId="@Model.PetTypeId" 
+                           asp-route-breedId="@Model.BreedId" 
+                           asp-route-gender="@Model.Gender" 
+                           asp-route-ageRange="@Model.AgeRange" 
+                           asp-route-minPrice="@Model.MinPrice" 
+                           asp-route-maxPrice="@Model.MaxPrice" 
+                           asp-route-search="@Model.Search" 
+                           asp-route-sortBy="@Model.SortBy" 
+                           asp-route-statusFilter=""
+                           class="btn rounded-pill @(string.IsNullOrEmpty(Model.StatusFilter) ? "btn-teal text-white" : "btn-light text-muted border-0")">
+                            Tất cả
+                        </a>
+                    </div>
+
+                    <!-- Sort dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                            <i class="ph ph-arrows-down-up me-1"></i>
+                            @(Model.SortBy switch
+                            {
+                                "price_asc" => "Giá: Thấp đến Cao",
+                                "price_desc" => "Giá: Cao đến Thấp",
+                                "name" => "Tên A-Z",
+                                "age_asc" => "Tuổi nhỏ nhất",
+                                _ => "Mới về nhất"
+                            })
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item @(Model.SortBy == "newest" ? "active" : "")" asp-action="Index" asp-route-sortBy="newest" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Mới về nhất</a></li>
+                            <li><a class="dropdown-item @(Model.SortBy == "price_asc" ? "active" : "")" asp-action="Index" asp-route-sortBy="price_asc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Giá: Thấp đến Cao</a></li>
+                            <li><a class="dropdown-item @(Model.SortBy == "price_desc" ? "active" : "")" asp-action="Index" asp-route-sortBy="price_desc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Giá: Cao đến Thấp</a></li>
+                            <li><a class="dropdown-item @(Model.SortBy == "age_asc" ? "active" : "")" asp-action="Index" asp-route-sortBy="age_asc" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Tuổi: Nhỏ nhất</a></li>
+                            <li><a class="dropdown-item @(Model.SortBy == "name" ? "active" : "")" asp-action="Index" asp-route-sortBy="name" asp-route-petTypeId="@Model.PetTypeId" asp-route-breedId="@Model.BreedId" asp-route-statusFilter="@Model.StatusFilter">Tên A-Z</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pet Cards Grid -->
+            @if (Model.Pets.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var pet in Model.Pets)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="pet-card-modern h-100 d-flex flex-column rounded-4 bg-white shadow-sm overflow-hidden border">
+                                <!-- Card Image Area -->
+                                <div class="pet-card-thumb position-relative overflow-hidden" style="height: 230px; background: #f8fafc;">
+                                    <a asp-action="Details" asp-route-id="@pet.Id" class="d-block w-100 h-100">
+                                        <img src="@(string.IsNullOrEmpty(pet.ImageUrl) ? "/images/kikiazoo-removebg.png" : pet.ImageUrl)" 
+                                             alt="@pet.Name" 
+                                             class="w-100 h-100 object-fit-cover pet-img-hover" 
+                                             loading="lazy" />
+                                    </a>
+
+                                    <!-- Top Badges -->
+                                    <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1">
+                                        <span class="badge rounded-pill px-2 py-1 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
+                                            <i class="ph ph-paw-print me-1"></i>@(pet.Breed?.PetType?.Name ?? "Thú cưng")
+                                        </span>
+                                        @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
+                                        {
+                                            var pct = (int)Math.Round((1 - (pet.Price / pet.OriginalPrice.Value)) * 100);
+                                            <span class="badge bg-danger rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">-@pct%</span>
+                                        }
+                                    </div>
+
+                                    <!-- Top Right Info (Gender) -->
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        @if (pet.Gender == "Đực")
+                                        {
+                                            <span class="badge bg-info-subtle text-info border border-info rounded-pill px-2 py-1 shadow-sm" title="Giới tính: Đực">
+                                                <i class="ph-bold ph-gender-male"></i> Đực
+                                            </span>
+                                        }
+                                        else if (pet.Gender == "Cái")
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-2 py-1 shadow-sm" title="Giới tính: Cái">
+                                                <i class="ph-bold ph-gender-female"></i> Cái
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted border rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
+                                                <i class="ph ph-sparkle"></i> @pet.Gender
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Quick View Overlay Button -->
+                                    <button type="button" 
+                                            class="btn btn-sm btn-light position-absolute bottom-0 start-50 translate-middle-x mb-2 rounded-pill px-3 py-1 shadow quick-view-btn d-flex align-items-center gap-1 opacity-0"
+                                            onclick="openPetQuickView(@pet.Id)" 
+                                            title="Xem nhanh">
+                                        <i class="ph ph-eye"></i> Xem nhanh
+                                    </button>
+
+                                    @if (!pet.IsAvailable)
+                                    {
+                                        <div class="position-absolute inset-0 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.55); backdrop-filter: blur(1.5px);">
+                                            <span class="badge bg-dark px-3 py-2 rounded-pill fs-7 text-white fw-bold">Đã về nhà mới</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Card Body Info -->
+                                <div class="pet-card-content p-3 d-flex flex-column flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="text-muted small fw-medium">
+                                            Giống: @(pet.Breed?.Name ?? "Thuần chủng")
+                                        </span>
+                                        <span class="badge bg-light text-teal border rounded-pill" style="font-size: 0.7rem;">
+                                            @(pet.AgeMonths == 0 ? "Cá non" : $"{pet.AgeMonths} tháng")
+                                        </span>
+                                    </div>
+
+                                    <h6 class="fw-bold mb-2 text-truncate" title="@pet.Name" style="color: var(--dark);">
+                                        <a asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none text-reset">
+                                            @pet.Name
+                                        </a>
+                                    </h6>
+
+                                    <!-- Health / Feature highlights -->
+                                    <div class="pet-features d-flex flex-wrap gap-1 mb-3">
+                                        @if (pet.IsVaccinated)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small" style="font-size: 0.68rem;">
+                                                <i class="ph-fill ph-check-circle me-1"></i>Đã tiêm phòng
+                                            </span>
+                                        }
+                                        else if (pet.Breed?.PetTypeId == 5)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small" style="font-size: 0.68rem;">
+                                                <i class="bi bi-water me-1"></i>Thuần dưỡng khỏe
+                                            </span>
+                                        }
+                                        @if (pet.IsDewormed)
+                                        {
+                                            <span class="badge bg-teal-subtle text-teal border border-teal-subtle rounded-pill small" style="font-size: 0.68rem;">
+                                                <i class="ph ph-shield-check me-1"></i>Đã tẩy giun
+                                            </span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(pet.MicrochipCode))
+                                        {
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill small" style="font-size: 0.68rem;">
+                                                <i class="ph ph-cpu me-1"></i>Chip CITES
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Price & CTA -->
+                                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="d-block fw-bold fs-5" style="color: var(--orange-dark);">
+                                                @pet.Price.ToString("N0")đ
+                                            </span>
+                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
+                                            {
+                                                <span class="text-muted text-decoration-line-through small" style="font-size: 0.75rem;">
+                                                    @pet.OriginalPrice.Value.ToString("N0")đ
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex gap-1">
+                                            @if (pet.IsAvailable)
+                                            {
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-teal rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                                        style="width: 36px; height: 36px;" 
+                                                        onclick="addToCartPetAjax(@pet.Id)" 
+                                                        title="Đón bé về nhà (Thêm giỏ hàng)">
+                                                    <i class="ph ph-shopping-cart-simple"></i>
+                                                </button>
+                                            }
+                                            <a asp-action="Details" asp-route-id="@pet.Id" 
+                                               class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold d-flex align-items-center" 
+                                               title="Xem chi tiết bé">
+                                                Xem bé
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-center mt-5">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-kiki">
+                                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" 
+                                       asp-route-page="@(Model.CurrentPage - 1)" 
+                                       asp-route-petTypeId="@Model.PetTypeId" 
+                                       asp-route-breedId="@Model.BreedId" 
+                                       asp-route-gender="@Model.Gender" 
+                                       asp-route-ageRange="@Model.AgeRange" 
+                                       asp-route-minPrice="@Model.MinPrice" 
+                                       asp-route-maxPrice="@Model.MaxPrice" 
+                                       asp-route-search="@Model.Search" 
+                                       asp-route-sortBy="@Model.SortBy" 
+                                       asp-route-statusFilter="@Model.StatusFilter">
+                                        <i class="ph ph-caret-left"></i>
+                                    </a>
+                                </li>
+                                @for (int i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" 
+                                           asp-route-page="@i" 
+                                           asp-route-petTypeId="@Model.PetTypeId" 
+                                           asp-route-breedId="@Model.BreedId" 
+                                           asp-route-gender="@Model.Gender" 
+                                           asp-route-ageRange="@Model.AgeRange" 
+                                           asp-route-minPrice="@Model.MinPrice" 
+                                           asp-route-maxPrice="@Model.MaxPrice" 
+                                           asp-route-search="@Model.Search" 
+                                           asp-route-sortBy="@Model.SortBy" 
+                                           asp-route-statusFilter="@Model.StatusFilter">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" 
+                                       asp-route-page="@(Model.CurrentPage + 1)" 
+                                       asp-route-petTypeId="@Model.PetTypeId" 
+                                       asp-route-breedId="@Model.BreedId" 
+                                       asp-route-gender="@Model.Gender" 
+                                       asp-route-ageRange="@Model.AgeRange" 
+                                       asp-route-minPrice="@Model.MinPrice" 
+                                       asp-route-maxPrice="@Model.MaxPrice" 
+                                       asp-route-search="@Model.Search" 
+                                       asp-route-sortBy="@Model.SortBy" 
+                                       asp-route-statusFilter="@Model.StatusFilter">
+                                        <i class="ph ph-caret-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm border p-4">
+                    <div class="mb-3 text-muted" style="font-size: 3.5rem;">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Chưa tìm thấy bé thú cưng phù hợp</h5>
+                    <p class="text-muted small mb-4" style="max-width: 420px; margin: 0 auto;">
+                        Không có bé nào khớp với tiêu chí tìm kiếm hiện tại. Bạn vui lòng thử chọn lại bộ lọc hoặc liên hệ hotline để đặt trước nhé!
+                    </p>
+                    <a asp-action="Index" class="btn btn-teal rounded-pill px-4 py-2 fw-semibold">
+                        <i class="ph ph-arrow-counter-clockwise me-1"></i> Xem tất cả thú cưng
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Offcanvas Filter Drawer -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobilePetFilter" aria-labelledby="mobilePetFilterLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="mobilePetFilterLabel">
+            <i class="ph ph-funnel-simple text-teal me-2"></i>Bộ lọc thú cưng
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        @{ ViewData["FilterPrefix"] = "Mobile"; }
+        <partial name="_PetFilterForm" model="Model" />
+    </div>
+</div>
+
+<!-- Quick View Modal Container -->
+<div class="modal fade" id="petQuickViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3 shadow-sm bg-white p-2 rounded-circle" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="petQuickViewModalContent">
+                <!-- Content loaded via AJAX -->
+                <div class="p-5 text-center">
+                    <div class="spinner-border text-teal" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Quick pills styling */
+    .pet-quick-pills {
+        white-space: nowrap;
+    }
+    .quick-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.55rem 1.2rem;
+        background: #fff;
+        color: #475569;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 999px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+    .quick-pill:hover {
+        background: #f8fafc;
+        border-color: var(--teal);
+        color: var(--teal-dark);
+        transform: translateY(-1px);
+    }
+    .quick-pill.active {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+    }
+
+    /* Card styling */
+    .pet-card-modern {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .pet-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+    }
+    .pet-img-hover {
+        transition: transform 0.4s ease;
+    }
+    .pet-card-modern:hover .pet-img-hover {
+        transform: scale(1.05);
+    }
+    .pet-card-modern:hover .quick-view-btn {
+        opacity: 1 !important;
+    }
+    .quick-view-btn {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .quick-view-btn:hover {
+        background: var(--teal) !important;
+        color: #fff !important;
+    }
+
+    /* Switch styling */
+    .custom-kiki-switch .form-check-input:checked {
+        background-color: var(--teal);
+        border-color: var(--teal);
+    }
+</style>
+
+@section Scripts {
+<script>
+    function openPetQuickView(petId) {
+        var modal = new bootstrap.Modal(document.getElementById('petQuickViewModal'));
+        var container = document.getElementById('petQuickViewModalContent');
+        container.innerHTML = '<div class="p-5 text-center"><div class="spinner-border text-teal" role="status"><span class="visually-hidden">Đang tải...</span></div></div>';
+        modal.show();
+
+        fetch('/thu-cung/QuickView/' + petId)
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+            })
+            .catch(err => {
+                container.innerHTML = '<div class="p-4 text-center text-danger">Có lỗi khi tải thông tin bé thú cưng. Vui lòng thử lại.</div>';
+            });
+    }
+
+    function addToCartPetAjax(petId) {
+        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        var formData = new FormData();
+        formData.append('petId', petId);
+        if (token) formData.append('__RequestVerificationToken', token);
+
+        fetch('/ShoppingCart/AddToCartPet', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Update badge
+                var badges = document.querySelectorAll('.cart-badge');
+                badges.forEach(b => {
+                    b.innerText = data.cartCount;
+                    b.classList.remove('d-none');
+                });
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'error');
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(err => {
+            alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+        });
+    }
+</script>
+}

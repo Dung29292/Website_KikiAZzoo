@@ -340,11 +340,14 @@ namespace KikiAZZoo.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PetId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -354,9 +357,126 @@ namespace KikiAZZoo.Migrations
 
                     b.HasIndex("OrderId");
 
+                    b.HasIndex("PetId");
+
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("KikiAZZoo.Models.Pet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgeMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Breed")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CareGuide")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<bool>("Dewormed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("HasPedigree")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HealthStatus")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Origin")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal?>("OriginalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PetTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Vaccinated")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("VaccineDoses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetTypeId");
+
+                    b.ToTable("Pets");
+                });
+
+            modelBuilder.Entity("KikiAZZoo.Models.PetImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetId");
+
+                    b.ToTable("PetImages");
                 });
 
             modelBuilder.Entity("KikiAZZoo.Models.PetProfile", b =>
@@ -880,15 +1000,41 @@ namespace KikiAZZoo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("KikiAZZoo.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId");
+
                     b.HasOne("KikiAZZoo.Models.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductId");
 
                     b.Navigation("Order");
 
+                    b.Navigation("Pet");
+
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("KikiAZZoo.Models.Pet", b =>
+                {
+                    b.HasOne("KikiAZZoo.Models.PetType", "PetType")
+                        .WithMany("Pets")
+                        .HasForeignKey("PetTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PetType");
+                });
+
+            modelBuilder.Entity("KikiAZZoo.Models.PetImage", b =>
+                {
+                    b.HasOne("KikiAZZoo.Models.Pet", "Pet")
+                        .WithMany("Images")
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
                 });
 
             modelBuilder.Entity("KikiAZZoo.Models.PetProfile", b =>
@@ -1056,8 +1202,15 @@ namespace KikiAZZoo.Migrations
                     b.Navigation("OrderDetails");
                 });
 
+            modelBuilder.Entity("KikiAZZoo.Models.Pet", b =>
+                {
+                    b.Navigation("Images");
+                });
+
             modelBuilder.Entity("KikiAZZoo.Models.PetType", b =>
                 {
+                    b.Navigation("Pets");
+
                     b.Navigation("Products");
                 });
 

@@ -1,0 +1,254 @@
+@model IEnumerable<KikiAZZoo.Models.Pet>
+@{
+    ViewData["Title"] = "Quản lý Thú cưng & Cá cảnh";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Thú cưng & Cá cảnh", "")
+    };
+    var petTypes = ViewBag.PetTypes as List<KikiAZZoo.Models.PetType> ?? new();
+    var breeds = ViewBag.Breeds as List<KikiAZZoo.Models.Breed> ?? new();
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<!-- Filter Bar -->
+<div class="card shadow-sm border-0 mb-4 bg-light-soft" style="background-color: #f8fafc; border: 1px solid #e2e8f0 !important;">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small text-muted fw-bold">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control border-start-0" placeholder="Tên, mã SKU, màu..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted fw-bold">Loại thú cưng</label>
+                <select name="petTypeId" class="form-select form-select-sm">
+                    <option value="">Tất cả loài</option>
+                    @foreach (var pt in petTypes)
+                    {
+                        <!option value="@pt.Id" @(ViewBag.SelectedPetTypeId == pt.Id ? "selected" : "")>@pt.Name</!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted fw-bold">Giống loài</label>
+                <select name="breedId" class="form-select form-select-sm">
+                    <option value="">Tất cả giống</option>
+                    @foreach (var b in breeds)
+                    {
+                        <!option value="@b.Id" @(ViewBag.SelectedBreedId == b.Id ? "selected" : "")>@b.Name</!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted fw-bold">Trạng thái</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Tất cả trạng thái</option>
+                    <!option value="Available" @(ViewBag.SelectedStatus == "Available" ? "selected" : "")>Đang bán (Available)</!option>
+                    <!option value="Sold" @(ViewBag.SelectedStatus == "Sold" ? "selected" : "")>Đã bán (Sold)</!option>
+                </select>
+            </div>
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                </a>
+                <button type="submit" class="btn btn-teal btn-sm rounded-pill px-4 text-white">
+                    <i class="bi bi-funnel"></i> Lọc dữ liệu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Header Action Row -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="small text-muted">
+        Tổng số: <strong>@ViewBag.TotalCount</strong> bé thú cưng / cá cảnh
+    </div>
+    <a asp-action="Upsert" class="btn btn-teal rounded-pill px-4 shadow-sm text-white">
+        <i class="bi bi-plus-circle me-1"></i> Thêm Thú Cưng / Cá Cảnh
+    </a>
+</div>
+
+<!-- Data Table -->
+<div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 70px;">Ảnh</th>
+                    <th>Tên bé thú cưng</th>
+                    <th>Loài & Giống</th>
+                    <th>Tuổi / Giới tính</th>
+                    <th>Giá bán</th>
+                    <th>Số lượng</th>
+                    <th>Tình trạng Y tế</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end" style="width: 140px;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var isAvail = item.IsAvailable;
+                        <tr class="@(!isAvail ? "table-light opacity-75" : "")">
+                            <td>
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/kikiazoo-removebg.png" : item.ImageUrl)" 
+                                     alt="@item.Name" 
+                                     class="rounded-3 object-fit-cover shadow-sm border" 
+                                     style="width: 55px; height: 55px;" />
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">@item.Name</div>
+                                @if (!string.IsNullOrEmpty(item.SkuCode))
+                                {
+                                    <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.7rem;">@item.SkuCode</span>
+                                }
+                                <div class="small text-muted">Màu: @item.Color</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-teal-subtle text-teal fw-semibold rounded-pill">
+                                    @(item.Breed?.PetType?.Name ?? "Thú cưng")
+                                </span>
+                                <div class="small text-secondary mt-1">
+                                    @(item.Breed?.Name ?? "Thuần chủng")
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold">
+                                    @(item.AgeMonths == 0 ? "Cá non" : $"{item.AgeMonths} tháng")
+                                </div>
+                                <div class="small">
+                                    @if (item.Gender == "Đực") { <span class="text-info"><i class="bi bi-gender-male"></i> Đực</span> }
+                                    else if (item.Gender == "Cái") { <span class="text-danger"><i class="bi bi-gender-female"></i> Cái</span> }
+                                    else { <span class="text-muted">@item.Gender</span> }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-danger">@item.Price.ToString("N0")đ</div>
+                                @if (item.OriginalPrice.HasValue && item.OriginalPrice > item.Price)
+                                {
+                                    <div class="text-muted text-decoration-line-through small" style="font-size: 0.75rem;">
+                                        @item.OriginalPrice.Value.ToString("N0")đ
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @(item.Quantity > 0 ? "bg-success" : "bg-secondary") rounded-pill">
+                                    @item.Quantity
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1" style="font-size: 0.75rem;">
+                                    @if (item.IsVaccinated)
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> Đã tiêm phòng</span>
+                                    }
+                                    @if (item.IsDewormed)
+                                    {
+                                        <span class="text-teal"><i class="bi bi-shield-check"></i> Đã tẩy giun</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.MicrochipCode))
+                                    {
+                                        <span class="text-primary"><i class="bi bi-cpu"></i> Có mã chip</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch custom-kiki-switch">
+                                    <input class="form-check-input" type="checkbox" id="toggle@(item.Id)" 
+                                           @(isAvail ? "checked" : "") 
+                                           onchange="togglePetStatus(@item.Id, this)" />
+                                    <label class="form-check-label small fw-semibold" for="toggle@(item.Id)" id="statusLabel@(item.Id)">
+                                        @(isAvail ? "Đang bán" : "Đã bán")
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Upsert" asp-route-id="@item.Id" class="btn btn-sm btn-outline-teal rounded-circle me-1" title="Sửa thông tin" style="width: 32px; height: 32px; padding: 0; line-height: 32px;">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bé @item.Name này không?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Xóa" style="width: 32px; height: 32px; padding: 0; line-height: 32px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            Không có dữ liệu thú cưng hoặc cá cảnh nào phù hợp.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <div class="card-footer bg-white border-0 py-3">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@ViewBag.Search" asp-route-petTypeId="@ViewBag.SelectedPetTypeId" asp-route-breedId="@ViewBag.SelectedBreedId" asp-route-status="@ViewBag.SelectedStatus">Trước</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(currentPage == i ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search" asp-route-petTypeId="@ViewBag.SelectedPetTypeId" asp-route-breedId="@ViewBag.SelectedBreedId" asp-route-status="@ViewBag.SelectedStatus">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@ViewBag.Search" asp-route-petTypeId="@ViewBag.SelectedPetTypeId" asp-route-breedId="@ViewBag.SelectedBreedId" asp-route-status="@ViewBag.SelectedStatus">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    function togglePetStatus(petId, switchEl) {
+        fetch('/Admin/Pet/ToggleStatus/' + petId, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                var label = document.getElementById('statusLabel' + petId);
+                if (label) {
+                    label.innerText = data.isAvailable ? 'Đang bán' : 'Đã bán';
+                }
+                var row = switchEl.closest('tr');
+                if (row) {
+                    if (data.isAvailable) {
+                        row.classList.remove('table-light', 'opacity-75');
+                    } else {
+                        row.classList.add('table-light', 'opacity-75');
+                    }
+                }
+            } else {
+                alert(data.message || 'Lỗi khi cập nhật trạng thái');
+                switchEl.checked = !switchEl.checked;
+            }
+        })
+        .catch(err => {
+            alert('Không thể kết nối máy chủ');
+            switchEl.checked = !switchEl.checked;
+        });
+    }
+</script>
+}

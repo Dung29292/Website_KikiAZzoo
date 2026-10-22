@@ -16,6 +16,20 @@
         }
     </div>
 
+    <!-- Quick link to Pet Shop -->
+    <div class="p-3 mb-3 rounded-4" style="background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(249,115,22,0.1)); border: 1px dashed var(--teal);">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="ph ph-sparkle text-orange fs-6"></i>
+            <span class="small fw-bold text-dark">Tìm mua thú cưng &amp; cá cảnh?</span>
+        </div>
+        <p class="small text-muted mb-2" style="font-size: 0.78rem; line-height: 1.4;">
+            Đã có gian hàng riêng cho các bé sinh vật sống, cá cảnh và thú cưng thuần chủng.
+        </p>
+        <a asp-controller="PetShop" asp-action="Index" class="btn btn-sm btn-teal w-100 rounded-pill fw-semibold py-1" style="font-size: 0.8rem;">
+            Xem gian hàng Thú cưng <i class="ph ph-arrow-right ms-1"></i>
+        </a>
+    </div>
+
     <!-- Loại thú cưng -->
     <div class="filter-section">
         <div class="filter-section-title">
@@ -41,7 +55,7 @@
         <div class="filter-section-title">
             <i class="ph ph-squares-four"></i> Danh mục
         </div>
-        @foreach (var group in Model.CategoryGroups)
+        @foreach (var group in Model.CategoryGroups.Where(g => g.Id != 1 && g.Name != "Thú cưng"))
         {
             <div class="filter-subsection">
                 <div class="filter-subsection-title">@group.Name</div>

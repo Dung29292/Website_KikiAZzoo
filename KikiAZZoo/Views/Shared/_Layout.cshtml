@@ -24,39 +24,75 @@
         })();
     </script>
     <header class="site-header">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container">
-                <a class="navbar-brand-kiki" asp-area="" asp-controller="Home" asp-action="Index"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 160px; height: 45px; object-fit: cover;" /></a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <nav class="navbar navbar-expand-lg py-2">
+            <div class="container-fluid px-3 px-md-4 px-xl-5">
+                <a class="navbar-brand-kiki d-flex align-items-center me-2 me-xl-4" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 150px; height: 42px; object-fit: contain;" />
+                </a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Index"><i class="ph ph-house"></i> Trang chủ</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Product" asp-action="Index"><i class="ph ph-storefront"></i> Sản phẩm</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Service" asp-action="Index"><i class="ph ph-scissors"></i> Dịch vụ</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="About"><i class="ph ph-info"></i> Về chúng tôi</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="News" asp-action="Index"><i class="ph ph-newspaper"></i> Tin tức</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Contact"><i class="ph ph-chat-circle-dots"></i> Liên hệ</a></li>
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="ph ph-house"></i> Trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="PetShop" asp-action="Index">
+                                <i class="ph-fill ph-paw-print text-teal"></i> Thú cưng
+                                <span class="badge-nav-new">MỚI</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Product" asp-action="Index">
+                                <i class="ph ph-storefront"></i> Sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Service" asp-action="Index">
+                                <i class="ph ph-scissors"></i> Dịch vụ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="News" asp-action="Index">
+                                <i class="ph ph-newspaper"></i> Tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="About">
+                                <i class="ph ph-info"></i> Về chúng tôi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-kiki" asp-area="" asp-controller="Home" asp-action="Contact">
+                                <i class="ph ph-chat-circle-dots"></i> Liên hệ
+                            </a>
+                        </li>
                     </ul>
-                    <form class="d-none d-lg-flex me-2 header-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
-                        <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm kiếm..." autocomplete="off" />
-                        <button type="submit" class="header-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
-                        <div id="searchSuggestions" class="search-suggestions-box d-none"></div>
-                    </form>
-                    <div class="header-actions d-flex align-items-center gap-2">
+
+                    <div class="header-right-zone d-flex align-items-center gap-2 gap-xl-3 ms-lg-auto">
+                        <!-- Header Search Bar -->
+                        <form class="d-none d-lg-flex header-search-box position-relative" asp-area="" asp-controller="Product" asp-action="Index" method="get">
+                            <input type="text" id="headerSearchInput" name="search" class="form-control header-search-input" placeholder="Tìm sản phẩm, thức ăn..." autocomplete="off" />
+                            <button type="submit" class="header-search-btn" aria-label="Search"><i class="ph ph-magnifying-glass"></i></button>
+                            <div id="searchSuggestions" class="search-suggestions-box d-none"></div>
+                        </form>
+
                         <!-- Dark Mode Toggle -->
                         <button id="darkModeToggle" class="header-icon-btn border-0 bg-transparent" title="Chuyển giao diện" onclick="toggleDarkMode()">
                             <i class="ph ph-moon" id="darkModeIcon"></i>
                         </button>
 
+                        <!-- Account / Auth -->
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <div class="dropdown">
                                 <button type="button" class="header-icon-btn dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown" aria-expanded="false" title="Tài khoản">
                                     <i class="ph-fill ph-user-circle-check"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
                                     <li><span class="dropdown-item-text small fw-bold text-teal">@User.Identity?.Name</span></li>
                                     <li><hr class="dropdown-divider" /></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile"><i class="ph ph-user me-2"></i>Tài khoản</a></li>
@@ -66,15 +102,19 @@
                                         <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="ph ph-gear me-2"></i>Quản trị</a></li>
                                     }
                                     <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout"><i class="ph ph-sign-out me-2"></i>Đăng xuất</a></li>
+                                    <li><a class="dropdown-item text-danger" asp-area="" asp-controller="Account" asp-action="Logout"><i class="ph ph-sign-out me-2"></i>Đăng xuất</a></li>
                                 </ul>
                             </div>
                         }
                         else
                         {
-                            <a asp-area="" asp-controller="Account" asp-action="Login" class="btn-header-login">Đăng nhập</a>
-                            <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-header-register">Đăng ký</a>
+                            <div class="d-flex align-items-center gap-2">
+                                <a asp-area="" asp-controller="Account" asp-action="Login" class="btn-header-login">Đăng nhập</a>
+                                <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-header-register">Đăng ký</a>
+                            </div>
                         }
+
+                        <!-- Cart -->
                         <a href="javascript:void(0)" onclick="openMiniCart()" class="header-icon-btn header-cart" title="Giỏ hàng">
                             <i class="ph ph-shopping-cart"></i>
                             <span class="cart-badge @(cartCount > 0 ? "" : "d-none")">@cartCount</span>
@@ -103,12 +143,12 @@
                     </div>
                 </div>
                 <div class="col-6 col-lg-2">
-                    <h5>Sản phẩm</h5>
-                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="1">Thú cưng</a>
+                    <h5>Cửa hàng</h5>
+                    <a asp-area="" asp-controller="PetShop" asp-action="Index"><span class="badge bg-warning text-dark me-1" style="font-size: 0.65rem;">HOT</span>Thú cưng &amp; Cá cảnh</a>
                     <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="2">Thức ăn</a>
                     <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="3">Đồ chơi</a>
                     <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="4">Phụ kiện</a>
-                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="5">Quần áo</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-categoryGroupId="5">Quần áo &amp; Chăm sóc</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Dịch vụ</h5>
@@ -190,8 +230,6 @@
         </div>
     </div>
     <div id="miniCartOverlay" class="mini-cart-overlay" onclick="closeMiniCart()"></div>
-
-    <partial name="_Chatbox" />
 
     <partial name="_Scripts" />
     <script src="~/js/toast.js" asp-append-version="true"></script>

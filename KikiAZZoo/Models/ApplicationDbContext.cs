@@ -23,12 +23,16 @@ namespace KikiAZZoo.Models
         public DbSet<PetProfile> PetProfiles => Set<PetProfile>();
         public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
         public DbSet<Coupon> Coupons => Set<Coupon>();
+        public DbSet<Breed> Breeds => Set<Breed>();
+        public DbSet<Pet> Pets => Set<Pet>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
             builder.Entity<Product>().Property(p => p.OriginalPrice).HasPrecision(18, 2);
+            builder.Entity<Pet>().Property(p => p.Price).HasPrecision(18, 2);
+            builder.Entity<Pet>().Property(p => p.OriginalPrice).HasPrecision(18, 2);
             builder.Entity<Order>().Property(o => o.TotalPrice).HasPrecision(18, 2);
             builder.Entity<Order>().Property(o => o.ShippingFee).HasPrecision(18, 2);
             builder.Entity<Order>().Property(o => o.DiscountAmount).HasPrecision(18, 2);
