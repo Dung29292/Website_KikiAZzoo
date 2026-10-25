@@ -26,17 +26,14 @@
                         <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="Price" class="form-label fw-semibold">Giá bán (đ) <span class="text-danger">*</span></label>
-                            <input asp-for="Price" asp-format="{0:0}" class="form-control" type="number" step="any" placeholder="Ví dụ: 150000" />
-                            <span asp-validation-for="Price" class="text-danger small"></span>
+                    <div class="mb-3">
+                        <label asp-for="Price" class="form-label fw-semibold">Giá gốc (đ) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-muted">₫</span>
+                            <input asp-for="Price" asp-format="{0:0}" class="form-control" type="number" step="any" placeholder="Nhập giá gốc... Ví dụ: 150000" />
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="OriginalPrice" class="form-label fw-semibold">Giá gốc (đ)</label>
-                            <input asp-for="OriginalPrice" asp-format="{0:0}" class="form-control" type="number" step="any" placeholder="Ví dụ: 180000" />
-                            <span asp-validation-for="OriginalPrice" class="text-danger small"></span>
-                        </div>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                        <div class="form-text small text-muted">Sản phẩm sử dụng 1 giá gốc duy nhất. Giá bán thực tế cho khách sẽ được tính khi áp dụng mã giảm giá (Voucher).</div>
                     </div>
 
                     <div class="mb-3">

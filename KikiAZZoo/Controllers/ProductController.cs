@@ -105,7 +105,7 @@ namespace KikiAZZoo.Controllers
             {
                 allProducts = statusFilter switch
                 {
-                    "sale" => allProducts.Where(p => p.OriginalPrice.HasValue && p.OriginalPrice.Value > p.Price).ToList(),
+                    "sale" => allProducts, // Mọi sản phẩm đều được áp dụng mã giảm giá Free (KIKI10 -10%)
                     "bestseller" => allProducts.Where(p => p.SalesCount >= 40).ToList(),
                     "new" => allProducts.Where(p => p.CreatedDate >= DateTime.Now.AddDays(-30)).ToList(),
                     _ => allProducts
@@ -138,7 +138,7 @@ namespace KikiAZZoo.Controllers
             var categoryGroups = await _catalogService.GetCategoryGroupsAsync();
             var categories = await _context.Categories
                 .Include(c => c.CategoryGroup)
-                .Where(c => c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng"))
+                .Where(c => c.CategoryGroup == null || c.CategoryGroup.Name != "Thú cưng")
                 .OrderBy(c => c.SortOrder)
                 .ToListAsync();
             var petTypes = await _catalogService.GetPetTypesAsync();
@@ -194,6 +194,7 @@ namespace KikiAZZoo.Controllers
                 PetAge = petAge,
                 FoodType = foodType
             };
+            ViewBag.ActiveCoupons = await _catalogService.GetActiveCouponsAsync();
             return View(model);
         }
 
@@ -209,6 +210,8 @@ namespace KikiAZZoo.Controllers
 
             var reviews = await _context.ProductReviews
                 .Include(r => r.ApplicationUser)
+                .Include(r => r.Replies)
+                    .ThenInclude(rep => rep.ApplicationUser)
                 .Where(r => r.ProductId == id)
                 .OrderByDescending(r => r.CreatedDate)
                 .ToListAsync();
@@ -218,9 +221,15 @@ namespace KikiAZZoo.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 hasPurchased = await _context.Orders
-                    .AnyAsync(o => o.UserId == userId && o.OrderDetails!.Any(d => d.ProductId == id));
+                    .AnyAsync(o => o.UserId == userId && o.Status != "Cancelled" && o.OrderDetails!.Any(d => d.ProductId == id));
             }
 
+            var activeCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+
+            ViewBag.ActiveCoupons = activeCoupons;
             ViewBag.Reviews = reviews;
             ViewBag.HasPurchased = hasPurchased;
             return View(product);

@@ -15,6 +15,7 @@ namespace KikiAZZoo.Data
 
             await context.Database.MigrateAsync();
             await EnsureCartTableAsync(context);
+            await EnsureReviewRepliesTableAsync(context);
             await SeedRolesAsync(roleManager);
             await SeedAdminAsync(userManager);
             await SeedEmployeeAsync(userManager);
@@ -28,12 +29,33 @@ namespace KikiAZZoo.Data
             if (!await context.Breeds.AnyAsync())
                 await SeedPetsAndBreedsAsync(context);
 
+            // Seed default initial coupons ONLY if Coupons table is completely empty
             if (!await context.Coupons.AnyAsync())
             {
-                context.Coupons.AddRange(
-                    new Coupon { Code = "KIKI10", DiscountValue = 10, IsPercentage = true, MinOrderValue = 100000, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddDays(30), IsActive = true, MaxUsage = 100 },
-                    new Coupon { Code = "SPALOVE", DiscountValue = 50000, IsPercentage = false, MinOrderValue = 200000, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddDays(30), IsActive = true, MaxUsage = 100 }
-                );
+                var defaultCoupons = new List<Coupon>
+                {
+                    new() { Code = "KIKI10", DiscountValue = 10, IsPercentage = true, MinOrderValue = 0, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddYears(1), IsActive = true, MaxUsage = 10000 },
+                    new() { Code = "KIKIFREE", DiscountValue = 20000, IsPercentage = false, MinOrderValue = 0, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddYears(1), IsActive = true, MaxUsage = 10000 },
+                    new() { Code = "FREESHIP", DiscountValue = 30000, IsPercentage = false, MinOrderValue = 0, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddYears(1), IsActive = true, MaxUsage = 10000 },
+                    new() { Code = "SPALOVE", DiscountValue = 50000, IsPercentage = false, MinOrderValue = 200000, StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddYears(1), IsActive = true, MaxUsage = 1000 }
+                };
+                context.Coupons.AddRange(defaultCoupons);
+                await context.SaveChangesAsync();
+            }
+
+            // Synchronize all existing products and pets to have single base price (OriginalPrice = Price)
+            var prods = await context.Products.Where(p => p.OriginalPrice != p.Price).ToListAsync();
+            foreach (var p in prods)
+            {
+                p.OriginalPrice = p.Price;
+            }
+            var pets = await context.Pets.Where(p => p.OriginalPrice != p.Price).ToListAsync();
+            foreach (var p in pets)
+            {
+                p.OriginalPrice = p.Price;
+            }
+            if (prods.Any() || pets.Any())
+            {
                 await context.SaveChangesAsync();
             }
         }
@@ -525,6 +547,27 @@ namespace KikiAZZoo.Data
                         CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE()
                     );
                     CREATE INDEX IX_UserCartItems_UserId ON UserCartItems(UserId);
+                END";
+            await context.Database.ExecuteSqlRawAsync(sql);
+        }
+
+        private static async Task EnsureReviewRepliesTableAsync(ApplicationDbContext context)
+        {
+            var sql = @"
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ProductReviewReplies')
+                BEGIN
+                    CREATE TABLE ProductReviewReplies (
+                        Id INT IDENTITY(1,1) PRIMARY KEY,
+                        ProductReviewId INT NOT NULL,
+                        UserId NVARCHAR(450) NOT NULL,
+                        Content NVARCHAR(1000) NOT NULL,
+                        IsStaffReply BIT NOT NULL DEFAULT 0,
+                        CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+                        CONSTRAINT FK_ProductReviewReplies_ProductReviews FOREIGN KEY (ProductReviewId) REFERENCES ProductReviews(Id) ON DELETE CASCADE,
+                        CONSTRAINT FK_ProductReviewReplies_AspNetUsers FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id)
+                    );
+                    CREATE INDEX IX_ProductReviewReplies_ProductReviewId ON ProductReviewReplies(ProductReviewId);
+                    CREATE INDEX IX_ProductReviewReplies_UserId ON ProductReviewReplies(UserId);
                 END";
             await context.Database.ExecuteSqlRawAsync(sql);
         }

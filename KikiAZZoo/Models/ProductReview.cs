@@ -28,5 +28,8 @@ namespace KikiAZZoo.Models
         public string Content { get; set; } = string.Empty;
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        [ValidateNever]
+        public List<ProductReviewReply> Replies { get; set; } = new();
     }
 }

@@ -12,6 +12,7 @@ namespace KikiAZZoo.Services
         Task<List<PetType>> GetPetTypesAsync();
         Task<List<Brand>> GetBrandsAsync();
         Task<List<PriceRange>> GetPriceRangesAsync();
+        Task<List<Coupon>> GetActiveCouponsAsync();
         
         /// <summary>
         /// Lấy categories theo category group

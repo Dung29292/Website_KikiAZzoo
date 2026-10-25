@@ -2384,42 +2384,51 @@ body {
 
 .order-status-badge {
   display: inline-block;
-  padding: 0.3rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
 }
 
 .order-status-pending {
-  background: #fff3cd;
-  color: #856404;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
 }
 
 .order-status-processing {
-  background: #cce5ff;
-  color: #004085;
+  background: #dbeafe !important;
+  color: #1e40af !important;
+  border: 1px solid #bfdbfe !important;
 }
 
 .order-status-shipping {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: #cffafe !important;
+  color: #155e75 !important;
+  border: 1px solid #a5f3fc !important;
 }
 
 .order-status-delivered {
-  background: #d4edda;
-  color: #155724;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
 }
 
 .order-status-cancelled {
-  background: #f8d7da;
-  color: #721c24;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
 }
 
 .order-status-default {
-  background: #e9ecef;
-  color: #495057;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
 }
+
 
 .order-mobile-card {
   background: #fff;
@@ -2898,6 +2907,20 @@ body {
   padding: 0.35rem 0.4rem 0.55rem 1.1rem;
   margin-left: 0.45rem;
   border-left: 2px solid rgba(13, 148, 136, 0.2);
+}
+
+.filter-food-type-box {
+  border-top-color: rgba(13, 148, 136, 0.15) !important;
+}
+
+.filter-food-type-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
 }
 
 .filter-options-scaled {
@@ -4192,7 +4215,15 @@ body.dark-mode .order-mobile-card,
 body.dark-mode .order-info-box {
   background: #1e293b !important;
   color: #cbd5e1 !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .order-info-box h6 {
+  color: #5eead4 !important;
+}
+
+body.dark-mode .order-info-box p {
+  color: #cbd5e1 !important;
 }
 
 body.dark-mode .checkout-item-img-placeholder {
@@ -4205,8 +4236,8 @@ body.dark-mode .profile-page h3,
 body.dark-mode .profile-page h5,
 body.dark-mode .profile-page h6,
 body.dark-mode .profile-page label,
-body.dark-mode .profile-page td,
-body.dark-mode .profile-page span {
+body.dark-mode .profile-page td:not(:has(.badge)):not(:has(.order-status-badge)),
+body.dark-mode .profile-page span:not(.badge):not(.order-status-badge) {
   color: #e2e8f0 !important;
 }
 
@@ -4325,8 +4356,8 @@ body.dark-mode .admin-content h5,
 body.dark-mode .admin-content h6,
 body.dark-mode .admin-content label,
 body.dark-mode .admin-content p,
-body.dark-mode .admin-content span:not(.badge),
-body.dark-mode .admin-content td,
+body.dark-mode .admin-content span:not(.badge):not(.order-status-badge),
+body.dark-mode .admin-content td:not(:has(.badge)):not(:has(.order-status-badge)),
 body.dark-mode .admin-content th {
   color: #cbd5e1 !important;
 }
@@ -4614,5 +4645,341 @@ body.dark-mode .pet-discovery-callout {
     right: -100%;
   }
 }
+
+/* ============================================
+   Product & Pet Pricing Card, Badges & Details
+   ============================================ */
+.pricing-card {
+  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
+  border: 1.5px solid rgba(13, 148, 136, 0.2);
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.05);
+  border-radius: var(--card-radius);
+  transition: all 0.3s ease;
+}
+
+.pricing-card--pet {
+  background: linear-gradient(180deg, #fdfaf6 0%, #ffffff 100%);
+  border: 1.5px solid #fecaca;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05);
+}
+
+.coupons-suggest-box {
+  background: #ffffff;
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  border-radius: 12px;
+}
+
+.product-trust-box {
+  background: #f8fafc;
+  border: 1.5px solid rgba(13, 148, 136, 0.15);
+  border-radius: 12px;
+  color: #334155;
+}
+
+.bg-teal-soft {
+  background: var(--teal-light);
+  color: var(--teal-dark);
+}
+
+.bg-orange-soft {
+  background: var(--orange-light);
+  color: #c4622a;
+}
+
+.product-detail-actions .btn-add-cart {
+  width: auto !important;
+}
+
+/* Dark Mode Overrides for Product Details */
+body.dark-mode .pricing-card {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.35) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .pricing-card--pet {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+body.dark-mode .pricing-card .text-dark,
+body.dark-mode .pricing-card--pet .text-dark {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .pricing-card .text-muted,
+body.dark-mode .pricing-card--pet .text-muted {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .pricing-card .coupons-suggest-box,
+body.dark-mode .pricing-card--pet .coupons-suggest-box {
+  background: #0f172a !important;
+  border-color: rgba(13, 148, 136, 0.3) !important;
+}
+
+body.dark-mode .coupons-suggest-box .text-teal {
+  color: #5eead4 !important;
+}
+
+body.dark-mode .product-trust-box {
+  background: #1e293b !important;
+  border-color: rgba(13, 148, 136, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .product-trust-box strong {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .bg-teal-soft {
+  background: rgba(13, 148, 136, 0.25) !important;
+  color: #5eead4 !important;
+}
+
+body.dark-mode .bg-orange-soft {
+  background: rgba(249, 115, 22, 0.25) !important;
+  color: #fdba74 !important;
+}
+
+body.dark-mode .breadcrumb-kiki {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .breadcrumb-kiki a {
+  color: var(--teal-light) !important;
+}
+
+body.dark-mode .review-card {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .reply-item {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .reply-form-box form {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ============================================
+   Pet Care Notes & Guidelines (PetShop Details)
+   ============================================ */
+.pet-care-note {
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.pet-care-note--pet {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.pet-care-note--pet h6 {
+  color: #047857;
+}
+
+.pet-care-note--fish {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: rgba(14, 165, 233, 0.25);
+}
+
+.pet-care-note--fish h6 {
+  color: #0284c7;
+}
+
+body.dark-mode .pet-care-note--pet {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #a7f3d0 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+body.dark-mode .pet-care-note--pet h6 {
+  color: #34d399 !important;
+}
+
+body.dark-mode .pet-care-note--fish {
+  background: rgba(14, 165, 233, 0.12) !important;
+  color: #bae6fd !important;
+  border-color: rgba(14, 165, 233, 0.3) !important;
+}
+
+body.dark-mode .pet-care-note--fish h6 {
+  color: #38bdf8 !important;
+}
+
+/* ============================================
+   Order Success Card — Dark Mode
+   ============================================ */
+body.dark-mode .order-success-card {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .order-success-card h2 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .order-success-card .order-success-id {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .order-success-card .order-success-id strong {
+  color: var(--teal-light) !important;
+}
+
+body.dark-mode .order-success-step {
+  color: #94a3b8;
+}
+
+body.dark-mode .order-success-step .step-dot {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+body.dark-mode .order-success-step.active {
+  color: #5eead4 !important;
+}
+
+body.dark-mode .order-success-step.active .step-dot {
+  background: var(--teal) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .order-success-step-line {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-mode .btn-outline-secondary {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* ============================================
+   Alert Banners — Dark Mode Overrides
+   ============================================ */
+body.dark-mode .alert-warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
+}
+
+body.dark-mode .alert-warning strong {
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .alert-success {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #a7f3d0 !important;
+}
+
+body.dark-mode .alert-info {
+  background: rgba(13, 148, 136, 0.15) !important;
+  border: 1px solid rgba(13, 148, 136, 0.35) !important;
+  color: #99f6e4 !important;
+}
+
+body.dark-mode .alert-danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+
+/* ============================================
+   Order Status Badges — Dark Mode
+   ============================================ */
+body.dark-mode .order-status-pending {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+body.dark-mode .order-status-processing {
+  background: rgba(59, 130, 246, 0.22) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.45) !important;
+}
+
+body.dark-mode .order-status-shipping {
+  background: rgba(6, 182, 212, 0.22) !important;
+  color: #22d3ee !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+}
+
+body.dark-mode .order-status-delivered {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+}
+
+body.dark-mode .order-status-cancelled {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+}
+
+body.dark-mode .order-status-default {
+  background: rgba(148, 163, 184, 0.22) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.45) !important;
+}
+
+/* ============================================
+   Card Discount Price & Badge Styling
+   ============================================ */
+.price-current.text-danger {
+  color: #ef4444 !important;
+}
+
+.price-old {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.badge-discount {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+  display: inline-flex;
+  align-items: center;
+}
+
+body.dark-mode .price-current.text-danger {
+  color: #f87171 !important;
+}
+
+body.dark-mode .price-old {
+  color: #64748b !important;
+}
+
+body.dark-mode .bg-danger-subtle {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+
+
 
 

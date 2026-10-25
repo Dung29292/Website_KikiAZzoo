@@ -91,7 +91,7 @@
                     <th>Tên bé thú cưng</th>
                     <th>Loài & Giống</th>
                     <th>Tuổi / Giới tính</th>
-                    <th>Giá bán</th>
+                    <th>Giá gốc</th>
                     <th>Số lượng</th>
                     <th>Tình trạng Y tế</th>
                     <th>Trạng thái</th>
@@ -138,13 +138,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-danger">@item.Price.ToString("N0")đ</div>
-                                @if (item.OriginalPrice.HasValue && item.OriginalPrice > item.Price)
-                                {
-                                    <div class="text-muted text-decoration-line-through small" style="font-size: 0.75rem;">
-                                        @item.OriginalPrice.Value.ToString("N0")đ
-                                    </div>
-                                }
+                                <div class="fw-bold text-dark">@item.Price.ToString("N0")đ</div>
                             </td>
                             <td>
                                 <span class="badge @(item.Quantity > 0 ? "bg-success" : "bg-secondary") rounded-pill">

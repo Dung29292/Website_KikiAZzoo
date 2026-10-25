@@ -93,18 +93,15 @@
                             <span asp-validation-for="Color" class="text-danger small"></span>
                         </div>
 
-                        <!-- Giá bán -->
+                        <!-- Giá gốc -->
                         <div class="col-md-4">
-                            <label asp-for="Price" class="form-label fw-bold small text-muted">Giá bán (VNĐ) <span class="text-danger">*</span></label>
-                            <input asp-for="Price" asp-format="{0:0}" type="number" step="any" class="form-control fw-bold text-danger" placeholder="VD: 1800000" />
+                            <label asp-for="Price" class="form-label fw-bold small text-muted">Giá gốc (VNĐ) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted fw-bold">₫</span>
+                                <input asp-for="Price" asp-format="{0:0}" type="number" step="any" class="form-control fw-bold text-dark" placeholder="VD: 1800000" />
+                            </div>
                             <span asp-validation-for="Price" class="text-danger small"></span>
-                        </div>
-
-                        <!-- Giá niêm yết gốc -->
-                        <div class="col-md-4">
-                            <label asp-for="OriginalPrice" class="form-label fw-bold small text-muted">Giá niêm yết gốc (nếu giảm)</label>
-                            <input asp-for="OriginalPrice" asp-format="{0:0}" type="number" step="any" class="form-control" placeholder="VD: 2200000" />
-                            <span asp-validation-for="OriginalPrice" class="text-danger small"></span>
+                            <div class="form-text small text-muted" style="font-size: 0.72rem;">Giá gốc. Giá bán sẽ tự giảm khi áp dụng mã voucher.</div>
                         </div>
 
                         <!-- Số lượng tồn -->

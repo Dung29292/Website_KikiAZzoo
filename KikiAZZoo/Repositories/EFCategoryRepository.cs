@@ -13,7 +13,7 @@ namespace KikiAZZoo.Repositories
             await _context.Categories
                 .Include(c => c.CategoryGroup)
                 .Include(c => c.Products)
-                .Where(c => c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng"))
+                .Where(c => c.CategoryGroup == null || c.CategoryGroup.Name != "Thú cưng")
                 .OrderBy(c => c.CategoryGroup!.SortOrder)
                 .ThenBy(c => c.Name)
                 .ToListAsync();
@@ -22,7 +22,7 @@ namespace KikiAZZoo.Repositories
             await _context.Categories
                 .Include(c => c.CategoryGroup)
                 .Include(c => c.Products)
-                .FirstOrDefaultAsync(c => c.Id == id && (c.CategoryGroup == null || (c.CategoryGroupId != 1 && c.CategoryGroup.Name != "Thú cưng")));
+                .FirstOrDefaultAsync(c => c.Id == id && (c.CategoryGroup == null || c.CategoryGroup.Name != "Thú cưng"));
 
         public async Task AddAsync(Category category)
         {

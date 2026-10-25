@@ -90,7 +90,7 @@
                     <th>Tên sản phẩm</th>
                     <th>Danh mục</th>
                     <th>Thương hiệu</th>
-                    <th>Giá bán</th>
+                    <th>Giá gốc</th>
                     <th>Tồn kho</th>
                     <th>Trạng thái</th>
                     <th style="width: 130px;" class="text-center pe-3">Thao tác</th>
@@ -123,10 +123,6 @@
                             <td>
                                 <div class="fw-semibold text-dark">@p.Name</div>
                                 <div class="d-flex align-items-center gap-1 mt-1">
-                                    @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
-                                    {
-                                        <span class="badge bg-danger-soft text-danger small" style="font-size: 0.7rem; padding: 0.2em 0.5em;">Giảm giá</span>
-                                    }
                                     <span class="badge @(p.IsActive ? "bg-success-soft text-success" : "bg-secondary-soft text-secondary") small" id="badge-status-@p.Id" style="font-size: 0.7rem; padding: 0.2em 0.5em;">
                                         <i class="bi @(p.IsActive ? "bi-eye-fill" : "bi-eye-slash-fill") me-1"></i>@(p.IsActive ? "Hiển thị" : "Đang ẩn")
                                     </span>
@@ -136,10 +132,6 @@
                             <td><span class="small">@p.Brand?.Name</span></td>
                             <td>
                                 <div class="fw-bold text-teal">@p.Price.ToString("#,##0")đ</div>
-                                @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
-                                {
-                                    <del class="text-muted small" style="font-size: 0.75rem;">@p.OriginalPrice.Value.ToString("#,##0")đ</del>
-                                }
                             </td>
                             <td>
                                 @if (p.Stock == 0)

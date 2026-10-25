@@ -22,6 +22,7 @@ namespace KikiAZZoo.Models
         public DbSet<PetServiceBooking> PetServiceBookings => Set<PetServiceBooking>();
         public DbSet<PetProfile> PetProfiles => Set<PetProfile>();
         public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
+        public DbSet<ProductReviewReply> ProductReviewReplies => Set<ProductReviewReply>();
         public DbSet<Coupon> Coupons => Set<Coupon>();
         public DbSet<Breed> Breeds => Set<Breed>();
         public DbSet<Pet> Pets => Set<Pet>();
@@ -30,6 +31,12 @@ namespace KikiAZZoo.Models
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<ProductReviewReply>()
+                .HasOne(r => r.ProductReview)
+                .WithMany(pr => pr.Replies)
+                .HasForeignKey(r => r.ProductReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
             builder.Entity<Product>().Property(p => p.OriginalPrice).HasPrecision(18, 2);
             builder.Entity<Pet>().Property(p => p.Price).HasPrecision(18, 2);

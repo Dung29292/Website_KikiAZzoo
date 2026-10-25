@@ -446,10 +446,39 @@
                         }
                     </div>
 
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Tạm tính (@Model.TotalItems sản phẩm)</span>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tạm tính</span>
                         <span class="fw-semibold text-dark">@Model.SubTotal.ToString("#,##0")đ</span>
                     </div>
+
+                    @{
+                        var activeCoupons = (ViewBag.ActiveCoupons as List<Coupon>) ?? new List<Coupon>();
+                        var eligibleCoupon = activeCoupons.FirstOrDefault(c => Model.SubTotal >= c.MinOrderValue);
+                        decimal couponDiscount = 0;
+                        if (eligibleCoupon != null)
+                        {
+                            couponDiscount = eligibleCoupon.IsPercentage
+                                ? Math.Round(Model.SubTotal * (eligibleCoupon.DiscountValue / 100m))
+                                : eligibleCoupon.DiscountValue;
+                        }
+                        var grandTotal = Math.Max(0, Model.SubTotal - couponDiscount + shipping);
+                    }
+
+                    @if (eligibleCoupon != null && couponDiscount > 0)
+                    {
+                        <!-- Free Voucher Banner: Chỉ hiện khi có mã giảm giá đang hoạt động -->
+                        <div class="p-2.5 rounded-3 bg-light border border-teal-subtle my-2.5">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="small fw-bold text-teal"><i class="bi bi-ticket-perforated-fill me-1"></i>Mã @eligibleCoupon.Code (@(eligibleCoupon.IsPercentage ? $"-{eligibleCoupon.DiscountValue}%" : $"-{eligibleCoupon.DiscountValue:#,##0}đ"))</span>
+                                <span class="badge bg-teal text-white small">Tự động áp dụng</span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-danger fw-semibold">
+                                <span>Giảm giá mã:</span>
+                                <span>-@couponDiscount.ToString("#,##0")đ</span>
+                            </div>
+                        </div>
+                    }
+
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Phí vận chuyển</span>
                         <span class="@(shipping == 0 ? "text-success fw-bold" : "text-dark fw-semibold")">
@@ -457,11 +486,17 @@
                         </span>
                     </div>
                     
-                    <hr class="my-4" style="border-color: #e2e8f0;" />
+                    <hr class="my-3" style="border-color: #e2e8f0;" />
                     
-                    <div class="d-flex justify-content-between fw-bold fs-5 mb-4" style="color: var(--dark);">
-                        <span>Tổng thanh toán</span>
-                        <span class="text-orange">@total.ToString("#,##0")đ</span>
+                    <div class="d-flex justify-content-between align-items-baseline mb-4" style="color: var(--dark);">
+                        <div>
+                            <span class="fw-bold fs-5 d-block">Tổng cộng</span>
+                            @if (couponDiscount > 0)
+                            {
+                                <small class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Đã áp dụng mã giảm giá</small>
+                            }
+                        </div>
+                        <span class="text-orange fs-4 fw-bold">@grandTotal.ToString("#,##0")đ</span>
                     </div>
 
                     @if (Model.HasOutOfStockItems)

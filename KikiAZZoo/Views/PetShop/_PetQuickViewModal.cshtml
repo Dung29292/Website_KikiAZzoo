@@ -10,13 +10,7 @@
                      class="w-100 h-100 object-fit-cover" 
                      style="transition: transform 0.4s ease;" />
                 
-                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
-                {
-                    var discountPercent = (int)Math.Round((1 - (Model.Price / Model.OriginalPrice.Value)) * 100);
-                    <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fw-bold shadow">
-                        -@discountPercent%
-                    </span>
-                }
+
 
                 @if (!Model.IsAvailable)
                 {
@@ -40,13 +34,41 @@
 
             <h3 class="fw-bold mb-2" style="color: var(--dark); font-size: 1.45rem;">@Model.Name</h3>
             
-            <div class="d-flex align-items-baseline gap-2 mb-3">
-                <span class="fs-4 fw-bold" style="color: var(--orange-dark);">@Model.Price.ToString("N0")đ</span>
-                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+            @{
+                var activeCoupons = (ViewBag.ActiveCoupons as List<Coupon>) ?? new List<Coupon>();
+                var bestCoupon = activeCoupons
+                    .Where(c => Model.Price >= c.MinOrderValue)
+                    .OrderByDescending(c => c.IsPercentage ? (Model.Price * c.DiscountValue / 100m) : c.DiscountValue)
+                    .FirstOrDefault();
+                decimal maxDiscount = 0;
+                if (bestCoupon != null)
                 {
-                    <span class="text-decoration-line-through text-muted small">@Model.OriginalPrice.Value.ToString("N0")đ</span>
+                    maxDiscount = bestCoupon.IsPercentage ? Math.Round(Model.Price * (bestCoupon.DiscountValue / 100m)) : bestCoupon.DiscountValue;
                 }
-            </div>
+                decimal finalPrice = Math.Max(0, Model.Price - maxDiscount);
+            }
+
+            @if (activeCoupons.Any() && bestCoupon != null && maxDiscount > 0)
+            {
+                <div class="p-2.5 rounded-3 bg-light border mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="small text-muted">Giá gốc:</span>
+                        <span class="small fw-semibold text-secondary text-decoration-line-through">@Model.Price.ToString("N0")đ</span>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" style="font-size: 0.68rem;">Mã @bestCoupon.Code</span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <span class="small fw-bold text-dark">Giá bán:</span>
+                        <span class="fs-4 fw-bold text-danger">@finalPrice.ToString("N0")đ</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="p-2.5 rounded-3 bg-light border mb-3">
+                    <span class="small text-muted d-block">Giá bán:</span>
+                    <span class="fs-4 fw-bold text-teal">@Model.Price.ToString("N0")đ</span>
+                </div>
+            }
 
             <!-- Thuộc tính đặc thù sinh vật sống -->
             <div class="row g-2 mb-3 p-3 rounded-4" style="background: #f8fafc; border: 1px solid #edf2f7; font-size: 0.85rem;">

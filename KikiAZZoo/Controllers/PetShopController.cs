@@ -160,6 +160,12 @@ namespace KikiAZZoo.Controllers
                 TotalCount = totalCount
             };
 
+            var now = DateTime.Now;
+            ViewBag.ActiveCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= now && c.EndDate >= now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+
             return View(model);
         }
 
@@ -190,6 +196,12 @@ namespace KikiAZZoo.Controllers
                     .ToListAsync();
             }
 
+            var activeCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+
+            ViewBag.ActiveCoupons = activeCoupons;
             ViewBag.RelatedPets = relatedPets;
             return View(pet);
         }
@@ -203,6 +215,12 @@ namespace KikiAZZoo.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (pet == null) return NotFound();
+
+            var activeCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+            ViewBag.ActiveCoupons = activeCoupons;
 
             return PartialView("_PetQuickViewModal", pet);
         }

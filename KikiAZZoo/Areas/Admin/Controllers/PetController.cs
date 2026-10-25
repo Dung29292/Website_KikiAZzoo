@@ -167,6 +167,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
                     pet.SkuCode = pet.SkuCode.Trim();
                 }
 
+                pet.OriginalPrice = pet.Price;
                 pet.CreatedDate = DateTime.Now;
                 _context.Pets.Add(pet);
                 TempData["Success"] = $"Đã thêm bé '{pet.Name}' thành công (Mã: {pet.SkuCode})!";
@@ -184,7 +185,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
                 existing.Gender = pet.Gender;
                 existing.Color = pet.Color;
                 existing.Price = pet.Price;
-                existing.OriginalPrice = pet.OriginalPrice;
+                existing.OriginalPrice = pet.Price;
                 existing.IsVaccinated = pet.IsVaccinated;
                 existing.VaccinationDetails = pet.VaccinationDetails;
                 existing.IsDewormed = pet.IsDewormed;

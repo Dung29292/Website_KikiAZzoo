@@ -12,7 +12,7 @@ namespace KikiAZZoo.Repositories
         private IQueryable<Product> BaseQuery(bool? isActive = null)
         {
             var query = _context.Products
-                .Where(p => p.Category == null || p.Category.CategoryGroup == null || (p.Category.CategoryGroupId != 1 && p.Category.CategoryGroup.Name != "Thú cưng"))
+                .Where(p => p.Category == null || p.Category.CategoryGroup == null || p.Category.CategoryGroup.Name != "Thú cưng")
                 .Include(p => p.Category!).ThenInclude(c => c.CategoryGroup)
                 .Include(p => p.Brand)
                 .Include(p => p.PetType)

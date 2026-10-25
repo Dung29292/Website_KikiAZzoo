@@ -20,7 +20,7 @@ namespace KikiAZZoo.Services
         public async Task<List<CategoryGroup>> GetCategoryGroupsAsync()
         {
             return await _context.CategoryGroups
-                .Where(g => g.Id != 1 && g.Name != "Thú cưng")
+                .Where(g => g.Name != "Thú cưng")
                 .OrderBy(g => g.SortOrder)
                 .Include(g => g.Categories)
                 .ToListAsync();
@@ -39,6 +39,15 @@ namespace KikiAZZoo.Services
         public async Task<List<PriceRange>> GetPriceRangesAsync()
         {
             return await _context.PriceRanges.OrderBy(r => r.SortOrder).ToListAsync();
+        }
+
+        public async Task<List<Coupon>> GetActiveCouponsAsync()
+        {
+            var now = DateTime.Now;
+            return await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= now && c.EndDate >= now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
         }
 
         public async Task<List<Category>> GetCategoriesByGroupAsync(int groupId)

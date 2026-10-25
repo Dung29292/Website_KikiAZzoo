@@ -84,23 +84,91 @@
                     }
                 </div>
 
-                <h1 class="display-7 fw-bold mb-3" style="color: var(--dark); font-size: 1.85rem;">@Model.Name</h1>
+                <h1 class="display-7 fw-bold mb-3" style="font-size: 1.85rem;">@Model.Name</h1>
 
-                <!-- Giá -->
-                <div class="p-3 mb-4 rounded-4 d-flex align-items-baseline gap-3" style="background: #fdfaf6; border: 1px solid #fee2e2;">
-                    <span class="display-6 fw-bold" style="color: var(--orange-dark); font-size: 2.1rem;">
-                        @Model.Price.ToString("N0")đ
-                    </span>
-                    @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                @{
+                    var activeCoupons = (ViewBag.ActiveCoupons as List<Coupon>) ?? new List<Coupon>();
+                    var eligibleCoupons = activeCoupons.Where(c => Model.Price >= c.MinOrderValue).ToList();
+                    Coupon? bestCoupon = null;
+                    decimal maxDiscount = 0;
+                    foreach (var c in eligibleCoupons)
                     {
-                        <span class="text-muted text-decoration-line-through fs-5">
-                            @Model.OriginalPrice.Value.ToString("N0")đ
-                        </span>
+                        decimal disc = c.IsPercentage ? Math.Round(Model.Price * (c.DiscountValue / 100m)) : c.DiscountValue;
+                        if (disc > maxDiscount)
+                        {
+                            maxDiscount = disc;
+                            bestCoupon = c;
+                        }
                     }
-                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-auto px-3 py-1 rounded-pill">
-                        @(Model.IsAvailable ? "Đang có sẵn tại cửa hàng" : "Tạm hết hàng")
-                    </span>
-                </div>
+                    decimal finalPrice = Math.Max(0, Model.Price - maxDiscount);
+                }
+
+                @if (activeCoupons.Any() && bestCoupon != null && maxDiscount > 0)
+                {
+                    <!-- Pricing & Voucher Section: Hiển thị khi Admin kích hoạt mã giảm giá -->
+                    <div class="pricing-card pricing-card--pet p-3 mb-4 rounded-4">
+                        <!-- Giá bán sau áp mã (ở trên) -->
+                        <div class="d-flex align-items-baseline justify-content-between mb-2">
+                            <div>
+                                <span class="fw-bold text-dark fs-6 d-block">Giá bán:</span>
+                                <small class="text-danger fw-semibold">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Đã áp dụng mã <strong>@bestCoupon.Code (@(bestCoupon.IsPercentage ? $"-{bestCoupon.DiscountValue}%" : $"-{bestCoupon.DiscountValue:N0}đ"))</strong>
+                                </small>
+                            </div>
+                            <span class="display-6 fw-bold text-danger" style="font-size: 2rem;">
+                                @finalPrice.ToString("N0")đ
+                            </span>
+                        </div>
+
+                        <!-- Ở dưới: Giá gốc bị gạch đi -->
+                        <div class="d-flex align-items-center justify-content-between pt-2 border-top border-teal-subtle">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted fw-semibold small">Giá gốc:</span>
+                                <span class="fs-5 text-secondary fw-bold text-decoration-line-through">@Model.Price.ToString("N0")đ</span>
+                                <span class="badge bg-secondary-subtle text-secondary small rounded-pill">Tiết kiệm @maxDiscount.ToString("N0")đ</span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">
+                                @(Model.IsAvailable ? "Đang có sẵn tại cửa hàng" : "Tạm hết hàng")
+                            </span>
+                        </div>
+
+                        @if (eligibleCoupons.Any())
+                        {
+                            <!-- Voucher code chips: Hiển thị danh sách mã giảm giá do Admin tạo -->
+                            <div class="coupons-suggest-box p-2.5 rounded-3 mt-3">
+                                <div class="small fw-bold text-dark mb-2 d-flex align-items-center">
+                                    <i class="bi bi-ticket-perforated-fill text-danger me-1"></i> Mã giảm giá ưu đãi đang áp dụng:
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var c in eligibleCoupons)
+                                    {
+                                        <span class="badge bg-white text-danger border border-danger-subtle px-2.5 py-1.5 rounded-3 d-flex align-items-center gap-1 shadow-xs">
+                                            <i class="bi bi-tag-fill text-danger"></i> Mã <strong>@c.Code</strong>: @(c.IsPercentage ? $"Giảm {c.DiscountValue}%" : $"Giảm {c.DiscountValue:N0}đ")
+                                            @(c.MinOrderValue > 0 ? $"(Đơn từ {c.MinOrderValue:N0}đ)" : "")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- Khi không có mã giảm giá (Admin tắt mã): Chỉ hiển thị Giá bán thông thường -->
+                    <div class="pricing-card pricing-card--pet p-3 mb-4 rounded-4">
+                        <div class="d-flex align-items-baseline justify-content-between">
+                            <div>
+                                <span class="text-muted fw-semibold small d-block">Giá bán:</span>
+                                <span class="display-6 fw-bold text-teal" style="font-size: 2rem;">
+                                    @Model.Price.ToString("N0")đ
+                                </span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">
+                                @(Model.IsAvailable ? "Đang có sẵn tại cửa hàng" : "Tạm hết hàng")
+                            </span>
+                        </div>
+                    </div>
+                }
 
                 <!-- Thẻ Hộ chiếu sức khỏe & Sinh trắc học -->
                 <div class="card rounded-4 border mb-4 shadow-sm overflow-hidden">
@@ -163,7 +231,7 @@
 
                 <!-- Mô tả chi tiết -->
                 <div class="mb-4">
-                    <h5 class="fw-bold mb-2" style="color: var(--dark);">Về bé thú cưng này</h5>
+                    <h5 class="fw-bold mb-2">Về bé thú cưng này</h5>
                     <p class="text-secondary" style="line-height: 1.7;">
                         @Model.Description
                     </p>
@@ -172,7 +240,7 @@
                 <!-- Hướng dẫn chăm sóc đặc thù (đặc biệt cho cá cảnh & thú cưng) -->
                 @if (isFish)
                 {
-                    <div class="alert alert-info border-0 rounded-4 p-3 mb-4" style="background: #e0f2fe; color: #0369a1;">
+                    <div class="pet-care-note pet-care-note--fish rounded-4 p-3 mb-4">
                         <h6 class="fw-bold mb-2"><i class="bi bi-water me-2"></i>Hướng dẫn chăm sóc cá cảnh & thủy sinh:</h6>
                         <ul class="mb-0 ps-3 small" style="line-height: 1.6;">
                             <li><strong>Nhiệt độ nước lý tưởng:</strong> 26°C - 30°C (ổn định).</li>
@@ -184,7 +252,7 @@
                 }
                 else
                 {
-                    <div class="alert alert-success border-0 rounded-4 p-3 mb-4" style="background: #ecfdf5; color: #047857;">
+                    <div class="pet-care-note pet-care-note--pet rounded-4 p-3 mb-4">
                         <h6 class="fw-bold mb-2"><i class="ph ph-heart-straight me-2"></i>Chế độ dinh dưỡng & Chăm sóc khi đón bé:</h6>
                         <ul class="mb-0 ps-3 small" style="line-height: 1.6;">
                             <li>Bé đã được ăn dặm hạt khô ngâm sữa/pate và ăn thức ăn chuyên dụng quen dạ.</li>
@@ -235,6 +303,7 @@
             <div class="row g-4">
                 @foreach (var rel in relatedPets)
                 {
+                    var relDisc = CouponHelper.GetBestDiscount(rel.Price, activeCoupons);
                     <div class="col-md-6 col-lg-3">
                         <div class="product-card-wrapper h-100">
                             <div class="pet-card-modern kiki-card @(!rel.IsAvailable ? "product-out-of-stock" : "")">
@@ -248,6 +317,12 @@
                                     <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.7rem;">
                                         @(rel.Breed?.Name ?? "Thú cưng")
                                     </span>
+                                    @if (relDisc.HasDiscount)
+                                    {
+                                        <span class="badge bg-danger rounded-pill px-2 py-1 position-absolute top-0 end-0 m-2 fw-bold shadow-sm" style="font-size: 0.7rem; z-index: 2;">
+                                            @relDisc.DiscountBadgeText
+                                        </span>
+                                    }
                                     <span class="badge bg-light text-muted border position-absolute bottom-0 start-0 m-2 rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
                                         @rel.Gender
                                     </span>
@@ -263,9 +338,23 @@
                                     </a>
                                 </h3>
                                 <div class="product-card__price-section mb-1">
-                                    <p class="product-card__price mb-0">
-                                        <span class="price-current">@rel.Price.ToString("N0")đ</span>
-                                    </p>
+                                    @if (relDisc.HasDiscount)
+                                    {
+                                        <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                                            <span class="price-current text-danger fw-bold fs-5">
+                                                @relDisc.FinalPrice.ToString("N0")đ
+                                            </span>
+                                            <span class="price-old text-muted text-decoration-line-through small">
+                                                @rel.Price.ToString("N0")đ
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="product-card__price mb-0">
+                                            <span class="price-current text-teal fw-bold fs-5">@rel.Price.ToString("N0")đ</span>
+                                        </p>
+                                    }
                                 </div>
                                 <div class="text-muted small mb-2">@(rel.AgeMonths == 0 ? "Cá non" : $"{rel.AgeMonths} tháng") • @rel.Gender</div>
                                 <div class="product-card__actions mt-auto pt-2">

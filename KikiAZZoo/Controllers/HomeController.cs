@@ -31,6 +31,7 @@ namespace KikiAZZoo.Controllers
             ViewBag.PetTypes = await _catalogService.GetPetTypesAsync();
             ViewBag.CategoryGroups = await _catalogService.GetCategoryGroupsAsync();
             ViewBag.FeaturedPets = (await _petRepository.GetFeaturedAsync(4)).ToList();
+            ViewBag.ActiveCoupons = await _catalogService.GetActiveCouponsAsync();
             var products = (await _productRepository.GetAllAsync()).Take(8);
             return View(products);
         }

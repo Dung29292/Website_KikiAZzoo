@@ -184,12 +184,36 @@
 
                 <!-- Coupon Section -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small"><i class="bi bi-ticket-perforated"></i> Mã giảm giá (Coupon)</label>
-                    <div class="input-group">
-                        <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Nhập mã (VD: KIKI10, SPALOVE)" />
-                        <button class="btn btn-outline-teal" type="button" id="applyCouponBtn">Áp dụng</button>
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label fw-semibold text-muted small mb-0"><i class="bi bi-ticket-perforated"></i> Mã giảm giá (Coupon)</label>
+                        <span class="badge bg-success-subtle text-success small">Tự động thêm mã Free</span>
                     </div>
-                    <div id="couponMessage" class="small mt-1 d-none"></div>
+                    <div class="input-group">
+                        <input type="text" id="couponInput" class="form-control text-uppercase font-monospace fw-bold" placeholder="Nhập mã ưu đãi..." value="@(Model.CouponCode ?? "")" />
+                        <button class="btn btn-teal" type="button" id="applyCouponBtn">Áp dụng</button>
+                    </div>
+                    <div id="couponMessage" class="small mt-1 @(Model.DiscountAmount > 0 ? "text-success fw-semibold" : "d-none")">
+                        @(Model.DiscountAmount > 0 ? $"Đã áp dụng mã {Model.CouponCode}!" : "")
+                    </div>
+
+                    @if (ViewBag.ActiveCoupons is List<Coupon> coupons && coupons.Any())
+                    {
+                        <!-- Quick Select Coupons: Chỉ hiện khi có mã giảm giá đang mở -->
+                        <div class="mt-2.5">
+                            <small class="text-muted d-block mb-1.5 fw-semibold" style="font-size: 0.78rem;"><i class="bi bi-stars text-warning me-1"></i>Chọn nhanh mã ưu đãi có sẵn:</small>
+                            <div class="d-flex flex-wrap gap-1.5" id="quickCouponList">
+                                @foreach (var c in coupons)
+                                {
+                                    var isSelected = !string.IsNullOrEmpty(Model.CouponCode) && Model.CouponCode.Equals(c.Code, StringComparison.OrdinalIgnoreCase);
+                                    <button type="button" class="btn btn-sm @(isSelected ? "btn-teal active" : "btn-outline-secondary") quick-coupon-btn rounded-pill px-2.5 py-0.5" 
+                                            data-code="@c.Code" style="font-size: 0.75rem;">
+                                        <i class="bi bi-tag-fill me-1"></i><strong>@c.Code</strong>
+                                        <span>(@(c.Code.ToUpper() == "FREESHIP" ? "Free Ship" : (c.IsPercentage ? $"-{c.DiscountValue}%" : $"-{c.DiscountValue:#,##0}đ")))</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
 
                 <!-- Loyalty points Section -->
@@ -208,8 +232,8 @@
 
                 <!-- Pricing Details -->
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Tạm tính</span>
-                    <span id="subTotalVal">@cart.SubTotal.ToString("#,##0")đ</span>
+                    <span class="text-muted">Giá gốc (Tạm tính)</span>
+                    <span id="subTotalVal" class="fw-semibold">@cart.SubTotal.ToString("#,##0")đ</span>
                 </div>
                 
                 <div class="d-flex justify-content-between mb-2" id="shippingRow">
@@ -217,9 +241,9 @@
                     <span id="shippingFeeVal">@Model.ShippingFee.ToString("#,##0")đ</span>
                 </div>
 
-                <div class="d-flex justify-content-between mb-2 text-danger d-none" id="couponDiscountRow">
-                    <span class="text-muted text-danger">Mã giảm giá</span>
-                    <span id="couponDiscountVal">-0đ</span>
+                <div class="d-flex justify-content-between mb-2 text-danger @(Model.DiscountAmount > 0 ? "" : "d-none")" id="couponDiscountRow">
+                    <span class="text-danger"><i class="bi bi-tag-fill me-1"></i>Mã giảm giá (<span id="couponCodeLabel">@(Model.CouponCode ?? "")</span>)</span>
+                    <span id="couponDiscountVal" class="fw-bold">-@Model.DiscountAmount.ToString("#,##0")đ</span>
                 </div>
 
                 <div class="d-flex justify-content-between mb-2 text-danger d-none" id="loyaltyDiscountRow">
@@ -231,9 +255,9 @@
                     <i class="bi bi-info-circle"></i> Miễn phí giao hàng cho đơn từ 300k (Hà Nội, TP.HCM) và từ 500k (Tỉnh khác).
                 </p>
                 <hr />
-                <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
-                    <span>Tổng cộng</span>
-                    <span class="product-price" id="totalVal">@Model.Total.ToString("#,##0")đ</span>
+                <div class="d-flex justify-content-between align-items-baseline fw-bold fs-5 mb-3">
+                    <span class="text-dark">Giá bán (Tổng thanh toán)</span>
+                    <span class="product-price text-teal fs-4 fw-bold" id="totalVal">@Model.Total.ToString("#,##0")đ</span>
                 </div>
 
                 <button type="submit" form="checkoutForm" class="btn btn-teal btn-lg w-100 d-none d-lg-block">
@@ -343,7 +367,25 @@
             const hiddenCouponCode = document.getElementById("hiddenCouponCode");
             const hiddenUsePoints = document.getElementById("hiddenUsePoints");
 
-            let appliedCoupon = "";
+            let appliedCoupon = couponInput.value.trim();
+
+            // Click quick-select coupon chips
+            document.querySelectorAll(".quick-coupon-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const code = this.getAttribute("data-code");
+                    couponInput.value = code;
+                    appliedCoupon = code;
+
+                    document.querySelectorAll(".quick-coupon-btn").forEach(b => {
+                        b.classList.remove("btn-teal", "active");
+                        b.classList.add("btn-outline-secondary");
+                    });
+                    this.classList.remove("btn-outline-secondary");
+                    this.classList.add("btn-teal", "active");
+
+                    updateCheckoutValues();
+                });
+            });
 
             applyCouponBtn.addEventListener("click", function () {
                 const code = couponInput.value.trim();
@@ -392,6 +434,11 @@
 
                         // Update Coupon
                         const couponRow = document.getElementById("couponDiscountRow");
+                        const couponLabel = document.getElementById("couponCodeLabel");
+                        if (couponLabel) {
+                            couponLabel.textContent = code || "Coupon";
+                        }
+
                         if (res.discountAmount > 0) {
                             couponRow.classList.remove("d-none");
                             document.getElementById("couponDiscountVal").textContent = "-" + formatMoney(res.discountAmount) + "đ";
@@ -409,6 +456,17 @@
                             }
                         }
 
+                        // Sync quick buttons active state
+                        document.querySelectorAll(".quick-coupon-btn").forEach(b => {
+                            if (b.getAttribute("data-code").toUpperCase() === (code || "").toUpperCase()) {
+                                b.classList.remove("btn-outline-secondary");
+                                b.classList.add("btn-teal", "active");
+                            } else {
+                                b.classList.remove("btn-teal", "active");
+                                b.classList.add("btn-outline-secondary");
+                            }
+                        });
+
                         // Update Loyalty
                         const loyaltyRow = document.getElementById("loyaltyDiscountRow");
                         if (res.loyaltyDiscount > 0) {
@@ -424,6 +482,9 @@
                 })
                 .catch(err => console.error("Error calculating checkout values:", err));
             }
+
+            // Automatically calculate checkout with free coupon on initial load
+            updateCheckoutValues();
 
             function formatMoney(amount) {
                 return new Intl.NumberFormat('vi-VN').format(amount);

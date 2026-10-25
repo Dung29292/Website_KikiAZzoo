@@ -5,6 +5,7 @@
         || !string.IsNullOrEmpty(Model.AgeRange) || Model.IsVaccinated == true || Model.HasMicrochip == true
         || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || !string.IsNullOrEmpty(Model.Search)
         || Model.StatusFilter != "available";
+    var activeCoupons = ViewBag.ActiveCoupons as List<Coupon> ?? new();
 }
 
 <div class="container py-4">
@@ -248,6 +249,7 @@
                 <div class="row g-4">
                     @foreach (var pet in Model.Pets)
                     {
+                        var discInfo = CouponHelper.GetBestDiscount(pet.Price, activeCoupons);
                         <div class="col-md-6 col-lg-4">
                             <div class="product-card-wrapper h-100">
                                 <div class="pet-card-modern kiki-card @(!pet.IsAvailable ? "product-out-of-stock" : "")">
@@ -265,11 +267,6 @@
                                             <span class="badge rounded-pill px-2 py-1 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
                                                 <i class="ph ph-paw-print me-1"></i>@(pet.Breed?.PetType?.Name ?? "Thú cưng")
                                             </span>
-                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
-                                            {
-                                                var pct = (int)Math.Round((1 - (pet.Price / pet.OriginalPrice.Value)) * 100);
-                                                <span class="badge-discount">-@pct%</span>
-                                            }
                                         </div>
 
                                         <!-- Gender Badge (Bottom Left) -->
@@ -319,15 +316,25 @@
                                         </a>
                                     </h3>
 
-                                    <!-- Price -->
-                                    <div class="product-card__price-section mb-1">
-                                        <p class="product-card__price mb-0">
-                                            <span class="price-current">@pet.Price.ToString("N0")đ</span>
-                                            @if (pet.OriginalPrice.HasValue && pet.OriginalPrice > pet.Price)
-                                            {
-                                                <span class="price-original">@pet.OriginalPrice.Value.ToString("N0")đ</span>
-                                            }
-                                        </p>
+                                    <!-- Price Section -->
+                                    <div class="product-card__price-section mb-2">
+                                        @if (discInfo.HasDiscount)
+                                        {
+                                            <div class="d-flex flex-column">
+                                                <span class="price-current text-danger fw-bold" style="font-size: 1.25rem; line-height: 1.2;">
+                                                    @discInfo.FinalPrice.ToString("N0")đ
+                                                </span>
+                                                <span class="price-old text-muted text-decoration-line-through mt-0.5" style="font-size: 0.85rem;">
+                                                    @pet.Price.ToString("N0")đ
+                                                </span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="price-current text-teal fw-bold" style="font-size: 1.25rem;">
+                                                @pet.Price.ToString("N0")đ
+                                            </span>
+                                        }
                                     </div>
 
                                     <!-- Breed & Age Info -->

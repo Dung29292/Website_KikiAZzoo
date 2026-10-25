@@ -375,6 +375,11 @@ namespace KikiAZZoo.Controllers
                 return RedirectToAction("Login", "Account", new { returnUrl = "/ShoppingCart" });
             }
             var cart = await GetCartAsync();
+            var activeCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+            ViewBag.ActiveCoupons = activeCoupons;
             return View(cart);
         }
 
@@ -560,15 +565,21 @@ namespace KikiAZZoo.Controllers
                     else
                     {
                         couponSuccess = true;
-                        if (coupon.IsPercentage)
+                        if (coupon.Code.ToUpper() == "FREESHIP")
+                        {
+                            discountAmount = shippingFee;
+                            message = "Áp dụng mã Miễn phí vận chuyển thành công!";
+                        }
+                        else if (coupon.IsPercentage)
                         {
                             discountAmount = Math.Round(subTotal * (coupon.DiscountValue / 100m));
+                            message = $"Áp dụng mã {coupon.Code} (-{coupon.DiscountValue}%) thành công!";
                         }
                         else
                         {
                             discountAmount = coupon.DiscountValue;
+                            message = $"Áp dụng mã {coupon.Code} (-{coupon.DiscountValue:N0}đ) thành công!";
                         }
-                        message = "Áp dụng mã giảm giá thành công!";
                     }
                 }
                 else
@@ -684,6 +695,34 @@ namespace KikiAZZoo.Controllers
             
             // Set initial shipping fee
             model.ShippingFee = CalculateShippingFee("", cart.SubTotal);
+
+            // Active coupons to present in checkout
+            var activeCoupons = await _context.Coupons
+                .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                .OrderBy(c => c.MinOrderValue)
+                .ToListAsync();
+            ViewBag.ActiveCoupons = activeCoupons;
+
+            // Auto-apply coupon only if there are active coupons and cart is eligible
+            var freeCoupon = activeCoupons.FirstOrDefault(c => cart.SubTotal >= c.MinOrderValue);
+
+            if (freeCoupon != null)
+            {
+                model.CouponCode = freeCoupon.Code;
+                if (freeCoupon.Code.ToUpper() == "FREESHIP")
+                {
+                    model.DiscountAmount = model.ShippingFee;
+                }
+                else if (freeCoupon.IsPercentage)
+                {
+                    model.DiscountAmount = Math.Round(cart.SubTotal * (freeCoupon.DiscountValue / 100m));
+                }
+                else
+                {
+                    model.DiscountAmount = freeCoupon.DiscountValue;
+                }
+            }
+
             return View(model);
         }
 
@@ -774,6 +813,10 @@ namespace KikiAZZoo.Controllers
                     currUser = await _userManager.GetUserAsync(User);
                 }
                 model.AvailableLoyaltyPoints = currUser?.LoyaltyPoints ?? 0;
+                ViewBag.ActiveCoupons = await _context.Coupons
+                    .Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now)
+                    .OrderBy(c => c.MinOrderValue)
+                    .ToListAsync();
                 return View(model);
             }
 
@@ -791,7 +834,18 @@ namespace KikiAZZoo.Controllers
                     .FirstOrDefaultAsync(c => c.Code.ToUpper() == model.CouponCode.ToUpper() && c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now);
                 if (coupon != null && subTotal >= coupon.MinOrderValue && !(coupon.MaxUsage.HasValue && coupon.UsageCount >= coupon.MaxUsage.Value))
                 {
-                    discountAmount = coupon.IsPercentage ? Math.Round(subTotal * (coupon.DiscountValue / 100m)) : coupon.DiscountValue;
+                    if (coupon.Code.ToUpper() == "FREESHIP")
+                    {
+                        discountAmount = shippingFee;
+                    }
+                    else if (coupon.IsPercentage)
+                    {
+                        discountAmount = Math.Round(subTotal * (coupon.DiscountValue / 100m));
+                    }
+                    else
+                    {
+                        discountAmount = coupon.DiscountValue;
+                    }
                     coupon.UsageCount++;
                 }
             }

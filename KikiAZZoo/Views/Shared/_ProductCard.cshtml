@@ -1,4 +1,10 @@
 @model Product
+@inject ApplicationDbContext DbContext
+@{
+    var activeCoupons = (ViewBag.ActiveCoupons as List<Coupon>) 
+        ?? DbContext.Coupons.Where(c => c.IsActive && c.StartDate <= DateTime.Now && c.EndDate >= DateTime.Now).ToList();
+    var discInfo = CouponHelper.GetBestDiscount(Model.Price, activeCoupons);
+}
 
 <div class="product-card-wrapper">
     <div class="product-card kiki-card @(Model.Stock == 0 ? "product-out-of-stock" : "")">
@@ -27,19 +33,6 @@
 
             <!-- Badges -->
             <div class="product-badges">
-                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
-                {
-                    var discount = (int)Math.Round((Model.OriginalPrice.Value - Model.Price) / Model.OriginalPrice.Value * 100);
-                    <span class="badge-discount">-@discount%</span>
-                }
-                @if (Model.SalesCount >= 30)
-                {
-                    <span class="badge-bestseller"><i class="ph-fill ph-fire"></i> Bán chạy</span>
-                }
-                @if (Model.Rating >= 4.8)
-                {
-                    <span class="badge bg-warning text-dark"><i class="ph-fill ph-star"></i> Yêu thích</span>
-                }
                 @if (Model.CreatedDate >= DateTime.Now.AddDays(-30))
                 {
                     <span class="badge-new"><i class="ph ph-sparkle"></i> Mới</span>
@@ -71,22 +64,24 @@
             </a>
         </h3>
 
-        <!-- Price & Countdown -->
-        <div class="product-card__price-section">
-            <p class="product-card__price mb-1">
-                <span class="price-current">@Model.Price.ToString("#,##0")đ</span>
-                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
-                {
-                    <span class="price-original">@Model.OriginalPrice.Value.ToString("#,##0")đ</span>
-                }
-            </p>
-            
-            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
+        <!-- Price Section -->
+        <div class="product-card__price-section mb-2">
+            @if (discInfo.HasDiscount)
             {
-                <!-- Fake Countdown Timer to create urgency -->
-                <div class="product-countdown d-flex align-items-center gap-1 text-danger small fw-bold mb-2" data-countdown="true">
-                    <i class="bi bi-clock-history"></i> <span class="countdown-text" style="font-size: 0.75rem;">Kết thúc sau: <span class="countdown-timer">02:15:30</span></span>
+                <div class="d-flex flex-column">
+                    <span class="price-current text-danger fw-bold" style="font-size: 1.25rem; line-height: 1.2;">
+                        @discInfo.FinalPrice.ToString("#,##0")đ
+                    </span>
+                    <span class="price-old text-muted text-decoration-line-through mt-0.5" style="font-size: 0.85rem;">
+                        @Model.Price.ToString("#,##0")đ
+                    </span>
                 </div>
+            }
+            else
+            {
+                <span class="price-current text-teal fw-bold" style="font-size: 1.25rem;">
+                    @Model.Price.ToString("#,##0")đ
+                </span>
             }
         </div>
 

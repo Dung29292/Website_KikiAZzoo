@@ -60,20 +60,77 @@
                     <i class="bi bi-star@(i < (int)Model.Rating ? "-fill" : "") text-warning"></i>
                 }
                 <span class="text-muted ms-1">(@Model.Rating)</span>
-                @if (Model.SalesCount >= 40)
-                {
-                    <span class="badge bg-orange-soft ms-2">Bán chạy</span>
-                }
             </div>
-            <div class="mb-3">
-                <span class="product-price fs-3">@Model.Price.ToString("#,##0")đ</span>
-                @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+            @{
+                var activeCoupons = (ViewBag.ActiveCoupons as List<Coupon>) ?? new List<Coupon>();
+                var eligibleCoupons = activeCoupons.Where(c => Model.Price >= c.MinOrderValue).ToList();
+                Coupon? bestCoupon = null;
+                decimal maxDiscount = 0;
+                foreach (var c in eligibleCoupons)
                 {
-                    <span class="product-price-old">@Model.OriginalPrice.Value.ToString("#,##0")đ</span>
-                    var discount = (int)Math.Round((Model.OriginalPrice.Value - Model.Price) / Model.OriginalPrice.Value * 100);
-                    <span class="badge bg-danger ms-2">-@discount%</span>
+                    decimal disc = c.IsPercentage ? Math.Round(Model.Price * (c.DiscountValue / 100m)) : c.DiscountValue;
+                    if (disc > maxDiscount)
+                    {
+                        maxDiscount = disc;
+                        bestCoupon = c;
+                    }
                 }
-            </div>
+                decimal finalPrice = Math.Max(0, Model.Price - maxDiscount);
+            }
+
+            @if (activeCoupons.Any() && bestCoupon != null && maxDiscount > 0)
+            {
+                <!-- Pricing & Voucher Section: Hiển thị khi Admin kích hoạt mã giảm giá -->
+                <div class="pricing-card p-3 rounded-4 mb-4">
+                    <!-- Giá bán (giá đã giảm) -->
+                    <div class="d-flex align-items-baseline justify-content-between">
+                        <div>
+                            <span class="fw-bold text-dark fs-6 d-block">Giá bán:</span>
+                            <small class="text-success fw-semibold">
+                                <i class="bi bi-patch-check-fill me-1"></i>Đã áp dụng mã <strong>@bestCoupon.Code (@(bestCoupon.IsPercentage ? $"-{bestCoupon.DiscountValue}%" : $"-{bestCoupon.DiscountValue:#,##0}đ"))</strong>
+                            </small>
+                        </div>
+                        <span class="product-price fs-2 text-danger fw-bold">@finalPrice.ToString("#,##0")đ</span>
+                    </div>
+
+                    <!-- Ở dưới: Giá gốc bị gạch đi -->
+                    <div class="d-flex align-items-center gap-2 pt-2 mt-2 border-top border-teal-subtle">
+                        <span class="text-muted fw-semibold" style="font-size: 0.9rem;">Giá gốc:</span>
+                        <span class="fs-5 text-secondary fw-bold text-decoration-line-through">@Model.Price.ToString("#,##0")đ</span>
+                        <span class="badge bg-secondary-subtle text-secondary small rounded-pill">Tiết kiệm @maxDiscount.ToString("#,##0")đ</span>
+                    </div>
+
+                    @if (eligibleCoupons.Any())
+                    {
+                        <!-- Danh sách mã giảm giá do Admin tạo đang hoạt động -->
+                        <div class="coupons-suggest-box p-2.5 rounded-3 mt-3">
+                            <div class="small fw-bold text-teal mb-2 d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-ticket-perforated-fill me-1"></i> Mã giảm giá ưu đãi áp dụng:</span>
+                                <span class="badge bg-success-subtle text-success small">Đang kích hoạt</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var c in eligibleCoupons)
+                                {
+                                    <div class="badge bg-teal-subtle text-teal border border-teal px-2.5 py-1.5 rounded-3 d-flex align-items-center gap-1.5">
+                                        <i class="bi bi-tag-fill text-teal"></i>
+                                        <span class="font-monospace fw-bold">@c.Code</span>
+                                        <span class="badge bg-teal text-white">@(c.IsPercentage ? $"Giảm {c.DiscountValue}%" : $"Giảm {c.DiscountValue:#,##0}đ")</span>
+                                        @(c.MinOrderValue > 0 ? $"(Đơn từ {c.MinOrderValue:#,##0}đ)" : "")
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Khi không có mã giảm giá (Admin tắt mã): Chỉ hiển thị Giá bán thông thường -->
+                <div class="pricing-card p-3 rounded-4 mb-4">
+                    <span class="text-muted fw-semibold small d-block">Giá bán:</span>
+                    <div class="product-price fs-2 text-teal fw-bold">@Model.Price.ToString("#,##0")đ</div>
+                </div>
+            }
 
             @if (features.Any())
             {
@@ -86,7 +143,7 @@
             }
 
             <!-- Product Specs & Trust Badges -->
-            <div class="product-trust-box p-3 bg-light rounded-3 mb-4 text-dark" style="border: 1.5px solid rgba(13, 148, 136, 0.15); font-size: 0.88rem;">
+            <div class="product-trust-box p-3 rounded-3 mb-4" style="font-size: 0.88rem;">
                 @if (Model.Category?.CategoryGroup?.Name == "Thức ăn" || Model.Category?.CategoryGroup?.Name == "Chăm sóc")
                 {
                     <div class="mb-2"><i class="bi bi-calendar-event text-teal me-2"></i><strong>Hạn sử dụng:</strong> 12 tháng kể từ ngày sản xuất (HSD chi tiết in trên bao bì)</div>
@@ -101,11 +158,11 @@
 
             @if (Model.Category?.CategoryGroup?.Name != "Thú cưng")
             {
-                <div class="product-detail-actions d-flex gap-2 flex-wrap mb-3">
+                <div id="product-buy-section" class="product-detail-actions d-flex gap-2 flex-wrap mb-3">
                     <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-teal btn-lg flex-grow-1 btn-add-cart py-3 fw-bold" style="box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
                         <i class="bi bi-cart-plus-fill me-1"></i> THÊM VÀO GIỎ
                     </a>
-                    <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-orange btn-lg btn-add-cart btn-buy-now py-3 fw-bold" data-buy-now="true" style="box-shadow: 0 4px 15px rgba(242, 141, 82, 0.3);">
+                    <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-orange btn-lg btn-buy-now py-3 fw-bold flex-grow-1" data-buy-now="true" style="box-shadow: 0 4px 15px rgba(242, 141, 82, 0.3);">
                         <i class="bi bi-lightning-fill me-1"></i> MUA NGAY
                     </a>
                 </div>
@@ -179,7 +236,10 @@
 
                         @if (!((List<ProductReview>)ViewBag.Reviews).Any())
                         {
-                            <p class="text-muted py-3">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                            <div class="text-center py-4 bg-light rounded-4 border">
+                                <i class="bi bi-chat-heart text-teal fs-2 d-block mb-2"></i>
+                                <p class="text-muted mb-0">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                            </div>
                         }
                         else
                         {
@@ -189,17 +249,120 @@
                                     <div class="review-card p-3 rounded-4 bg-light border shadow-sm">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <strong class="text-dark d-block">@(review.ApplicationUser?.FullName ?? "Khách hàng ẩn danh")</strong>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <strong class="text-dark">@(review.ApplicationUser?.FullName ?? "Khách hàng")</strong>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0" style="font-size: 0.72rem;">
+                                                        <i class="bi bi-patch-check-fill"></i> Đã mua hàng
+                                                    </span>
+                                                </div>
                                                 <small class="text-muted small">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
                                             </div>
-                                            <div class="text-warning" style="font-size: 0.9rem;">
-                                                @for (int s = 1; s <= 5; s++)
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="text-warning" style="font-size: 0.9rem;">
+                                                    @for (int s = 1; s <= 5; s++)
+                                                    {
+                                                        <i class="bi bi-star@(s <= review.Rating ? "-fill" : "")"></i>
+                                                    }
+                                                </div>
+                                                @if (User.Identity?.IsAuthenticated == true && (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == review.UserId || User.IsInRole(SD.Role_Admin)))
                                                 {
-                                                    <i class="bi bi-star@(s <= review.Rating ? "-fill" : "")"></i>
+                                                    <form asp-controller="ProductReview" asp-action="DeleteReview" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="reviewId" value="@review.Id" />
+                                                        <input type="hidden" name="productId" value="@Model.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-link text-danger p-0 border-0 ms-1" title="Xóa đánh giá">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 }
                                             </div>
                                         </div>
-                                        <p class="mb-0 text-muted small">@review.Content</p>
+                                        <p class="mb-2 text-dark small" style="white-space: pre-line;">@review.Content</p>
+
+                                        <!-- Actions / Reply Trigger -->
+                                        <div class="d-flex align-items-center justify-content-between pt-2 border-top border-1 mt-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button type="button" class="btn btn-sm btn-link text-decoration-none text-teal p-0 fw-semibold btn-toggle-reply" data-review-id="@review.Id">
+                                                    <i class="bi bi-reply-fill"></i> Trả lời
+                                                </button>
+                                                @if (review.Replies != null && review.Replies.Any())
+                                                {
+                                                    <span class="text-muted small">· @review.Replies.Count phản hồi</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Replies Thread -->
+                                        @if (review.Replies != null && review.Replies.Any())
+                                        {
+                                            <div class="replies-list mt-3 ps-3 border-start border-3 border-teal d-flex flex-column gap-2">
+                                                @foreach (var reply in review.Replies.OrderBy(r => r.CreatedDate))
+                                                {
+                                                    <div class="reply-item p-2.5 rounded-3 bg-white border small">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                <strong class="text-dark">@(reply.ApplicationUser?.FullName ?? "Người dùng")</strong>
+                                                                @if (reply.IsStaffReply)
+                                                                {
+                                                                    <span class="badge bg-teal text-white rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">
+                                                                        <i class="bi bi-shop"></i> KikiAZZoo Store
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">
+                                                                        Khách hàng
+                                                                    </span>
+                                                                }
+                                                                <small class="text-muted" style="font-size: 0.75rem;">@reply.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                                            </div>
+                                                            @if (User.Identity?.IsAuthenticated == true && (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == reply.UserId || User.IsInRole(SD.Role_Admin)))
+                                                            {
+                                                                <form asp-controller="ProductReview" asp-action="DeleteReply" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phản hồi này?');">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="hidden" name="replyId" value="@reply.Id" />
+                                                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 border-0" title="Xóa phản hồi">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            }
+                                                        </div>
+                                                        <div class="text-dark" style="white-space: pre-line;">@reply.Content</div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        <!-- Reply Form (Hidden by default, shown when clicking 'Trả lời') -->
+                                        <div id="reply-form-@review.Id" class="reply-form-box mt-3 d-none">
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <form asp-controller="ProductReview" asp-action="AddReply" method="post" class="p-3 bg-white rounded-3 border shadow-sm">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="reviewId" value="@review.Id" />
+                                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold text-muted mb-1">
+                                                            <i class="bi bi-chat-dots text-teal"></i> Viết câu trả lời cho @(review.ApplicationUser?.FullName ?? "khách hàng"):
+                                                        </label>
+                                                        <textarea name="content" class="form-control form-control-sm" rows="2" placeholder="Nhập nội dung phản hồi..." required minlength="2"></textarea>
+                                                    </div>
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button type="button" class="btn btn-sm btn-light border btn-cancel-reply" data-review-id="@review.Id">Hủy</button>
+                                                        <button type="submit" class="btn btn-sm btn-teal rounded-pill px-3">Gửi phản hồi</button>
+                                                    </div>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <div class="p-3 bg-white rounded-3 border text-center small shadow-sm">
+                                                    <span class="text-muted">Vui lòng </span>
+                                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="text-teal fw-semibold">đăng nhập</a>
+                                                    <span class="text-muted"> để gửi phản hồi cho đánh giá này.</span>
+                                                </div>
+                                            }
+                                        </div>
                                     </div>
                                 }
                             </div>
@@ -208,51 +371,70 @@
 
                     <!-- Add Review Form -->
                     <div class="col-lg-5">
-                        <div class="bg-light p-4 rounded-4 border shadow-sm">
+                        <div class="bg-light p-4 rounded-4 border shadow-sm sticky-top" style="top: 100px;">
                             <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square text-teal"></i> Viết đánh giá của bạn</h5>
                             
                             @if (User.Identity?.IsAuthenticated == true)
                             {
-                                <form asp-controller="ProductReview" asp-action="AddReview" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                @if (ViewBag.HasPurchased == true || User.IsInRole(SD.Role_Admin))
+                                {
+                                    <form asp-controller="ProductReview" asp-action="AddReview" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@Model.Id" />
 
-                                    @if (ViewBag.HasPurchased == true)
-                                    {
-                                        <div class="badge bg-success-light text-success rounded-pill px-3 py-1 mb-3 small d-inline-block">
-                                            <i class="bi bi-patch-check-fill"></i> Đã mua hàng
+                                        <div class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 mb-3 small d-inline-block">
+                                            <i class="bi bi-patch-check-fill"></i> Đã mua hàng (Đủ điều kiện đánh giá)
                                         </div>
-                                    }
 
-                                    <!-- Rating selection -->
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-semibold">Chọn số sao đánh giá</label>
-                                        <div class="rating-picker d-flex gap-2 text-warning fs-4">
-                                            <i class="bi bi-star-fill rating-star" data-value="1" style="cursor:pointer;"></i>
-                                            <i class="bi bi-star-fill rating-star" data-value="2" style="cursor:pointer;"></i>
-                                            <i class="bi bi-star-fill rating-star" data-value="3" style="cursor:pointer;"></i>
-                                            <i class="bi bi-star-fill rating-star" data-value="4" style="cursor:pointer;"></i>
-                                            <i class="bi bi-star-fill rating-star" data-value="5" style="cursor:pointer;"></i>
+                                        <!-- Rating selection -->
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Chọn số sao đánh giá</label>
+                                            <div class="rating-picker d-flex gap-2 text-warning fs-4">
+                                                <i class="bi bi-star-fill rating-star" data-value="1" style="cursor:pointer;"></i>
+                                                <i class="bi bi-star-fill rating-star" data-value="2" style="cursor:pointer;"></i>
+                                                <i class="bi bi-star-fill rating-star" data-value="3" style="cursor:pointer;"></i>
+                                                <i class="bi bi-star-fill rating-star" data-value="4" style="cursor:pointer;"></i>
+                                                <i class="bi bi-star-fill rating-star" data-value="5" style="cursor:pointer;"></i>
+                                            </div>
+                                            <input type="hidden" name="rating" id="ratingInputValue" value="5" />
                                         </div>
-                                        <input type="hidden" name="rating" id="ratingInputValue" value="5" />
-                                    </div>
 
-                                    <!-- Content -->
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-semibold">Nội dung nhận xét</label>
-                                        <textarea name="content" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này..." required minlength="5"></textarea>
-                                    </div>
+                                        <!-- Content -->
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Nội dung nhận xét</label>
+                                            <textarea name="content" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này..." required minlength="5"></textarea>
+                                        </div>
 
-                                    <button type="submit" class="btn btn-teal rounded-pill px-4 btn-sm w-100 fw-semibold">
-                                        Gửi nhận xét
-                                    </button>
-                                </form>
+                                        <button type="submit" class="btn btn-teal rounded-pill px-4 btn-sm w-100 fw-semibold">
+                                            Gửi nhận xét
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-4 px-2">
+                                        <div class="mb-3 text-warning">
+                                            <i class="bi bi-shield-lock-fill" style="font-size: 2.8rem;"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-2">Chỉ người mua mới được đánh giá</h6>
+                                        <p class="text-muted small mb-3">
+                                            Để đảm bảo tính khách quan và trải nghiệm thực tế, chỉ khách hàng đã từng mua sản phẩm này thành công mới có thể gửi đánh giá và nhận xét.
+                                        </p>
+                                        <a href="#product-buy-section" class="btn btn-sm btn-outline-teal rounded-pill px-4">
+                                            <i class="bi bi-cart-plus me-1"></i> Mua ngay sản phẩm
+                                        </a>
+                                    </div>
+                                }
                             }
                             else
                             {
-                                <div class="text-center py-3">
-                                    <p class="text-muted small mb-3">Vui lòng đăng nhập để đánh giá sản phẩm.</p>
-                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="btn btn-outline-teal btn-sm rounded-pill px-4">Đăng nhập</a>
+                                <div class="text-center py-4">
+                                    <div class="mb-3 text-muted">
+                                        <i class="bi bi-person-lock" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">Đăng nhập để đánh giá</h6>
+                                    <p class="text-muted small mb-3">Vui lòng đăng nhập bằng tài khoản đã mua hàng để gửi nhận xét và số sao.</p>
+                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="btn btn-teal btn-sm rounded-pill px-4 fw-semibold">Đăng nhập</a>
                                 </div>
                             }
                         </div>
@@ -295,6 +477,31 @@
                     });
                 });
             }
+
+            // Reply toggle handlers
+            document.querySelectorAll('.btn-toggle-reply').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const reviewId = this.dataset.reviewId;
+                    const formBox = document.getElementById(`reply-form-${reviewId}`);
+                    if (formBox) {
+                        formBox.classList.toggle('d-none');
+                        if (!formBox.classList.contains('d-none')) {
+                            const textarea = formBox.querySelector('textarea');
+                            if (textarea) textarea.focus();
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-cancel-reply').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const reviewId = this.dataset.reviewId;
+                    const formBox = document.getElementById(`reply-form-${reviewId}`);
+                    if (formBox) {
+                        formBox.classList.add('d-none');
+                    }
+                });
+            });
         });
     </script>
 }

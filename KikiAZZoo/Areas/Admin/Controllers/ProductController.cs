@@ -103,6 +103,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                product.OriginalPrice = product.Price;
                 if (imageUrl != null)
                     product.ImageUrl = await SaveImageAsync(imageUrl);
                 await _productRepository.AddAsync(product);
@@ -143,7 +144,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
                 existing.Name = product.Name;
                 existing.Price = product.Price;
-                existing.OriginalPrice = product.OriginalPrice;
+                existing.OriginalPrice = product.Price;
                 existing.Description = product.Description;
                 existing.Ingredients = product.Ingredients;
                 existing.UsageGuide = product.UsageGuide;

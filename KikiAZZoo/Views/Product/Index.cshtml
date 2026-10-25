@@ -412,10 +412,10 @@
                                 <span id="qv-rating-text" class="text-muted small"></span>
                             </div>
 
-                            <!-- Price -->
-                            <div class="mb-3">
-                                <span id="qv-price" class="fs-4 fw-bold text-danger me-2"></span>
-                                <del id="qv-original-price" class="text-muted small"></del>
+                            <!-- Price Section -->
+                            <div class="mb-3 p-2.5 rounded-3 bg-light border">
+                                <span class="small text-muted d-block">Giá bán:</span>
+                                <span id="qv-price" class="fs-4 fw-bold text-teal"></span>
                             </div>
 
                             <!-- Description -->
@@ -639,11 +639,6 @@
 
                             // Price
                             document.getElementById("qv-price").textContent = data.price.toLocaleString('vi-VN') + "đ";
-                            if (data.originalPrice && data.originalPrice > data.price) {
-                                document.getElementById("qv-original-price").textContent = data.originalPrice.toLocaleString('vi-VN') + "đ";
-                            } else {
-                                document.getElementById("qv-original-price").textContent = "";
-                            }
 
                             // Description
                             document.getElementById("qv-description").innerHTML = data.description || "Chưa có mô tả chi tiết cho sản phẩm này.";

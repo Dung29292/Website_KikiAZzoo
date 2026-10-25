@@ -6,6 +6,7 @@
     var petTypes = ViewBag.PetTypes as List<PetType> ?? new();
     var categoryGroups = ViewBag.CategoryGroups as List<CategoryGroup> ?? new();
     var featuredPets = ViewBag.FeaturedPets as List<Pet> ?? new();
+    var activeCoupons = ViewBag.ActiveCoupons as List<Coupon> ?? new();
 
     string GetPetIcon(PetType pt) => pt.Name switch
     {
@@ -177,6 +178,7 @@
             <div class="row g-4">
                 @foreach (var pet in featuredPets)
                 {
+                    var discInfo = CouponHelper.GetBestDiscount(pet.Price, activeCoupons);
                     <div class="col-md-6 col-lg-3">
                         <div class="product-card-wrapper h-100">
                             <div class="pet-card-modern kiki-card @(!pet.IsAvailable ? "product-out-of-stock" : "")">
@@ -190,6 +192,12 @@
                                     <span class="badge rounded-pill px-2 py-1 position-absolute top-0 start-0 m-2 fw-bold shadow-sm" style="background: var(--teal); color: #fff; font-size: 0.72rem;">
                                         @(pet.Breed?.Name ?? "Thú cưng")
                                     </span>
+                                    @if (discInfo.HasDiscount)
+                                    {
+                                        <span class="badge bg-danger rounded-pill px-2 py-1 position-absolute top-0 end-0 m-2 fw-bold shadow-sm" style="font-size: 0.72rem; z-index: 2;">
+                                            @discInfo.DiscountBadgeText
+                                        </span>
+                                    }
                                     <span class="badge bg-light text-muted border position-absolute bottom-0 start-0 m-2 rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.7rem;">
                                         @pet.Gender
                                     </span>
@@ -205,9 +213,28 @@
                                     </a>
                                 </h3>
                                 <div class="product-card__price-section mb-1">
-                                    <p class="product-card__price mb-0">
-                                        <span class="price-current">@pet.Price.ToString("N0")đ</span>
-                                    </p>
+                                    @if (discInfo.HasDiscount)
+                                    {
+                                        <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                                            <span class="price-current text-danger fw-bold fs-5">
+                                                @discInfo.FinalPrice.ToString("N0")đ
+                                            </span>
+                                            <span class="price-old text-muted text-decoration-line-through small">
+                                                @pet.Price.ToString("N0")đ
+                                            </span>
+                                        </div>
+                                        <div class="mt-0.5">
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-0.5 fw-semibold" style="font-size: 0.68rem;">
+                                                <i class="bi bi-tag-fill me-1"></i>Mã @discInfo.BestCoupon!.Code (@discInfo.DiscountBadgeText)
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="product-card__price mb-0">
+                                            <span class="price-current text-teal fw-bold fs-5">@pet.Price.ToString("N0")đ</span>
+                                        </p>
+                                    }
                                 </div>
                                 <div class="text-muted small mb-2">
                                     @(pet.AgeMonths == 0 ? "Cá non" : $"{pet.AgeMonths} tháng tuổi") • @pet.Color
@@ -316,10 +343,21 @@
             </div>
             <div class="modal-body p-4 text-center">
                 <i class="bi bi-gift text-teal" style="font-size: 3rem;"></i>
-                <h5 class="fw-bold text-dark mt-3">Quà tặng dành riêng cho bạn</h5>
-                <p class="text-muted small">Cảm ơn bạn đã đăng ký nhận tin. Dưới đây là mã giảm giá 10% áp dụng cho đơn hàng tiếp theo:</p>
-                <div class="bg-light p-3 rounded-3 border border-dashed text-teal fw-bold fs-4 letter-spacing-1 mb-2">KIKINEW10</div>
-                <small class="text-muted d-block">Sao chép mã trên và sử dụng tại trang thanh toán.</small>
+                @{
+                    var welcomeCoupon = activeCoupons.FirstOrDefault();
+                }
+                @if (welcomeCoupon != null)
+                {
+                    <h5 class="fw-bold text-dark mt-3">Quà tặng dành riêng cho bạn</h5>
+                    <p class="text-muted small">Cảm ơn bạn đã đăng ký nhận tin. Dưới đây là mã giảm giá @(welcomeCoupon.IsPercentage ? $"{welcomeCoupon.DiscountValue}%" : $"{welcomeCoupon.DiscountValue:#,##0}đ") áp dụng cho đơn hàng tiếp theo:</p>
+                    <div class="bg-light p-3 rounded-3 border border-dashed text-teal fw-bold fs-4 letter-spacing-1 mb-2">@welcomeCoupon.Code</div>
+                    <small class="text-muted d-block">Sao chép mã trên và sử dụng tại trang thanh toán@(welcomeCoupon.MinOrderValue > 0 ? $" (Đơn từ {welcomeCoupon.MinOrderValue:#,##0}đ)" : "").</small>
+                }
+                else
+                {
+                    <h5 class="fw-bold text-dark mt-3">Đăng ký thành công!</h5>
+                    <p class="text-muted small">Cảm ơn bạn đã đăng ký nhận tin từ KikiAzoo! Chúng tôi sẽ gửi các thông báo ưu đãi và bí quyết chăm sóc thú cưng hữu ích nhất đến bạn.</p>
+                }
             </div>
             <div class="modal-footer bg-light border-0">
                 <button type="button" class="btn btn-teal w-100 rounded-pill" data-bs-dismiss="modal">Bắt đầu mua sắm</button>
