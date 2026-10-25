@@ -1,3 +1,4 @@
+using KikiAZZoo.Extensions;
 using KikiAZZoo.Models;
 using KikiAZZoo.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -49,7 +50,44 @@ namespace KikiAZZoo.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    var guestCart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart_Guest");
+                    if (guestCart != null && guestCart.Items.Any())
+                    {
+                        var dbItems = await _context.UserCartItems.Where(c => c.UserId == user.Id).ToListAsync();
+                        foreach (var gItem in guestCart.Items)
+                        {
+                            var existing = dbItems.FirstOrDefault(d => 
+                                (d.ItemType == gItem.ItemType) &&
+                                ((gItem.ItemType == "pet" && (d.PetId == gItem.PetId || d.ProductId == gItem.ProductId)) || 
+                                 (gItem.ItemType != "pet" && d.ProductId == gItem.ProductId))
+                            );
+                            if (existing != null)
+                            {
+                                existing.Quantity += gItem.Quantity;
+                            }
+                            else
+                            {
+                                _context.UserCartItems.Add(new UserCartItem
+                                {
+                                    UserId = user.Id,
+                                    ProductId = gItem.ProductId,
+                                    PetId = gItem.PetId,
+                                    ItemType = gItem.ItemType,
+                                    Quantity = gItem.Quantity,
+                                    CreatedDate = DateTime.Now
+                                });
+                            }
+                        }
+                        await _context.SaveChangesAsync();
+                        HttpContext.Session.Remove("Cart_Guest");
+                    }
+                }
                 return RedirectToLocal(returnUrl);
+            }
 
             ModelState.AddModelError("", "Email hoặc mật khẩu không đúng.");
             return View(model);
@@ -182,6 +220,7 @@ namespace KikiAZZoo.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear();
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }

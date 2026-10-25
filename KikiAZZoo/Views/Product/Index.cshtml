@@ -438,7 +438,7 @@
                             </div>
 
                             <div class="d-flex gap-2">
-                                <a id="qv-add-cart-btn" href="" class="btn btn-teal flex-grow-1 py-2 fw-bold"><i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ</a>
+                                <a id="qv-add-cart-btn" href="" class="btn btn-teal flex-grow-1 py-2 fw-bold btn-add-cart"><i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ</a>
                                 <a id="qv-detail-btn" href="" class="btn btn-outline-teal py-2 fw-bold">Chi tiết</a>
                             </div>
                         </div>
@@ -804,7 +804,7 @@
                 // Row: Thao tác mua
                 rowsHtml += `<tr><td class="fw-bold text-muted small text-start ps-3">Hành động</td>`;
                 comparedProducts.forEach(p => {
-                    rowsHtml += `<td><a href="/ShoppingCart/AddToCart/${p.id}" class="btn btn-teal btn-sm"><i class="bi bi-cart-plus me-1"></i>Mua ngay</a></td>`;
+                    rowsHtml += `<td><a href="/ShoppingCart/AddToCart?productId=${p.id}&quantity=1" class="btn btn-teal btn-sm btn-add-cart"><i class="bi bi-cart-plus me-1"></i>Mua ngay</a></td>`;
                 });
                 rowsHtml += `</tr>`;
 

@@ -488,7 +488,7 @@
 <div class="modal fade" id="petQuickViewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden position-relative">
-            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3 shadow-sm bg-white p-2 rounded-circle" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 shadow-sm bg-white p-2 rounded-circle" style="z-index: 1060; cursor: pointer; pointer-events: auto;" data-bs-dismiss="modal" onclick="bootstrap.Modal.getOrCreateInstance(document.getElementById('petQuickViewModal')).hide()" aria-label="Close"></button>
             <div id="petQuickViewModalContent">
                 <!-- Content loaded via AJAX -->
                 <div class="p-5 text-center">
@@ -584,7 +584,8 @@
 @section Scripts {
 <script>
     function openPetQuickView(petId) {
-        var modal = new bootstrap.Modal(document.getElementById('petQuickViewModal'));
+        var modalEl = document.getElementById('petQuickViewModal');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         var container = document.getElementById('petQuickViewModalContent');
         container.innerHTML = '<div class="p-5 text-center"><div class="spinner-border text-teal" role="status"><span class="visually-hidden">Đang tải...</span></div></div>';
         modal.show();
@@ -600,6 +601,18 @@
     }
 
     function addToCartPetAjax(petId) {
+        if (typeof window.isUserAuthenticated !== 'undefined' && !window.isUserAuthenticated) {
+            if (typeof ToastNotification !== 'undefined' && ToastNotification.warning) {
+                ToastNotification.warning('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để đón bé về nhà.');
+            } else {
+                alert('Vui lòng đăng nhập để đón bé về nhà.');
+            }
+            setTimeout(() => {
+                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+            }, 1000);
+            return;
+        }
+
         var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
         var formData = new FormData();
         formData.append('petId', petId);
@@ -621,13 +634,26 @@
                     b.innerText = data.cartCount;
                     b.classList.remove('d-none');
                 });
-                if (typeof showToast === 'function') {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.success) {
+                    ToastNotification.success('Thành công', data.message);
+                } else if (typeof showToast === 'function') {
                     showToast(data.message, 'success');
                 } else {
                     alert(data.message);
                 }
+            } else if (data.requireLogin) {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.warning) {
+                    ToastNotification.warning('Yêu cầu đăng nhập', data.message);
+                } else {
+                    alert(data.message);
+                }
+                setTimeout(() => {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+                }, 1000);
             } else {
-                if (typeof showToast === 'function') {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.error) {
+                    ToastNotification.error('Thông báo', data.message);
+                } else if (typeof showToast === 'function') {
                     showToast(data.message, 'error');
                 } else {
                     alert(data.message);

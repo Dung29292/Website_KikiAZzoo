@@ -8,7 +8,7 @@ using KikiAZZoo.Services;
 namespace KikiAZZoo.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
+    [Authorize(Roles = $"{SD.Role_Admin},{SD.Role_Employee}")]
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -72,6 +72,27 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             order.Status = status;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.Id == id);
+            if (order != null)
+            {
+                if (order.OrderDetails != null && order.OrderDetails.Any())
+                {
+                    _context.OrderDetails.RemoveRange(order.OrderDetails);
+                }
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"Đã xóa đơn hàng #{id} thành công.";
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]

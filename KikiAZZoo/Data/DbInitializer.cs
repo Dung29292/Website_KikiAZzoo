@@ -14,8 +14,10 @@ namespace KikiAZZoo.Data
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             await context.Database.MigrateAsync();
+            await EnsureCartTableAsync(context);
             await SeedRolesAsync(roleManager);
             await SeedAdminAsync(userManager);
+            await SeedEmployeeAsync(userManager);
 
             // Clean up any legacy "Thú cưng" CategoryGroup/Categories from Products table if present
             await CleanUpLegacyPetsFromProductsAsync(context);
@@ -72,6 +74,27 @@ namespace KikiAZZoo.Data
             };
             await userManager.CreateAsync(admin, "Admin@123");
             await userManager.AddToRoleAsync(admin, SD.Role_Admin);
+        }
+
+        private static async Task SeedEmployeeAsync(UserManager<ApplicationUser> userManager)
+        {
+            var employeeEmail = "nhanvien@kikiazoo.com";
+            if (await userManager.Users.AnyAsync(u => u.UserName == employeeEmail)) return;
+
+            var employee = new ApplicationUser
+            {
+                UserName = employeeEmail,
+                Email = employeeEmail,
+                FullName = "Nhân viên KikiAzoo",
+                PhoneNumber = "0987654321",
+                Address = "KikiAzoo Store - Hà Nội",
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(employee, "Employee@123");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(employee, SD.Role_Employee);
+            }
         }
 
         private static async Task CleanUpLegacyPetsFromProductsAsync(ApplicationDbContext context)
@@ -267,22 +290,22 @@ namespace KikiAZZoo.Data
 
             var breeds = new List<Breed>
             {
-                new() { Name = "Poodle Tiny", PetTypeId = p["Chó"], Description = "Giống chó thông minh, không rụng lông, ngoại hình đáng yêu như gấu bông.", Origin = "Pháp / Đức" },
-                new() { Name = "Golden Retriever", PetTypeId = p["Chó"], Description = "Thân thiện, trung thành, cực kỳ tình cảm và nghe lời chủ nhân.", Origin = "Anh Quốc" },
-                new() { Name = "Corgi Pembroke", PetTypeId = p["Chó"], Description = "Chó chân ngắn, mông trái tim nổi tiếng của Hoàng gia Anh, rất lanh lợi.", Origin = "Xứ Wales" },
-                new() { Name = "Phốc Sóc (Pomeranian)", PetTypeId = p["Chó"], Description = "Bộ lông xù quý tộc, tính cách năng động, tinh nghịch.", Origin = "Ba Lan / Đức" },
-                new() { Name = "Shiba Inu", PetTypeId = p["Chó"], Description = "Quốc khuyển Nhật Bản với gương mặt cười trứ danh, sạch sẽ và độc lập.", Origin = "Nhật Bản" },
+                new() { Name = "Poodle Tiny", Code = "POD", PetTypeId = p["Chó"], Description = "Giống chó thông minh, không rụng lông, ngoại hình đáng yêu như gấu bông.", Origin = "Pháp / Đức" },
+                new() { Name = "Golden Retriever", Code = "GLD", PetTypeId = p["Chó"], Description = "Thân thiện, trung thành, cực kỳ tình cảm và nghe lời chủ nhân.", Origin = "Anh Quốc" },
+                new() { Name = "Corgi Pembroke", Code = "CRG", PetTypeId = p["Chó"], Description = "Chó chân ngắn, mông trái tim nổi tiếng của Hoàng gia Anh, rất lanh lợi.", Origin = "Xứ Wales" },
+                new() { Name = "Phốc Sóc (Pomeranian)", Code = "POM", PetTypeId = p["Chó"], Description = "Bộ lông xù quý tộc, tính cách năng động, tinh nghịch.", Origin = "Ba Lan / Đức" },
+                new() { Name = "Shiba Inu", Code = "SHI", PetTypeId = p["Chó"], Description = "Quốc khuyển Nhật Bản với gương mặt cười trứ danh, sạch sẽ và độc lập.", Origin = "Nhật Bản" },
 
-                new() { Name = "Mèo Anh lông ngắn (BSH)", PetTypeId = p["Mèo"], Description = "Khuôn mặt bánh bao tròn trĩnh, tính tình điềm đạm, quấn chủ.", Origin = "Anh Quốc" },
-                new() { Name = "Mèo Tai cụp (Scottish Fold)", PetTypeId = p["Mèo"], Description = "Đôi tai cụp độc đáo, đôi mắt to tròn ngây thơ, rất ngọt ngào.", Origin = "Scotland" },
-                new() { Name = "Mèo Ragdoll", PetTypeId = p["Mèo"], Description = "Bộ lông dài mượt mà, mắt xanh biếc hút hồn, tính tình hiền như cục bột.", Origin = "Hoa Kỳ" },
+                new() { Name = "Mèo Anh lông ngắn (BSH)", Code = "BSH", PetTypeId = p["Mèo"], Description = "Khuôn mặt bánh bao tròn trĩnh, tính tình điềm đạm, quấn chủ.", Origin = "Anh Quốc" },
+                new() { Name = "Mèo Tai cụp (Scottish Fold)", Code = "SCF", PetTypeId = p["Mèo"], Description = "Đôi tai cụp độc đáo, đôi mắt to tròn ngây thơ, rất ngọt ngào.", Origin = "Scotland" },
+                new() { Name = "Mèo Ragdoll", Code = "RGD", PetTypeId = p["Mèo"], Description = "Bộ lông dài mượt mà, mắt xanh biếc hút hồn, tính tình hiền như cục bột.", Origin = "Hoa Kỳ" },
 
-                new() { Name = "Chim Họa Mi", PetTypeId = p["Chim"], Description = "Giọng hót trong trẻo, thánh thót, dáng vóc thanh tao.", Origin = "Việt Nam / Trung Quốc" },
-                new() { Name = "Vẹt Sun Conure", PetTypeId = p["Chim"], Description = "Màu lông vàng cam rực rỡ, thông minh, biết nói và bắt chước tiếng người.", Origin = "Nam Mỹ" },
-                new() { Name = "Chim Yến Phụng", PetTypeId = p["Chim"], Description = "Màu sắc đa dạng, hiền lành, dễ nuôi và rất quấn người.", Origin = "Úc" },
+                new() { Name = "Chim Họa Mi", Code = "MI", PetTypeId = p["Chim"], Description = "Giọng hót trong trẻo, thánh thót, dáng vóc thanh tao.", Origin = "Việt Nam / Trung Quốc" },
+                new() { Name = "Vẹt Sun Conure", Code = "BRD", PetTypeId = p["Chim"], Description = "Màu lông vàng cam rực rỡ, thông minh, biết nói và bắt chước tiếng người.", Origin = "Nam Mỹ" },
+                new() { Name = "Chim Yến Phụng", Code = "BRD", PetTypeId = p["Chim"], Description = "Màu sắc đa dạng, hiền lành, dễ nuôi và rất quấn người.", Origin = "Úc" },
 
-                new() { Name = "Hamster Bear (Syrian)", PetTypeId = p["Hamster"], Description = "Thân hình tròn trịa mập mạp, hiền khô, dễ bế ẵm.", Origin = "Syria" },
-                new() { Name = "Hamster Winter White", PetTypeId = p["Hamster"], Description = "Kích thước mini, nhanh nhẹn, có thể đổi màu lông theo mùa.", Origin = "Siberia" }
+                new() { Name = "Hamster Bear (Syrian)", Code = "HAM", PetTypeId = p["Hamster"], Description = "Thân hình tròn trịa mập mạp, hiền khô, dễ bế ẵm.", Origin = "Syria" },
+                new() { Name = "Hamster Winter White", Code = "WW", PetTypeId = p["Hamster"], Description = "Kích thước mini, nhanh nhẹn, có thể đổi màu lông theo mùa.", Origin = "Siberia" }
             };
 
             context.Breeds.AddRange(breeds);
@@ -485,6 +508,25 @@ namespace KikiAZZoo.Data
 
             context.Pets.AddRange(pets);
             await context.SaveChangesAsync();
+        }
+
+        private static async Task EnsureCartTableAsync(ApplicationDbContext context)
+        {
+            var sql = @"
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UserCartItems')
+                BEGIN
+                    CREATE TABLE UserCartItems (
+                        Id INT IDENTITY(1,1) PRIMARY KEY,
+                        UserId NVARCHAR(450) NOT NULL,
+                        ProductId INT NOT NULL,
+                        PetId INT NULL,
+                        ItemType NVARCHAR(50) NOT NULL DEFAULT 'product',
+                        Quantity INT NOT NULL DEFAULT 1,
+                        CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE()
+                    );
+                    CREATE INDEX IX_UserCartItems_UserId ON UserCartItems(UserId);
+                END";
+            await context.Database.ExecuteSqlRawAsync(sql);
         }
     }
 }

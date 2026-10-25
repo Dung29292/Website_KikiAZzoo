@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace KikiAZZoo.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
+    [Authorize(Roles = $"{SD.Role_Admin},{SD.Role_Employee}")]
     public class PetController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -82,6 +85,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Upsert(int? id)
         {
             await PopulateDropdowns();
@@ -89,7 +93,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             if (id == null || id == 0)
             {
                 // Create
-                return View(new Pet
+                var newPet = new Pet
                 {
                     Status = "Available",
                     Quantity = 1,
@@ -98,7 +102,16 @@ namespace KikiAZZoo.Areas.Admin.Controllers
                     IsVaccinated = true,
                     IsDewormed = true,
                     CreatedDate = DateTime.Now
-                });
+                };
+
+                var firstBreed = await _context.Breeds.Include(b => b.PetType).OrderBy(b => b.PetTypeId).ThenBy(b => b.Name).FirstOrDefaultAsync();
+                if (firstBreed != null)
+                {
+                    newPet.BreedId = firstBreed.Id;
+                    newPet.SkuCode = await GeneratePetSkuCode(firstBreed.Id);
+                }
+
+                return View(newPet);
             }
 
             // Edit
@@ -112,6 +125,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Upsert(Pet pet, IFormFile? imageFile)
         {
             ModelState.Remove("Breed");
@@ -144,9 +158,18 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
             if (pet.Id == 0)
             {
+                if (string.IsNullOrWhiteSpace(pet.SkuCode))
+                {
+                    pet.SkuCode = await GeneratePetSkuCode(pet.BreedId);
+                }
+                else
+                {
+                    pet.SkuCode = pet.SkuCode.Trim();
+                }
+
                 pet.CreatedDate = DateTime.Now;
                 _context.Pets.Add(pet);
-                TempData["Success"] = $"Đã thêm bé '{pet.Name}' thành công!";
+                TempData["Success"] = $"Đã thêm bé '{pet.Name}' thành công (Mã: {pet.SkuCode})!";
             }
             else
             {
@@ -185,6 +208,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var pet = await _context.Pets.FindAsync(id);
@@ -203,14 +227,14 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             var pet = await _context.Pets.FindAsync(id);
             if (pet == null) return Json(new { success = false, message = "Không tìm thấy thú cưng." });
 
-            pet.Status = (pet.Status == "Available" || pet.Status == "Còn hàng") ? "Sold" : "Available";
+            pet.Status = (pet.Status == "Available" || pet.Status == "Còn hàng") ? "Hidden" : "Available";
             if (pet.Status == "Available" && pet.Quantity <= 0)
             {
                 pet.Quantity = 1;
             }
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, newStatus = pet.Status, isAvailable = pet.IsAvailable });
+            return Json(new { success = true, newStatus = pet.Status, isAvailable = pet.IsAvailable, statusText = pet.IsAvailable ? "Đang bán" : "Tạm ẩn" });
         }
 
         private async Task PopulateDropdowns()
@@ -221,11 +245,86 @@ namespace KikiAZZoo.Areas.Admin.Controllers
                 .ThenBy(b => b.Name)
                 .Select(b => new {
                     b.Id,
-                    DisplayName = $"{(b.PetType != null ? b.PetType.Name + " - " : "")}{b.Name}"
+                    DisplayName = $"{(b.PetType != null ? b.PetType.Name + " - " : "")}{b.Name}{(!string.IsNullOrEmpty(b.Code) ? $" [{b.Code}]" : "")}"
                 })
                 .ToListAsync();
 
             ViewBag.BreedList = new SelectList(breeds, "Id", "DisplayName");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNextSku(int breedId)
+        {
+            if (breedId <= 0)
+            {
+                return Json(new { success = false, sku = "" });
+            }
+
+            string nextSku = await GeneratePetSkuCode(breedId);
+            return Json(new { success = true, sku = nextSku });
+        }
+
+        private async Task<string> GeneratePetSkuCode(int breedId)
+        {
+            var breed = await _context.Breeds.Include(b => b.PetType).FirstOrDefaultAsync(b => b.Id == breedId);
+            
+            // Middle code is the breed's Code, or fallback to pet type slug
+            string middleCode = !string.IsNullOrWhiteSpace(breed?.Code)
+                ? breed.Code.Trim().ToUpper()
+                : (!string.IsNullOrWhiteSpace(breed?.PetType?.Name) ? GetPetTypeSlug(breed.PetType.Name).ToUpper() : "BRD");
+
+            // Extract maximum sequence number from existing SkuCodes (e.g. PET-POD-001, PET-BRD-008, PET-HAM-009)
+            var existingSkus = await _context.Pets
+                .Where(p => !string.IsNullOrEmpty(p.SkuCode))
+                .Select(p => p.SkuCode!)
+                .ToListAsync();
+
+            int totalExistingCount = await _context.Pets.CountAsync();
+
+            int maxSeq = 0;
+            var regex = new Regex(@"[-_](\d+)$");
+            foreach (var sku in existingSkus)
+            {
+                var match = regex.Match(sku.Trim());
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int seq))
+                {
+                    if (seq > maxSeq) maxSeq = seq;
+                }
+            }
+
+            int nextSeq = Math.Max(maxSeq, totalExistingCount) + 1;
+            return $"PET-{middleCode}-{nextSeq:D3}";
+        }
+
+        public static string GetPetTypeSlug(string? petTypeName)
+        {
+            if (string.IsNullOrWhiteSpace(petTypeName)) return "pet";
+            string lower = petTypeName.Trim().ToLower();
+            if (lower.Contains("chó") || lower.Contains("cho")) return "cho";
+            if (lower.Contains("mèo") || lower.Contains("meo")) return "meo";
+            if (lower.Contains("cá") || lower.Contains("ca") || lower.Contains("thủy sinh")) return "ca";
+            if (lower.Contains("chim")) return "chim";
+            if (lower.Contains("hamster") || lower.Contains("chuột")) return "hamster";
+            if (lower.Contains("thỏ") || lower.Contains("tho")) return "tho";
+
+            string clean = Regex.Replace(RemoveDiacritics(lower), @"[^a-z0-9]+", "");
+            return string.IsNullOrEmpty(clean) ? "pet" : clean;
+        }
+
+        public static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString().Normalize(NormalizationForm.FormC).Replace("đ", "d").Replace("Đ", "D");
         }
     }
 }

@@ -44,15 +44,20 @@
     </script>
     <div class="row g-0">
         <div class="col-md-2 admin-sidebar">
-            <h5 class="text-white px-3 mb-4"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 120px; height: 35px; object-fit: cover; vertical-align: middle;" /> <span class="small text-white-50 align-middle">Admin</span></h5>
+            <h5 class="text-white px-3 mb-4"><img src="/images/kikiazoo-removebg.png" alt="KikiAzoo" style="width: 120px; height: 35px; object-fit: cover; vertical-align: middle;" /> <span class="small text-white-50 align-middle">@(User.IsInRole(SD.Role_Admin) ? "Admin" : "Nhân viên")</span></h5>
             <a asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index"><i class="bi bi-receipt"></i> Đơn hàng</a>
+            <a asp-area="Admin" asp-controller="Booking" asp-action="Index"><i class="bi bi-calendar-check"></i> Lịch đặt dịch vụ</a>
             <a asp-area="Admin" asp-controller="Pet" asp-action="Index"><i class="bi bi-heart-pulse"></i> Thú cưng &amp; Cá cảnh</a>
+            <a asp-area="Admin" asp-controller="Breed" asp-action="Index"><i class="bi bi-diagram-3"></i> Giống loài</a>
             <a asp-area="Admin" asp-controller="Product" asp-action="Index"><i class="bi bi-box"></i> Sản phẩm</a>
             <a asp-area="Admin" asp-controller="Category" asp-action="Index"><i class="bi bi-tags"></i> Danh mục</a>
-            <a asp-area="Admin" asp-controller="Order" asp-action="Index"><i class="bi bi-receipt"></i> Đơn hàng</a>
             <a asp-area="Admin" asp-controller="News" asp-action="Index"><i class="bi bi-newspaper"></i> Tin tức</a>
-            <a asp-area="Admin" asp-controller="Booking" asp-action="Index"><i class="bi bi-calendar-check"></i> Lịch đặt dịch vụ</a>
-            <a asp-area="Admin" asp-controller="Coupon" asp-action="Index"><i class="bi bi-tag-fill"></i> Mã giảm giá</a>
+            @if (User.IsInRole(SD.Role_Admin))
+            {
+                <a asp-area="Admin" asp-controller="Coupon" asp-action="Index"><i class="bi bi-tag-fill"></i> Mã giảm giá</a>
+                <a asp-area="Admin" asp-controller="User" asp-action="Index"><i class="bi bi-people"></i> Quản lý Tài khoản</a>
+            }
             <hr class="border-secondary mx-3" />
             <a asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i> Về trang chủ</a>
             <a asp-area="" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>

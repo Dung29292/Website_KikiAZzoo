@@ -1,0 +1,125 @@
+@model KikiAZZoo.Models.Breed
+@{
+    bool isCreate = Model.Id == 0;
+    ViewData["Title"] = isCreate ? "Thêm Giống Loài Mới" : $"Chỉnh sửa giống: {Model.Name}";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Thú cưng & Cá cảnh", "/Admin/Pet"),
+        ("Giống loài", "/Admin/Breed"),
+        (isCreate ? "Thêm mới" : "Chỉnh sửa", "")
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <form asp-action="Upsert" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-light py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-teal">
+                        <i class="bi @(isCreate ? "bi-plus-circle" : "bi-pencil-square") me-2"></i>
+                        @(isCreate ? "Thêm giống loài thú cưng mới" : "Cập nhật thông tin giống loài")
+                    </h5>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                    </a>
+                </div>
+
+                <div class="card-body p-4">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                    <div class="row g-3">
+                        <!-- Tên giống loài -->
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label fw-bold small text-muted">Tên giống loài <span class="text-danger">*</span></label>
+                            <input asp-for="Name" id="breedNameInput" class="form-control" placeholder="VD: Poodle Tiny, Corgi Pembroke, Mèo Ragdoll, Chim Yến Phụng..." />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Thuộc nhóm loài pet -->
+                        <div class="col-md-4">
+                            <label asp-for="PetTypeId" class="form-label fw-bold small text-muted">Thuộc loài thú cưng <span class="text-danger">*</span></label>
+                            <select asp-for="PetTypeId" class="form-select" asp-items="ViewBag.PetTypeList">
+                                <option value="">-- Chọn loài thú cưng --</option>
+                            </select>
+                            <span asp-validation-for="PetTypeId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Mã giống loài (phần ở giữa SKU) -->
+                        <div class="col-md-3">
+                            <label asp-for="Code" class="form-label fw-bold small text-muted">Mã giống loài (ở giữa SKU)</label>
+                            <input asp-for="Code" id="breedCodeInput" class="form-control text-uppercase fw-bold text-teal" placeholder="VD: BRD, POD, GLD..." maxlength="15" />
+                            <span asp-validation-for="Code" class="text-danger small"></span>
+                            <div class="form-text small text-muted">Ghép thành: <code>PET-<strong class="text-primary" id="previewCode">@(string.IsNullOrEmpty(Model.Code) ? "BRD" : Model.Code)</strong>-001</code></div>
+                        </div>
+
+                        <!-- Nguồn gốc / Xuất xứ -->
+                        <div class="col-md-12">
+                            <label asp-for="Origin" class="form-label fw-bold small text-muted">Nguồn gốc / Xuất xứ</label>
+                            <input asp-for="Origin" class="form-control" placeholder="VD: Anh Quốc, Pháp / Đức, Nhật Bản, Việt Nam..." />
+                            <span asp-validation-for="Origin" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Mô tả chi tiết -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-bold small text-muted">Mô tả đặc điểm & tập tính</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Mô tả tóm tắt về đặc điểm ngoại hình, tính cách, mức độ dễ nuôi hoặc hướng dẫn chăm sóc sơ bộ..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white py-3 px-4 d-flex justify-content-end gap-2 border-top">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    <button type="submit" class="btn btn-teal rounded-pill px-5 text-white fw-bold shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i> Lưu giống loài
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nameInput = document.getElementById("breedNameInput");
+            const codeInput = document.getElementById("breedCodeInput");
+            const previewCode = document.getElementById("previewCode");
+
+            function updatePreview() {
+                const code = (codeInput.value || "").trim().toUpperCase();
+                previewCode.textContent = code || "BRD";
+            }
+
+            if (codeInput) {
+                codeInput.addEventListener("input", function () {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+                    updatePreview();
+                });
+            }
+
+            if (nameInput && codeInput) {
+                nameInput.addEventListener("blur", function () {
+                    if (!codeInput.value.trim() && this.value.trim()) {
+                        // Generate quick 3-letter acronym or prefix
+                        const words = this.value.trim().split(/\s+/);
+                        let autoCode = "";
+                        if (words.length >= 2) {
+                            autoCode = words.map(w => w[0]).join('').substring(0, 4).toUpperCase();
+                        } else {
+                            autoCode = this.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
+                        }
+                        if (autoCode) {
+                            codeInput.value = autoCode;
+                            updatePreview();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

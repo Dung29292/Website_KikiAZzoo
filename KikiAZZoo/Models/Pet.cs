@@ -27,8 +27,10 @@ namespace KikiAZZoo.Models
         public string Color { get; set; } = "Đa sắc";
 
         [Range(0.01, 1000000000)]
+        [DisplayFormat(DataFormatString = "{0:0}", ApplyFormatInEditMode = true)]
         public decimal Price { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:0}", ApplyFormatInEditMode = true)]
         public decimal? OriginalPrice { get; set; }
 
         public bool IsVaccinated { get; set; } = true;

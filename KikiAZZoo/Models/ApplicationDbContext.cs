@@ -25,6 +25,7 @@ namespace KikiAZZoo.Models
         public DbSet<Coupon> Coupons => Set<Coupon>();
         public DbSet<Breed> Breeds => Set<Breed>();
         public DbSet<Pet> Pets => Set<Pet>();
+        public DbSet<UserCartItem> UserCartItems => Set<UserCartItem>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

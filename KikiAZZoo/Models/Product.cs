@@ -11,8 +11,10 @@ namespace KikiAZZoo.Models
         public string Name { get; set; } = string.Empty;
 
         [Range(0.01, 100000000)]
+        [DisplayFormat(DataFormatString = "{0:0}", ApplyFormatInEditMode = true)]
         public decimal Price { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:0}", ApplyFormatInEditMode = true)]
         public decimal? OriginalPrice { get; set; }
 
         [StringLength(2000, MinimumLength = 10, ErrorMessage = "Mô tả phải từ 10 đến 2000 ký tự")]

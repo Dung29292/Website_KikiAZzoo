@@ -1,0 +1,74 @@
+@model KikiAZZoo.Models.ViewModels.CreateUserViewModel
+@{
+    ViewData["Title"] = "Thêm tài khoản mới";
+    ViewData["Breadcrumbs"] = new List<(string Name, string Url)>
+    {
+        ("Tài khoản", "/Admin/User"),
+        ("Tạo mới", "")
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-teal"><i class="bi bi-person-plus-fill me-2"></i>Tạo tài khoản / Nhân viên mới</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 mb-4" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-bold small text-muted"></label>
+                            <input asp-for="FullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-bold small text-muted"></label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="example@kikiazoo.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-bold small text-muted"></label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="0987654321" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Role" class="form-label fw-bold small text-muted"></label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="Employee" selected>Nhân viên (Employee)</option>
+                                <option value="Admin">Quản trị viên (Admin)</option>
+                                <option value="Customer">Khách hàng (Customer)</option>
+                                <option value="Company">Doanh nghiệp (Company)</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-bold small text-muted"></label>
+                        <input asp-for="Address" class="form-control" placeholder="Địa chỉ chi nhánh hoặc nơi ở..." />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label fw-bold small text-muted"></label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="Tối thiểu 6 ký tự (Ví dụ: Pass@123)" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                        <div class="form-text small">Mật khẩu ban đầu để nhân viên hoặc người dùng đăng nhập lần đầu.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+                        <button type="submit" class="btn btn-teal px-4 fw-bold"><i class="bi bi-check-lg me-1"></i>Tạo tài khoản</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

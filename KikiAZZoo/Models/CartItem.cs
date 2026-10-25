@@ -18,5 +18,11 @@ namespace KikiAZZoo.Models
         
         [Range(1, 999, ErrorMessage = "Số lượng phải từ 1 đến 999")]
         public int Quantity { get; set; }
+
+        public int MaxStock { get; set; } = 999;
+
+        public bool IsOutOfStock { get; set; } = false;
+
+        public string? OutOfStockReason { get; set; }
     }
 }

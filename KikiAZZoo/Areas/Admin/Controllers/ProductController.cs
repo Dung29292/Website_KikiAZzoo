@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KikiAZZoo.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
+    [Authorize(Roles = $"{SD.Role_Admin},{SD.Role_Employee}")]
     public class ProductController : Controller
     {
         private readonly IProductRepository _productRepository;
@@ -30,11 +30,16 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             decimal? minPrice,
             decimal? maxPrice,
             string? sortBy,
+            string? status,
             int page = 1)
         {
             int pageSize = 10;
-            // Get base products
-            var products = await _productRepository.GetFilteredAsync(categoryId, null, petTypeId, brandId, minPrice, maxPrice, search);
+            bool? isActiveFilter = null;
+            if (status == "active") isActiveFilter = true;
+            else if (status == "inactive") isActiveFilter = false;
+
+            // Get products (including inactive products unless filtered)
+            var products = await _productRepository.GetFilteredAsync(categoryId, null, petTypeId, brandId, minPrice, maxPrice, search, isActiveFilter);
 
             // Sorting
             switch (sortBy)
@@ -72,6 +77,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
             ViewBag.SortBy = sortBy;
+            ViewBag.Status = status;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
@@ -83,6 +89,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return View(paginatedProducts);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Add()
         {
             await LoadViewBagsAsync();
@@ -91,6 +98,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Add(Product product, IFormFile? imageUrl)
         {
             if (ModelState.IsValid)
@@ -111,6 +119,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return View(product);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Update(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
@@ -121,6 +130,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Update(int id, Product product, IFormFile? imageUrl)
         {
             ModelState.Remove("ImageUrl");
@@ -163,6 +173,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return Json(new { success = true, isActive = product.IsActive });
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
@@ -172,6 +183,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _productRepository.DeleteAsync(id);

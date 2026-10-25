@@ -215,7 +215,7 @@
                                 <div class="product-card__actions mt-auto pt-2">
                                     @if (pet.IsAvailable)
                                     {
-                                        <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@pet.Id" class="btn btn-buy btn-add-cart w-100" title="Đón bé về nhà">
+                                        <a asp-controller="PetShop" asp-action="Details" asp-route-id="@pet.Id" class="btn btn-buy w-100" title="Đón bé về nhà">
                                             <i class="ph ph-shopping-cart-simple"></i> Đón bé
                                         </a>
                                     }

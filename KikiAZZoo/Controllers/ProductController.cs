@@ -202,6 +202,10 @@ namespace KikiAZZoo.Controllers
         {
             var product = await _productRepository.GetByIdAsync(id);
             if (product == null) return NotFound();
+            if (!product.IsActive && !User.IsInRole(SD.Role_Admin) && !User.IsInRole(SD.Role_Employee))
+            {
+                return NotFound();
+            }
 
             var reviews = await _context.ProductReviews
                 .Include(r => r.ApplicationUser)
@@ -227,7 +231,7 @@ namespace KikiAZZoo.Controllers
         public async Task<IActionResult> GetProductJson(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
-            if (product == null) return NotFound();
+            if (product == null || (!product.IsActive && !User.IsInRole(SD.Role_Admin) && !User.IsInRole(SD.Role_Employee))) return NotFound();
 
             return Json(new
             {

@@ -8,6 +8,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const link = e.target.closest('.btn-add-cart[href*="AddToCart"]');
     if (link) {
       e.preventDefault();
+      if (typeof window.isUserAuthenticated !== 'undefined' && !window.isUserAuthenticated) {
+        if (typeof ToastNotification !== 'undefined' && ToastNotification.warning) {
+          ToastNotification.warning("Yêu cầu đăng nhập", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+        } else {
+          alert("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+        }
+        setTimeout(() => {
+          window.location.href = `/Account/Login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        }, 1000);
+        return;
+      }
       buyNowMode = link.dataset.buyNow === "true";
       updateModalButtons();
       openAddToCartModal(link.href);
@@ -168,8 +179,16 @@ function confirmAddToCart(productId, quantity, redirectUrl = null) {
         ToastNotification.success("Thành công", data.message);
         updateCartBadge(data.cartCount);
         openMiniCart();
+      } else if (data.requireLogin) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("addToCartModal"));
+        if (modal) modal.hide();
+
+        ToastNotification.warning("Yêu cầu đăng nhập", data.message);
+        setTimeout(() => {
+          window.location.href = `/Account/Login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        }, 1000);
       } else {
-        ToastNotification.error("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng");
+        ToastNotification.error("Thông báo", data.message || "Không thể thêm sản phẩm vào giỏ hàng");
       }
     })
     .catch((error) => {
@@ -248,20 +267,20 @@ function closeMiniCart() {
   }
 }
 
-function updateMiniCartQty(productId, qty) {
+function updateMiniCartQty(productId, qty, itemType = "product") {
   if (qty < 1) {
-    removeMiniCartItem(productId);
+    removeMiniCartItem(productId, itemType);
     return;
   }
-  fetch(`/ShoppingCart/UpdateQuantity?productId=${productId}&quantity=${qty}`)
+  fetch(`/ShoppingCart/UpdateQuantity?productId=${productId}&quantity=${qty}&itemType=${encodeURIComponent(itemType)}`)
     .then(() => {
       openMiniCart();
     })
     .catch(err => console.error(err));
 }
 
-function removeMiniCartItem(productId) {
-  fetch(`/ShoppingCart/RemoveFromCart?productId=${productId}`)
+function removeMiniCartItem(productId, itemType = "product") {
+  fetch(`/ShoppingCart/RemoveFromCart?productId=${productId}&itemType=${encodeURIComponent(itemType)}`)
     .then(() => {
       openMiniCart();
     })

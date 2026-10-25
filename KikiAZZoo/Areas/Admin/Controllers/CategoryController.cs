@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KikiAZZoo.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
+    [Authorize(Roles = $"{SD.Role_Admin},{SD.Role_Employee}")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
@@ -26,6 +26,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return View(categories);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Add()
         {
             await LoadGroupsAsync();
@@ -34,6 +35,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Add(Category category)
         {
             if (ModelState.IsValid)
@@ -45,6 +47,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return View(category);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Update(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
@@ -55,6 +58,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Update(int id, Category category)
         {
             if (id != category.Id) return NotFound();
@@ -67,6 +71,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             return View(category);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
@@ -76,6 +81,7 @@ namespace KikiAZZoo.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _categoryRepository.DeleteAsync(id);

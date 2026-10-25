@@ -42,14 +42,28 @@
                         <!-- Mã SKU -->
                         <div class="col-md-4">
                             <label asp-for="SkuCode" class="form-label fw-bold small text-muted">Mã định danh SKU</label>
-                            <input asp-for="SkuCode" class="form-control" placeholder="VD: PET-KOI-01" />
+                            <div class="input-group">
+                                <input asp-for="SkuCode" id="skuCodeInput" class="form-control fw-bold font-monospace text-primary" placeholder="VD: PET-BRD-008" />
+                                <button class="btn btn-outline-secondary" type="button" id="btnRefreshSku" title="Tạo lại mã tự động">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="SkuCode" class="text-danger small"></span>
+                            <div class="form-text small text-muted">Tự động sinh theo giống: <code>PET-[MÃ_GIỐNG]-[STT]</code> (VD: <code>PET-BRD-008</code>)</div>
                         </div>
 
                         <!-- Giống loài -->
                         <div class="col-md-6">
-                            <label asp-for="BreedId" class="form-label fw-bold small text-muted">Giống loài & Loài pet <span class="text-danger">*</span></label>
-                            <select asp-for="BreedId" class="form-select" asp-items="ViewBag.BreedList">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label asp-for="BreedId" class="form-label fw-bold small text-muted mb-0">Giống loài & Loài pet <span class="text-danger">*</span></label>
+                                @if (User.IsInRole(SD.Role_Admin))
+                                {
+                                    <a asp-controller="Breed" asp-action="Upsert" target="_blank" class="small text-teal text-decoration-none">
+                                        <i class="bi bi-plus-circle me-1"></i>Thêm giống mới
+                                    </a>
+                                }
+                            </div>
+                            <select asp-for="BreedId" id="breedSelect" class="form-select" asp-items="ViewBag.BreedList">
                                 <option value="">-- Chọn giống loài --</option>
                             </select>
                             <span asp-validation-for="BreedId" class="text-danger small"></span>
@@ -82,14 +96,14 @@
                         <!-- Giá bán -->
                         <div class="col-md-4">
                             <label asp-for="Price" class="form-label fw-bold small text-muted">Giá bán (VNĐ) <span class="text-danger">*</span></label>
-                            <input asp-for="Price" type="number" step="1000" class="form-control fw-bold text-danger" placeholder="VD: 1800000" />
+                            <input asp-for="Price" asp-format="{0:0}" type="number" step="any" class="form-control fw-bold text-danger" placeholder="VD: 1800000" />
                             <span asp-validation-for="Price" class="text-danger small"></span>
                         </div>
 
                         <!-- Giá niêm yết gốc -->
                         <div class="col-md-4">
                             <label asp-for="OriginalPrice" class="form-label fw-bold small text-muted">Giá niêm yết gốc (nếu giảm)</label>
-                            <input asp-for="OriginalPrice" type="number" step="1000" class="form-control" placeholder="VD: 2200000" />
+                            <input asp-for="OriginalPrice" asp-format="{0:0}" type="number" step="any" class="form-control" placeholder="VD: 2200000" />
                             <span asp-validation-for="OriginalPrice" class="text-danger small"></span>
                         </div>
 
@@ -192,5 +206,50 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const isCreate = @(isCreate ? "true" : "false");
+            const breedSelect = document.getElementById("breedSelect");
+            const skuInput = document.getElementById("skuCodeInput");
+            const refreshBtn = document.getElementById("btnRefreshSku");
+
+            function fetchNextSku(breedId, force) {
+                if (!breedId || breedId <= 0) return;
+                if (!force && !isCreate) return; // Do not auto-overwrite when editing existing pet unless forced
+
+                fetch(`/Admin/Pet/GetNextSku?breedId=${breedId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.success && data.sku) {
+                            skuInput.value = data.sku;
+                        }
+                    })
+                    .catch(err => console.error("Lỗi khi tải mã SKU tự động:", err));
+            }
+
+            if (breedSelect) {
+                breedSelect.addEventListener("change", function () {
+                    if (this.value) {
+                        fetchNextSku(this.value, false);
+                    }
+                });
+            }
+
+            if (refreshBtn) {
+                refreshBtn.addEventListener("click", function () {
+                    const breedId = breedSelect ? breedSelect.value : 0;
+                    if (!breedId) {
+                        alert("Vui lòng chọn Giống loài trước để tạo mã định danh!");
+                        return;
+                    }
+                    fetchNextSku(breedId, true);
+                });
+            }
+
+            // If create and SKU is currently empty but breed is chosen, fetch it
+            if (isCreate && (!skuInput.value || skuInput.value.trim() === "") && breedSelect && breedSelect.value) {
+                fetchNextSku(breedSelect.value, false);
+            }
+        });
     </script>
 }

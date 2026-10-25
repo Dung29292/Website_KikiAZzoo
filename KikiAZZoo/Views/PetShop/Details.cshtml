@@ -271,9 +271,9 @@
                                 <div class="product-card__actions mt-auto pt-2">
                                     @if (rel.IsAvailable)
                                     {
-                                        <a asp-controller="ShoppingCart" asp-action="AddToCart" asp-route-productId="@rel.Id" class="btn btn-buy btn-add-cart w-100" title="Đón bé về nhà">
+                                        <button type="button" class="btn btn-buy btn-add-cart w-100" onclick="addToCartPetAjax(@rel.Id)" title="Đón bé về nhà">
                                             <i class="ph ph-shopping-cart-simple"></i> Đón bé
-                                        </a>
+                                        </button>
                                     }
                                     <a asp-action="Details" asp-route-id="@rel.Id" class="btn btn-detail" title="Xem chi tiết">
                                         <i class="ph ph-eye"></i> Xem bé
@@ -291,6 +291,18 @@
 @section Scripts {
 <script>
     function addToCartPetAjax(petId) {
+        if (typeof window.isUserAuthenticated !== 'undefined' && !window.isUserAuthenticated) {
+            if (typeof ToastNotification !== 'undefined' && ToastNotification.warning) {
+                ToastNotification.warning('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để đón bé về nhà.');
+            } else {
+                alert('Vui lòng đăng nhập để đón bé về nhà.');
+            }
+            setTimeout(() => {
+                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+            }, 1000);
+            return;
+        }
+
         var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
         var formData = new FormData();
         formData.append('petId', petId);
@@ -311,13 +323,26 @@
                     b.innerText = data.cartCount;
                     b.classList.remove('d-none');
                 });
-                if (typeof showToast === 'function') {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.success) {
+                    ToastNotification.success('Thành công', data.message);
+                } else if (typeof showToast === 'function') {
                     showToast(data.message, 'success');
                 } else {
                     alert(data.message);
                 }
+            } else if (data.requireLogin) {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.warning) {
+                    ToastNotification.warning('Yêu cầu đăng nhập', data.message);
+                } else {
+                    alert(data.message);
+                }
+                setTimeout(() => {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+                }, 1000);
             } else {
-                if (typeof showToast === 'function') {
+                if (typeof ToastNotification !== 'undefined' && ToastNotification.error) {
+                    ToastNotification.error('Thông báo', data.message);
+                } else if (typeof showToast === 'function') {
                     showToast(data.message, 'error');
                 } else {
                     alert(data.message);

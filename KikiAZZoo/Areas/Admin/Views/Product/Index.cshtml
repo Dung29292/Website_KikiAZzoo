@@ -49,16 +49,22 @@
                     }
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
+                <label class="form-label small text-muted fw-bold">Trạng thái</label>
+                <select name="status" class="form-select form-select-sm">
+                    <!option value="" @(string.IsNullOrEmpty(ViewBag.Status) ? "selected" : "")>Tất cả</!option>
+                    <!option value="active" @(ViewBag.Status == "active" ? "selected" : "")>Hiển thị</!option>
+                    <!option value="inactive" @(ViewBag.Status == "inactive" ? "selected" : "")>Đang ẩn</!option>
+                </select>
+            </div>
+            <div class="col-md-1">
                 <label class="form-label small text-muted fw-bold">Sắp xếp</label>
                 <select name="sortBy" class="form-select form-select-sm">
                     <!option value="" @(string.IsNullOrEmpty(ViewBag.SortBy) ? "selected" : "")>Mới nhất</!option>
-                    <!option value="price_asc" @(ViewBag.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</!option>
-                    <!option value="price_desc" @(ViewBag.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</!option>
+                    <!option value="price_asc" @(ViewBag.SortBy == "price_asc" ? "selected" : "")>Giá tăng</!option>
+                    <!option value="price_desc" @(ViewBag.SortBy == "price_desc" ? "selected" : "")>Giá giảm</!option>
                     <!option value="name_asc" @(ViewBag.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</!option>
-                    <!option value="name_desc" @(ViewBag.SortBy == "name_desc" ? "selected" : "")>Tên Z-A</!option>
-                    <!option value="stock_asc" @(ViewBag.SortBy == "stock_asc" ? "selected" : "")>Tồn kho ít nhất</!option>
-                    <!option value="stock_desc" @(ViewBag.SortBy == "stock_desc" ? "selected" : "")>Tồn kho nhiều nhất</!option>
+                    <!option value="stock_asc" @(ViewBag.SortBy == "stock_asc" ? "selected" : "")>Kho ít</!option>
                 </select>
             </div>
             <div class="col-md-1 d-flex align-items-end justify-content-end">
@@ -71,7 +77,10 @@
 <div class="card shadow-sm border-0">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0 text-teal"><i class="bi bi-box-seam me-2"></i>Danh sách sản phẩm</h5>
-        <a asp-action="Add" class="btn btn-teal btn-sm"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a>
+        @if (User.IsInRole(SD.Role_Admin))
+        {
+            <a asp-action="Add" class="btn btn-teal btn-sm"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a>
+        }
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover align-middle mb-0 compact-admin-table">
@@ -98,7 +107,7 @@
                 {
                     foreach (var p in Model)
                     {
-                        <tr class="@(p.Stock == 0 ? "opacity-50 out-of-stock-row" : "")" style="@(p.Stock == 0 ? "opacity: 0.5;" : "")">
+                        <tr id="product-row-@p.Id" class="@(!p.IsActive ? "table-light opacity-75 inactive-product-row" : (p.Stock == 0 ? "opacity-50 out-of-stock-row" : ""))">
                             <td class="ps-3">
                                 @if (!string.IsNullOrEmpty(p.ImageUrl))
                                 {
@@ -113,10 +122,15 @@
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">@p.Name</div>
-                                @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
-                                {
-                                    <span class="badge bg-danger-soft text-danger small" style="font-size: 0.7rem; padding: 0.2em 0.5em;">Giảm giá</span>
-                                }
+                                <div class="d-flex align-items-center gap-1 mt-1">
+                                    @if (p.OriginalPrice.HasValue && p.OriginalPrice > p.Price)
+                                    {
+                                        <span class="badge bg-danger-soft text-danger small" style="font-size: 0.7rem; padding: 0.2em 0.5em;">Giảm giá</span>
+                                    }
+                                    <span class="badge @(p.IsActive ? "bg-success-soft text-success" : "bg-secondary-soft text-secondary") small" id="badge-status-@p.Id" style="font-size: 0.7rem; padding: 0.2em 0.5em;">
+                                        <i class="bi @(p.IsActive ? "bi-eye-fill" : "bi-eye-slash-fill") me-1"></i>@(p.IsActive ? "Hiển thị" : "Đang ẩn")
+                                    </span>
+                                </div>
                             </td>
                             <td><span class="small">@p.Category?.Name</span></td>
                             <td><span class="small">@p.Brand?.Name</span></td>
@@ -142,15 +156,21 @@
                                 }
                             </td>
                             <td>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input status-toggle" type="checkbox" data-id="@p.Id" @(p.IsActive ? "checked" : "")>
+                                <div class="form-check form-switch custom-kiki-switch d-inline-flex align-items-center gap-1">
+                                    <input class="form-check-input status-toggle" type="checkbox" id="toggle_@p.Id" data-id="@p.Id" @(p.IsActive ? "checked" : "") style="cursor: pointer;">
+                                    <label class="form-check-label small fw-semibold" for="toggle_@p.Id" id="status-text-@p.Id">
+                                        @(p.IsActive ? "Bật" : "Tắt")
+                                    </label>
                                 </div>
                             </td>
                             <td class="text-center pe-3">
                                 <div class="btn-group">
                                     <a asp-action="Display" asp-route-id="@p.Id" class="btn btn-sm btn-outline-info p-1 px-2" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
-                                    <a asp-action="Update" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary p-1 px-2" title="Chỉnh sửa"><i class="bi bi-pencil"></i></a>
-                                    <button class="btn btn-sm btn-outline-danger btn-delete-product p-1 px-2" data-id="@p.Id" data-name="@p.Name" title="Xóa"><i class="bi bi-trash"></i></button>
+                                    @if (User.IsInRole(SD.Role_Admin))
+                                    {
+                                        <a asp-action="Update" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary p-1 px-2" title="Chỉnh sửa"><i class="bi bi-pencil"></i></a>
+                                        <button class="btn btn-sm btn-outline-danger btn-delete-product p-1 px-2" data-id="@p.Id" data-name="@p.Name" title="Xóa"><i class="bi bi-trash"></i></button>
+                                    }
                                 </div>
                             </td>
                         </tr>
@@ -166,16 +186,16 @@
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center mb-0">
                     <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = ViewBag.CurrentPage - 1 })"><i class="bi bi-chevron-left"></i></a>
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, status = ViewBag.Status, page = ViewBag.CurrentPage - 1 })"><i class="bi bi-chevron-left"></i></a>
                     </li>
                     @for (int i = 1; i <= ViewBag.TotalPages; i++)
                     {
                         <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-                            <a class="page-link @(ViewBag.CurrentPage == i ? "bg-teal border-teal text-white" : "")" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = i })">@i</a>
+                            <a class="page-link @(ViewBag.CurrentPage == i ? "bg-teal border-teal text-white" : "")" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, status = ViewBag.Status, page = i })">@i</a>
                         </li>
                     }
                     <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, page = ViewBag.CurrentPage + 1 })"><i class="bi bi-chevron-right"></i></a>
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, petTypeId = ViewBag.PetTypeId, sortBy = ViewBag.SortBy, status = ViewBag.Status, page = ViewBag.CurrentPage + 1 })"><i class="bi bi-chevron-right"></i></a>
                     </li>
                 </ul>
             </nav>
@@ -217,6 +237,10 @@
     .out-of-stock-row {
         background-color: rgba(248, 215, 218, 0.15) !important;
         transition: opacity 0.3s ease;
+    }
+
+    .inactive-product-row {
+        background-color: rgba(241, 245, 249, 0.6) !important;
     }
 
     /* Customize checkbox toggle switches to light up green/teal */
@@ -262,7 +286,24 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Thành công, có thể hiển thị thông báo toast nhỏ
+                            // Cập nhật text & badge trực quan
+                            const textEl = document.getElementById("status-text-" + id);
+                            if (textEl) textEl.textContent = active ? "Bật" : "Tắt";
+
+                            const badgeEl = document.getElementById("badge-status-" + id);
+                            if (badgeEl) {
+                                badgeEl.className = active ? "badge bg-success-soft text-success small" : "badge bg-secondary-soft text-secondary small";
+                                badgeEl.innerHTML = (active ? '<i class="bi bi-eye-fill me-1"></i>Hiển thị' : '<i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn');
+                            }
+
+                            const rowEl = document.getElementById("product-row-" + id);
+                            if (rowEl) {
+                                if (active) {
+                                    rowEl.classList.remove("table-light", "opacity-75", "inactive-product-row");
+                                } else {
+                                    rowEl.classList.add("table-light", "opacity-75", "inactive-product-row");
+                                }
+                            }
                         } else {
                             alert("Có lỗi xảy ra khi cập nhật trạng thái!");
                             this.checked = !active; // Hoàn tác

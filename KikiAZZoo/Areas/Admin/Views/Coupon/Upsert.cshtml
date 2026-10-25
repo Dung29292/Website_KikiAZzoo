@@ -62,7 +62,7 @@
                                 <i class="bi bi-gift text-danger me-1"></i>Giá trị giảm <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
-                                <input asp-for="DiscountValue" type="number" class="form-control" min="0" step="1" placeholder="10" required />
+                                <input asp-for="DiscountValue" asp-format="{0:0}" type="number" class="form-control" min="0" step="any" placeholder="10" required />
                                 <span class="input-group-text fw-bold" id="discountSuffix">%</span>
                             </div>
                             <span asp-validation-for="DiscountValue" class="text-danger small"></span>
@@ -72,7 +72,7 @@
                             <label asp-for="MinOrderValue" class="form-label fw-semibold">
                                 <i class="bi bi-cart-check text-primary me-1"></i>Đơn hàng tối thiểu (đ)
                             </label>
-                            <input asp-for="MinOrderValue" type="number" class="form-control" min="0" step="1000" placeholder="100000" />
+                            <input asp-for="MinOrderValue" asp-format="{0:0}" type="number" class="form-control" min="0" step="any" placeholder="100000" />
                             <span asp-validation-for="MinOrderValue" class="text-danger small"></span>
                         </div>
 

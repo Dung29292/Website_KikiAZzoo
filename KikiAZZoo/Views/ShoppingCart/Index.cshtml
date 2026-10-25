@@ -242,6 +242,32 @@
         </div>
     }
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 small py-2 mb-3 mt-3" role="alert">
+            <i class="ph ph-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem 1rem;"></button>
+        </div>
+    }
+
+    @if (Model.HasOutOfStockItems)
+    {
+        <div class="alert alert-warning border border-warning-subtle rounded-4 p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-sm" style="background: #fffbeb;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-warning text-white rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                    <i class="ph-bold ph-warning fs-5"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Có món trong giỏ hàng đã hết hàng!</h6>
+                    <span class="text-muted small">Một số sản phẩm/thú cưng bạn chọn đã có người khác mua trước. Vui lòng bấm xóa các món này để tiếp tục thanh toán.</span>
+                </div>
+            </div>
+            <a asp-action="RemoveOutOfStockItems" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-1">
+                <i class="ph ph-trash"></i> Xóa tất cả đồ hết hàng
+            </a>
+        </div>
+    }
+
     @if (!Model.Items.Any())
     {
         <div class="empty-state-card text-center py-5 rounded-4 shadow-sm border bg-white">
@@ -261,41 +287,125 @@
                 <div class="cart-items-wrapper">
                     @foreach (var item in Model.Items)
                     {
-                        <div class="cart-item-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" id="cart-item-@item.ProductId">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="cart-item-image-wrapper">
-                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
-                                    {
-                                        <img src="@item.ImageUrl" alt="@item.Name" class="cart-item-image" />
-                                    }
-                                    else
-                                    {
-                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9;"><i class="ph ph-image" style="font-size: 1.5rem;"></i></div>
-                                    }
+                        var isPet = item.ItemType == "pet" || item.PetId.HasValue;
+                        var targetId = isPet ? (item.PetId ?? item.ProductId) : item.ProductId;
+                        var cardId = isPet ? $"pet_{targetId}" : targetId.ToString();
+                        var atMaxStock = item.MaxStock > 0 && item.Quantity >= item.MaxStock;
+                        
+                        @if (item.IsOutOfStock)
+                        {
+                            <!-- Out Of Stock Item Card -->
+                            <div class="cart-item-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 border-danger" id="cart-item-@cardId" style="background: #fff8f8; border: 1.5px dashed #fca5a5;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="cart-item-image-wrapper position-relative" style="filter: grayscale(85%); opacity: 0.65;">
+                                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                        {
+                                            <img src="@item.ImageUrl" alt="@item.Name" class="cart-item-image" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9;"><i class="ph ph-image" style="font-size: 1.5rem;"></i></div>
+                                        }
+                                        <span class="position-absolute top-50 start-50 translate-middle badge bg-danger text-white rounded-pill px-2 py-1 shadow" style="font-size: 0.68rem; white-space: nowrap;">
+                                            HẾT HÀNG
+                                        </span>
+                                    </div>
+                                    <div class="cart-item-details">
+                                        <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
+                                            <span class="badge bg-danger text-white rounded-pill px-2 py-0.5" style="font-size: 0.7rem;"><i class="ph-bold ph-x-circle me-1"></i>Hết hàng</span>
+                                            @if (isPet)
+                                            {
+                                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill" style="font-size: 0.7rem;"><i class="ph ph-paw-print"></i> Thú cưng</span>
+                                            }
+                                        </div>
+                                        <span class="cart-item-name text-muted text-decoration-line-through">@item.Name</span>
+                                        <div class="text-danger small mt-1 fw-semibold d-flex align-items-center gap-1">
+                                            <i class="ph-fill ph-warning-octagon"></i> @(item.OutOfStockReason ?? "Sản phẩm/thú cưng này vừa hết hàng do có người mua trước.")
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="cart-item-details">
-                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@item.ProductId" class="cart-item-name">@item.Name</a>
-                                    <span class="text-teal fw-semibold mt-1" style="font-size: 0.95rem;">@item.Price.ToString("#,##0")đ</span>
+
+                                <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-3 w-100 w-md-auto">
+                                    <span class="badge bg-secondary-subtle text-muted px-2 py-1 rounded-pill small">SL: @item.Quantity</span>
+                                    <span class="text-muted text-decoration-line-through small">@((item.Price * item.Quantity).ToString("#,##0"))đ</span>
+
+                                    <!-- Remove Button -->
+                                    <a asp-action="RemoveFromCart" asp-route-productId="@targetId" asp-route-itemType="@item.ItemType" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1" title="Xóa món hết hàng này" onclick="animateRemove(event, '@cardId')">
+                                        <i class="ph ph-trash"></i> Xóa
+                                    </a>
                                 </div>
                             </div>
-
-                            <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-4 w-100 w-md-auto">
-                                <!-- Quantity Stepper -->
-                                <div class="premium-qty-stepper">
-                                    <a asp-action="UpdateQuantity" asp-route-productId="@item.ProductId" asp-route-quantity="@(item.Quantity - 1)" class="premium-qty-btn" onclick="animateChange(this)">−</a>
-                                    <input type="number" value="@item.Quantity" class="premium-qty-input" readonly />
-                                    <a asp-action="UpdateQuantity" asp-route-productId="@item.ProductId" asp-route-quantity="@(item.Quantity + 1)" class="premium-qty-btn" onclick="animateChange(this)">+</a>
+                        }
+                        else
+                        {
+                            <!-- Normal Active Item Card -->
+                            <div class="cart-item-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" id="cart-item-@cardId">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="cart-item-image-wrapper">
+                                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                        {
+                                            <img src="@item.ImageUrl" alt="@item.Name" class="cart-item-image" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9;"><i class="ph ph-image" style="font-size: 1.5rem;"></i></div>
+                                        }
+                                    </div>
+                                    <div class="cart-item-details">
+                                        @if (isPet)
+                                        {
+                                            <a asp-controller="PetShop" asp-action="Details" asp-route-id="@targetId" class="cart-item-name">
+                                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill me-1" style="font-size: 0.72rem;"><i class="ph ph-paw-print"></i> Thú cưng</span>
+                                                @item.Name
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@targetId" class="cart-item-name">@item.Name</a>
+                                        }
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="text-teal fw-semibold" style="font-size: 0.95rem;">@item.Price.ToString("#,##0")đ</span>
+                                            @if (isPet)
+                                            {
+                                                <span class="badge bg-secondary-subtle text-secondary small rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                                                    Kho: @item.MaxStock bé
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Subtotal Price -->
-                                <span class="fw-bold text-dark fs-6 text-end min-w-100" style="min-width: 90px;">@((item.Price * item.Quantity).ToString("#,##0"))đ</span>
+                                <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-4 w-100 w-md-auto">
+                                    <!-- Quantity Stepper -->
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="premium-qty-stepper">
+                                            <a asp-action="UpdateQuantity" asp-route-productId="@targetId" asp-route-quantity="@(item.Quantity - 1)" asp-route-itemType="@item.ItemType" class="premium-qty-btn" onclick="animateChange(this)">−</a>
+                                            <input type="number" value="@item.Quantity" class="premium-qty-input" readonly />
+                                            @if (atMaxStock)
+                                            {
+                                                <span class="premium-qty-btn text-muted" style="opacity: 0.35; cursor: not-allowed;" title="Đã đạt số lượng tối đa trong kho (+@item.MaxStock)">+</span>
+                                            }
+                                            else
+                                            {
+                                                <a asp-action="UpdateQuantity" asp-route-productId="@targetId" asp-route-quantity="@(item.Quantity + 1)" asp-route-itemType="@item.ItemType" class="premium-qty-btn" onclick="animateChange(this)">+</a>
+                                            }
+                                        </div>
+                                        @if (atMaxStock && isPet)
+                                        {
+                                            <small class="text-muted" style="font-size: 0.7rem;">(Tối đa @item.MaxStock bé)</small>
+                                        }
+                                    </div>
 
-                                <!-- Remove Button -->
-                                <a asp-action="RemoveFromCart" asp-route-productId="@item.ProductId" class="premium-cart-remove" title="Xóa khỏi giỏ" onclick="animateRemove(event, '@item.ProductId')">
-                                    <i class="ph ph-trash"></i>
-                                </a>
+                                    <!-- Subtotal Price -->
+                                    <span class="fw-bold text-dark fs-6 text-end min-w-100" style="min-width: 90px;">@((item.Price * item.Quantity).ToString("#,##0"))đ</span>
+
+                                    <!-- Remove Button -->
+                                    <a asp-action="RemoveFromCart" asp-route-productId="@targetId" asp-route-itemType="@item.ItemType" class="premium-cart-remove" title="Xóa khỏi giỏ" onclick="animateRemove(event, '@cardId')">
+                                        <i class="ph ph-trash"></i>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
 
@@ -354,9 +464,21 @@
                         <span class="text-orange">@total.ToString("#,##0")đ</span>
                     </div>
 
-                    <a asp-action="Checkout" class="btn btn-teal w-100 btn-lg shadow-sm">
-                        <i class="ph ph-credit-card"></i> Tiến hành thanh toán
-                    </a>
+                    @if (Model.HasOutOfStockItems)
+                    {
+                        <button type="button" class="btn btn-secondary w-100 btn-lg shadow-sm" disabled style="opacity: 0.85; cursor: not-allowed;">
+                            <i class="ph ph-prohibit"></i> Vui lòng xóa món hết hàng
+                        </button>
+                        <p class="small text-danger text-center mt-2 mb-0 fw-semibold">
+                            <i class="ph ph-warning-circle"></i> Có đồ trong giỏ đã có người mua trước. Hãy xóa để tiếp tục thanh toán.
+                        </p>
+                    }
+                    else
+                    {
+                        <a asp-action="Checkout" class="btn btn-teal w-100 btn-lg shadow-sm">
+                            <i class="ph ph-credit-card"></i> Tiến hành thanh toán
+                        </a>
+                    }
                 </div>
             </div>
         </div>

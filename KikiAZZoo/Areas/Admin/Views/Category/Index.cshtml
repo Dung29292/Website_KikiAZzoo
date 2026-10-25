@@ -5,12 +5,15 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold mb-0">Danh mục</h2>
-    <a asp-action="Add" class="btn btn-teal"><i class="bi bi-plus"></i> Thêm danh mục</a>
+    @if (User.IsInRole(SD.Role_Admin))
+    {
+        <a asp-action="Add" class="btn btn-teal"><i class="bi bi-plus"></i> Thêm danh mục</a>
+    }
 </div>
 
 <table class="table table-hover">
     <thead class="table-light">
-        <tr><th>Nhóm</th><th>Tên</th><th>Icon</th><th>Số SP</th><th>Thao tác</th></tr>
+        <tr><th>Nhóm</th><th>Tên</th><th>Icon</th><th>Số SP</th><th style="width: 140px;">Thao tác</th></tr>
     </thead>
     <tbody>
         @foreach (var c in Model)
@@ -21,8 +24,15 @@
                 <td>@c.Icon</td>
                 <td>@(c.Products?.Count ?? 0)</td>
                 <td>
-                    <a asp-action="Update" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
+                    @if (User.IsInRole(SD.Role_Admin))
+                    {
+                        <a asp-action="Update" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted small"><i class="bi bi-eye"></i> Chỉ xem</span>
+                    }
                 </td>
             </tr>
         }

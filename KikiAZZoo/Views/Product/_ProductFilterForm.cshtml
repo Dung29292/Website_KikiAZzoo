@@ -76,32 +76,63 @@
 
     <!-- 2. Danh mục sản phẩm -->
     <div class="filter-section">
-        <div class="filter-section-title d-flex align-items-center justify-content-between">
+        <div class="filter-section-title d-flex align-items-center justify-content-between mb-2">
             <span><i class="ph ph-squares-four"></i> Danh mục sản phẩm</span>
             @if (Model.CategoryGroupId.HasValue || Model.CategoryId.HasValue)
             {
-                <span class="badge bg-teal text-white rounded-pill" style="font-size: 0.7rem;">1 đã chọn</span>
+                <span class="badge bg-teal text-white rounded-pill px-2 py-1" style="font-size: 0.68rem;">1 đang chọn</span>
             }
         </div>
-        <div class="filter-scroll-container">
+        <div class="filter-category-groups-wrapper">
             @foreach (var group in Model.CategoryGroups.Where(g => g.Name != "Thú cưng"))
             {
-                <div class="filter-subsection">
-                    <div class="filter-subsection-title">
-                        <i class="ph ph-caret-right text-teal" style="font-size: 0.7rem;"></i> @group.Name
-                    </div>
-                    <div class="filter-options">
-                        <div class="filter-chip @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "active" : "")">
-                            <input type="radio" name="categoryGroupId" value="@group.Id" id="grp@(prefix)@group.Id" @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "checked" : "") onchange="this.form.submit()" />
-                            <label for="grp@(prefix)@group.Id">Tất cả @group.Name</label>
+                var isGroupActive = Model.CategoryGroupId == group.Id || (group.Categories != null && group.Categories.Any(c => c.Id == Model.CategoryId));
+                var collapseId = $"collapseCat{prefix}{group.Id}";
+                var categoriesCount = (group.Categories?.Count ?? 0) + 1;
+
+                <div class="filter-category-dropdown @(isGroupActive ? "is-active" : "") mb-1">
+                    <!-- Dropdown Toggle Header -->
+                    <button type="button" 
+                            class="filter-category-header @(isGroupActive ? "" : "collapsed")" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#@collapseId" 
+                            aria-expanded="@(isGroupActive ? "true" : "false")" 
+                            aria-controls="@collapseId">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-chevron-right filter-category-caret"></i>
+                            <span class="filter-category-name">@group.Name</span>
                         </div>
-                        @foreach (var category in group.Categories ?? [])
-                        {
-                            <div class="filter-chip @(Model.CategoryId == category.Id ? "active" : "")">
-                                <input type="radio" name="categoryId" value="@category.Id" id="cat@(prefix)@category.Id" @(Model.CategoryId == category.Id ? "checked" : "") onchange="this.form.submit()" />
-                                <label for="cat@(prefix)@category.Id">@category.Name</label>
+                        <div class="d-flex align-items-center gap-1">
+                            @if (isGroupActive)
+                            {
+                                <span class="badge bg-teal-subtle text-teal border border-teal rounded-pill px-2 py-0" style="font-size: 0.65rem;">Đang chọn</span>
+                            }
+                            else
+                            {
+                                <span class="category-count-badge">@categoriesCount</span>
+                            }
+                        </div>
+                    </button>
+
+                    <!-- Collapsible Subcategories Content -->
+                    <div class="collapse @(isGroupActive ? "show" : "")" id="@collapseId">
+                        <div class="filter-category-body">
+                            <div class="filter-options filter-options-scaled">
+                                <div class="filter-chip filter-chip-sm @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "active" : "")">
+                                    <input type="radio" name="categoryGroupId" value="@group.Id" id="grp@(prefix)@group.Id" @(Model.CategoryGroupId == group.Id && !Model.CategoryId.HasValue ? "checked" : "") onchange="this.form.submit()" />
+                                    <label for="grp@(prefix)@group.Id">
+                                        <i class="bi bi-grid-fill me-1" style="font-size: 0.68rem;"></i>Tất cả @group.Name
+                                    </label>
+                                </div>
+                                @foreach (var category in group.Categories ?? [])
+                                {
+                                    <div class="filter-chip filter-chip-sm @(Model.CategoryId == category.Id ? "active" : "")">
+                                        <input type="radio" name="categoryId" value="@category.Id" id="cat@(prefix)@category.Id" @(Model.CategoryId == category.Id ? "checked" : "") onchange="this.form.submit()" />
+                                        <label for="cat@(prefix)@category.Id">@category.Name</label>
+                                    </div>
+                                }
                             </div>
-                        }
+                        </div>
                     </div>
                 </div>
             }

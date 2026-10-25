@@ -6,7 +6,16 @@
 </div>
 
 <div class="mini-cart-body p-3 style-scroll" style="max-height: calc(100vh - 240px); overflow-y: auto;">
-    @if (Model.Items == null || !Model.Items.Any())
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-person-lock text-teal" style="font-size: 3rem;"></i>
+            <h6 class="fw-bold mt-3 text-dark">Bạn chưa đăng nhập</h6>
+            <p class="text-muted small">Vui lòng đăng nhập để xem và quản lý giỏ hàng của bạn.</p>
+            <a href="/Account/Login" class="btn btn-teal btn-sm px-4 mt-2"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập ngay</a>
+        </div>
+    }
+    else if (Model.Items == null || !Model.Items.Any())
     {
         <div class="text-center py-5">
             <i class="bi bi-basket2 text-muted" style="font-size: 3rem;"></i>
@@ -18,35 +27,72 @@
     {
         @foreach (var item in Model.Items)
         {
-            <div class="mini-cart-item d-flex gap-3 mb-3 pb-3 border-bottom" data-product-id="@item.ProductId">
-                @if (!string.IsNullOrEmpty(item.ImageUrl))
-                {
-                    <img src="@item.ImageUrl" alt="@item.Name" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" />
-                }
-                else
-                {
-                    <div style="width: 60px; height: 60px; background-color: #eee; border-radius: 8px;" class="d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image"></i></div>
-                }
+            var isPet = item.ItemType == "pet" || item.PetId.HasValue;
+            var targetId = isPet ? (item.PetId ?? item.ProductId) : item.ProductId;
+            var atMaxStock = item.MaxStock > 0 && item.Quantity >= item.MaxStock;
+            <div class="mini-cart-item d-flex gap-3 mb-3 pb-3 border-bottom @(item.IsOutOfStock ? "rounded-3 p-2 border-danger-subtle" : "")" data-product-id="@targetId" style="@(item.IsOutOfStock ? "background: #fff8f8;" : "")">
+                <div class="position-relative" style="width: 60px; height: 60px; flex-shrink: 0;">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; @(item.IsOutOfStock ? "filter: grayscale(85%); opacity: 0.6;" : "")" />
+                    }
+                    else
+                    {
+                        <div style="width: 60px; height: 60px; background-color: #eee; border-radius: 8px;" class="d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image"></i></div>
+                    }
+                    @if (item.IsOutOfStock)
+                    {
+                        <span class="position-absolute top-50 start-50 translate-middle badge bg-danger text-white rounded-pill px-1" style="font-size: 9px; white-space: nowrap;">Hết</span>
+                    }
+                </div>
                 <div class="flex-grow-1">
-                    <h6 class="fw-bold text-dark small mb-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@item.Name</h6>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-teal small">@item.Price.ToString("#,##0")đ</span>
-                        <div class="quantity-selector-sm d-flex align-items-center gap-1">
-                            <button onclick="updateMiniCartQty(@item.ProductId, @(item.Quantity - 1))" class="btn btn-outline-secondary btn-xs py-0 px-2" style="font-size: 10px;">−</button>
-                            <span class="small px-1 text-dark fw-bold">@item.Quantity</span>
-                            <button onclick="updateMiniCartQty(@item.ProductId, @(item.Quantity + 1))" class="btn btn-outline-secondary btn-xs py-0 px-2" style="font-size: 10px;">+</button>
-                        </div>
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        @if (item.IsOutOfStock)
+                        {
+                            <span class="badge bg-danger text-white rounded-pill" style="font-size: 0.62rem;"><i class="bi bi-x-circle me-1"></i>Hết hàng</span>
+                        }
+                        @if (isPet)
+                        {
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill" style="font-size: 0.62rem;"><i class="bi bi-heart"></i> Bé</span>
+                        }
                     </div>
+                    <h6 class="fw-bold text-dark small mb-1 @(item.IsOutOfStock ? "text-muted text-decoration-line-through" : "")" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        @item.Name
+                    </h6>
+                    @if (item.IsOutOfStock)
+                    {
+                        <div class="text-danger small" style="font-size: 0.72rem;">
+                            @(item.OutOfStockReason ?? "Đã có người mua trước")
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-teal small">@item.Price.ToString("#,##0")đ</span>
+                            <div class="quantity-selector-sm d-flex align-items-center gap-1">
+                                <button onclick="updateMiniCartQty(@targetId, @(item.Quantity - 1), '@item.ItemType')" class="btn btn-outline-secondary btn-xs py-0 px-2" style="font-size: 10px;">−</button>
+                                <span class="small px-1 text-dark fw-bold">@item.Quantity</span>
+                                @if (atMaxStock)
+                                {
+                                    <button class="btn btn-outline-secondary btn-xs py-0 px-2 text-muted" disabled style="font-size: 10px; opacity: 0.35;" title="Tối đa kho">+</button>
+                                }
+                                else
+                                {
+                                    <button onclick="updateMiniCartQty(@targetId, @(item.Quantity + 1), '@item.ItemType')" class="btn btn-outline-secondary btn-xs py-0 px-2" style="font-size: 10px;">+</button>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
                 <div class="text-end">
-                    <button onclick="removeMiniCartItem(@item.ProductId)" class="btn text-danger btn-sm p-0" title="Xóa"><i class="bi bi-trash"></i></button>
+                    <button onclick="removeMiniCartItem(@targetId, '@item.ItemType')" class="btn text-danger btn-sm p-0" title="Xóa"><i class="bi bi-trash"></i></button>
                 </div>
             </div>
         }
     }
 </div>
 
-@if (Model.Items != null && Model.Items.Any())
+@if (User.Identity?.IsAuthenticated == true && Model.Items != null && Model.Items.Any())
 {
     <div class="mini-cart-footer p-3 border-top bg-light" style="position: absolute; bottom: 0; left: 0; right: 0;">
         <div class="d-flex justify-content-between mb-3">
@@ -54,7 +100,14 @@
             <span class="fw-bold text-teal fs-5">@Model.SubTotal.ToString("#,##0")đ</span>
         </div>
         <div class="d-grid gap-2">
-            <a href="/ShoppingCart/Checkout" class="btn btn-teal"><i class="bi bi-credit-card"></i> Tiến hành thanh toán</a>
+            @if (Model.HasOutOfStockItems)
+            {
+                <a href="/ShoppingCart" class="btn btn-warning"><i class="bi bi-exclamation-triangle"></i> Xử lý đồ hết hàng</a>
+            }
+            else
+            {
+                <a href="/ShoppingCart/Checkout" class="btn btn-teal"><i class="bi bi-credit-card"></i> Tiến hành thanh toán</a>
+            }
             <a href="/ShoppingCart" class="btn btn-outline-secondary btn-sm">Xem chi tiết giỏ hàng</a>
         </div>
     </div>

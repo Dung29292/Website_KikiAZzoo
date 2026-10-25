@@ -9,21 +9,31 @@ namespace KikiAZZoo.Repositories
 
         public EFProductRepository(ApplicationDbContext context) => _context = context;
 
-        private IQueryable<Product> BaseQuery() =>
-            _context.Products
-                .Where(p => p.IsActive && (p.Category == null || p.Category.CategoryGroup == null || (p.Category.CategoryGroupId != 1 && p.Category.CategoryGroup.Name != "Thú cưng")))
+        private IQueryable<Product> BaseQuery(bool? isActive = null)
+        {
+            var query = _context.Products
+                .Where(p => p.Category == null || p.Category.CategoryGroup == null || (p.Category.CategoryGroupId != 1 && p.Category.CategoryGroup.Name != "Thú cưng"))
                 .Include(p => p.Category!).ThenInclude(c => c.CategoryGroup)
                 .Include(p => p.Brand)
                 .Include(p => p.PetType)
                 .Include(p => p.Images)
-                .Include(p => p.Features);
+                .Include(p => p.Features)
+                .AsQueryable();
 
-        public async Task<IEnumerable<Product>> GetAllAsync() =>
-            await BaseQuery().OrderByDescending(p => p.Id).ToListAsync();
+            if (isActive.HasValue)
+            {
+                query = query.Where(p => p.IsActive == isActive.Value);
+            }
 
-        public async Task<IEnumerable<Product>> GetFilteredAsync(int? categoryId, int? categoryGroupId, int? petTypeId, int? brandId, decimal? minPrice, decimal? maxPrice, string? search)
+            return query;
+        }
+
+        public async Task<IEnumerable<Product>> GetAllAsync(bool activeOnly = true) =>
+            await BaseQuery(activeOnly ? true : null).OrderByDescending(p => p.Id).ToListAsync();
+
+        public async Task<IEnumerable<Product>> GetFilteredAsync(int? categoryId, int? categoryGroupId, int? petTypeId, int? brandId, decimal? minPrice, decimal? maxPrice, string? search, bool? isActive = true)
         {
-            var query = BaseQuery().AsQueryable();
+            var query = BaseQuery(isActive);
 
             if (categoryId.HasValue)
                 query = query.Where(p => p.CategoryId == categoryId);
@@ -45,8 +55,8 @@ namespace KikiAZZoo.Repositories
             return await query.OrderByDescending(p => p.Id).ToListAsync();
         }
 
-        public async Task<Product?> GetByIdAsync(int id) =>
-            await BaseQuery().FirstOrDefaultAsync(p => p.Id == id);
+        public async Task<Product?> GetByIdAsync(int id, bool activeOnly = false) =>
+            await BaseQuery(activeOnly ? true : null).FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task AddAsync(Product product)
         {
