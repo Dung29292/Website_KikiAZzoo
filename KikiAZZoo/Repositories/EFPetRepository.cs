@@ -91,6 +91,18 @@ namespace KikiAZZoo.Repositories
             var pet = await _context.Pets.FindAsync(id);
             if (pet != null)
             {
+                bool hasOrders = await _context.OrderDetails.AnyAsync(od => od.PetId == id);
+                if (hasOrders)
+                {
+                    pet.Status = "Hidden";
+                    pet.Quantity = 0;
+                    await _context.SaveChangesAsync();
+                    return;
+                }
+
+                var cartPets = await _context.UserCartItems.Where(c => c.PetId == id).ToListAsync();
+                if (cartPets.Any()) _context.UserCartItems.RemoveRange(cartPets);
+
                 _context.Pets.Remove(pet);
                 await _context.SaveChangesAsync();
             }

@@ -788,15 +788,26 @@ body {
 /* Product detail */
 .product-detail-img {
   border-radius: var(--card-radius);
-  max-height: 400px;
-  object-fit: cover;
+  max-height: 440px;
+  height: 400px;
+  object-fit: contain;
+  object-position: center;
   width: 100%;
+  background-color: #f8fafc;
+  padding: 12px;
+  transition: transform 0.3s ease;
+}
+
+.product-detail-img:hover {
+  transform: scale(1.02);
 }
 
 .thumb-img {
   width: 80px;
   height: 80px;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #f8fafc;
+  padding: 4px;
   border-radius: 8px;
   cursor: pointer;
   border: 2px solid transparent;
@@ -3130,20 +3141,21 @@ body.dark-mode .filter-chip-sm label:hover {
 /* Image Container */
 .product-card__img {
   width: 100%;
-  height: 180px;
-  margin-bottom: 15px;
+  height: 190px;
+  margin-bottom: 14px;
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%);
-  transition: all 0.5s ease;
+  background: #f8fafc;
+  padding: 6px;
+  transition: border-color 0.3s ease;
 }
 
 .product-card__img:hover {
-  transform: scale(1.05);
+  transform: none; /* Tránh scale kép cả khung lẫn ảnh gây mất hình */
 }
 
 .product-card__img a {
@@ -3157,12 +3169,34 @@ body.dark-mode .filter-chip-sm label:hover {
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Hover scale tinh tế 3.5%, không xoay nghiêng -5deg để giữ trọn vẹn chi tiết hình */
 .kiki-card:hover .product-image {
-  transform: scale(1.1) rotate(-5deg);
+  transform: scale(1.035);
+}
+
+/* Định dạng riêng cho thẻ thú cưng: Dùng cover canh giữa để hiển thị rõ mặt bé */
+.pet-card-modern .product-card__img {
+  padding: 0;
+  background: #f1f5f9;
+}
+
+.pet-card-modern .product-image,
+.pet-card-modern .pet-img-hover {
+  object-fit: cover;
+  object-position: center 20%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pet-card-modern:hover .pet-img-hover,
+.pet-card-modern:hover .product-image {
+  transform: scale(1.035);
 }
 
 .img-placeholder {
@@ -3370,11 +3404,11 @@ body.dark-mode .filter-chip-sm label:hover {
 }
 
 .pet-card-modern .pet-img-hover {
-  transition: transform 0.5s ease;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .pet-card-modern:hover .pet-img-hover {
-  transform: scale(1.08);
+  transform: scale(1.035);
 }
 
 .pet-card-modern .product-card__actions {

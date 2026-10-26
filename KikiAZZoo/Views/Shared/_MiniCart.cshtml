@@ -34,7 +34,7 @@
                 <div class="position-relative" style="width: 60px; height: 60px; flex-shrink: 0;">
                     @if (!string.IsNullOrEmpty(item.ImageUrl))
                     {
-                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; @(item.IsOutOfStock ? "filter: grayscale(85%); opacity: 0.6;" : "")" />
+                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 60px; height: 60px; object-fit: contain; background: #f8fafc; padding: 2px; border: 1px solid #eef2f6; border-radius: 8px; @(item.IsOutOfStock ? "filter: grayscale(85%); opacity: 0.6;" : "")" />
                     }
                     else
                     {

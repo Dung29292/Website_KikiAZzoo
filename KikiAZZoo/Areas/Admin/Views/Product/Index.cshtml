@@ -111,7 +111,7 @@
                             <td class="ps-3">
                                 @if (!string.IsNullOrEmpty(p.ImageUrl))
                                 {
-                                    <img src="@p.ImageUrl" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border: 1px solid #eee;" />
+                                    <img src="@p.ImageUrl" style="width:50px;height:50px;object-fit:contain;background:#f8fafc;padding:2px;border-radius:6px;border: 1px solid #eee;" />
                                 }
                                 else
                                 {
@@ -204,7 +204,10 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName" class="text-danger"></strong>? Hành động này không thể hoàn tác.
+                <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName" class="text-danger"></strong>?</p>
+                <div class="alert alert-warning small border-0 mb-0 py-2">
+                    <i class="bi bi-info-circle-fill me-1"></i> Lưu ý: Nếu sản phẩm đã từng có khách đặt mua trong lịch sử đơn hàng, hệ thống sẽ tự động chuyển sang trạng thái <strong>[Đang ẩn / Ngừng bán]</strong> để bảo toàn lịch sử hóa đơn.
+                </div>
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>

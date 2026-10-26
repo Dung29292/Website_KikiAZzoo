@@ -8,21 +8,7 @@
     var currentEmail = User.Identity?.Name ?? "";
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
 
 <!-- Filters & Actions Header -->
 <div class="card shadow-sm border-0 mb-4 bg-light-soft" style="background-color: #f8fafc; border: 1px solid #e2e8f0 !important;">

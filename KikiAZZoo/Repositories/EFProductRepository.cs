@@ -75,6 +75,26 @@ namespace KikiAZZoo.Repositories
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
+                bool hasOrders = await _context.OrderDetails.AnyAsync(od => od.ProductId == id);
+                if (hasOrders)
+                {
+                    product.IsActive = false;
+                    await _context.SaveChangesAsync();
+                    return;
+                }
+
+                var cartItems = await _context.UserCartItems.Where(c => c.ProductId == id).ToListAsync();
+                if (cartItems.Any()) _context.UserCartItems.RemoveRange(cartItems);
+
+                var features = await _context.ProductFeatures.Where(f => f.ProductId == id).ToListAsync();
+                if (features.Any()) _context.ProductFeatures.RemoveRange(features);
+
+                var images = await _context.ProductImages.Where(i => i.ProductId == id).ToListAsync();
+                if (images.Any()) _context.ProductImages.RemoveRange(images);
+
+                var reviews = await _context.ProductReviews.Where(r => r.ProductId == id).ToListAsync();
+                if (reviews.Any()) _context.ProductReviews.RemoveRange(reviews);
+
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
             }

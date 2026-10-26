@@ -215,9 +215,39 @@ namespace KikiAZZoo.Areas.Admin.Controllers
             var pet = await _context.Pets.FindAsync(id);
             if (pet != null)
             {
-                _context.Pets.Remove(pet);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = $"Đã xóa bé '{pet.Name}' khỏi hệ thống.";
+                bool hasOrders = await _context.OrderDetails.AnyAsync(od => od.PetId == id);
+                if (hasOrders)
+                {
+                    pet.Status = "Hidden";
+                    pet.Quantity = 0;
+                    await _context.SaveChangesAsync();
+
+                    var cartPets = await _context.UserCartItems.Where(c => c.PetId == id).ToListAsync();
+                    if (cartPets.Any())
+                    {
+                        _context.UserCartItems.RemoveRange(cartPets);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    TempData["Warning"] = $"Thú cưng '{pet.Name}' đã có trong lịch sử đơn hàng của khách. Hệ thống đã chuyển sang trạng thái [Tạm ẩn / Đã bán] để bảo toàn dữ liệu lịch sử đơn hàng.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                try
+                {
+                    var cartPets = await _context.UserCartItems.Where(c => c.PetId == id).ToListAsync();
+                    if (cartPets.Any()) _context.UserCartItems.RemoveRange(cartPets);
+
+                    _context.Pets.Remove(pet);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = $"Đã xóa bé '{pet.Name}' khỏi hệ thống.";
+                }
+                catch (Exception ex)
+                {
+                    pet.Status = "Hidden";
+                    await _context.SaveChangesAsync();
+                    TempData["Warning"] = $"Không thể xóa do ràng buộc dữ liệu ({ex.Message}). Bé '{pet.Name}' đã được chuyển sang trạng thái [Tạm ẩn].";
+                }
             }
             return RedirectToAction(nameof(Index));
         }

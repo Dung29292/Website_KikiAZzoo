@@ -179,6 +179,9 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         {
             var product = await _productRepository.GetByIdAsync(id);
             if (product == null) return NotFound();
+
+            bool hasOrders = await _context.OrderDetails.AnyAsync(od => od.ProductId == id);
+            ViewBag.HasOrders = hasOrders;
             return View(product);
         }
 
@@ -187,7 +190,64 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _productRepository.DeleteAsync(id);
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm cần xóa.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra xem sản phẩm đã từng phát sinh trong đơn hàng nào chưa
+            bool hasOrders = await _context.OrderDetails.AnyAsync(od => od.ProductId == id);
+            if (hasOrders)
+            {
+                // Ngừng bán / Ẩn sản phẩm để bảo vệ tính toàn vẹn dữ liệu đơn hàng và hóa đơn
+                product.IsActive = false;
+                await _context.SaveChangesAsync();
+
+                // Dọn dẹp giỏ hàng tạm thời
+                var cartItems = await _context.UserCartItems.Where(c => c.ProductId == id).ToListAsync();
+                if (cartItems.Any())
+                {
+                    _context.UserCartItems.RemoveRange(cartItems);
+                    await _context.SaveChangesAsync();
+                }
+
+                TempData["Warning"] = $"Sản phẩm \"{product.Name}\" đã có trong lịch sử đơn hàng của khách hàng. Hệ thống đã tự động chuyển sang trạng thái [Đang ẩn / Ngừng kinh doanh] thay vì xóa hẳn để bảo toàn lịch sử hóa đơn và báo cáo doanh thu.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                // Dọn dẹp giỏ hàng
+                var cartItems = await _context.UserCartItems.Where(c => c.ProductId == id).ToListAsync();
+                if (cartItems.Any()) _context.UserCartItems.RemoveRange(cartItems);
+
+                // Dọn dẹp features
+                var features = await _context.ProductFeatures.Where(f => f.ProductId == id).ToListAsync();
+                if (features.Any()) _context.ProductFeatures.RemoveRange(features);
+
+                // Dọn dẹp images
+                var images = await _context.ProductImages.Where(i => i.ProductId == id).ToListAsync();
+                if (images.Any()) _context.ProductImages.RemoveRange(images);
+
+                // Dọn dẹp reviews
+                var reviews = await _context.ProductReviews.Where(r => r.ProductId == id).ToListAsync();
+                if (reviews.Any()) _context.ProductReviews.RemoveRange(reviews);
+
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"Đã xóa vĩnh viễn sản phẩm \"{product.Name}\" thành công.";
+            }
+            catch (Exception ex)
+            {
+                // Fallback nếu có ràng buộc ngoại khác
+                product.IsActive = false;
+                await _context.SaveChangesAsync();
+                TempData["Warning"] = $"Không thể xóa hoàn toàn do ràng buộc cơ sở dữ liệu ({ex.Message}). Sản phẩm đã được chuyển sang trạng thái [Đang ẩn / Ngừng kinh doanh].";
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

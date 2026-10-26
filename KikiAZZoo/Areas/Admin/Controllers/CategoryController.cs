@@ -84,7 +84,14 @@ namespace KikiAZZoo.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
+            if (hasProducts)
+            {
+                TempData["Error"] = "Không thể xóa danh mục này vì vẫn còn sản phẩm đang thuộc danh mục. Vui lòng di chuyển hoặc xóa các sản phẩm đó trước.";
+                return RedirectToAction(nameof(Index));
+            }
             await _categoryRepository.DeleteAsync(id);
+            TempData["Success"] = "Đã xóa danh mục thành công.";
             return RedirectToAction(nameof(Index));
         }
 
